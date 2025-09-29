@@ -12,7 +12,7 @@
     button { padding: 8px 12px; border-radius: 6px; border: 1px solid #334155; background: #1e293b; color: #e2e8f0; cursor: pointer; }
     button:hover { background: #0b1222; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 12px; }
-    .card { background: #111827; border: 1px solid #374151; border-radius: 8px; padding: 12px; height: 500px }
+    .card { background: #111827; border: 1px solid #374151; border-radius: 8px; padding: 12px; }
     .muted { color: #94a3b8; font-size: 12px; }
     #chart { background: #0b1222; border: 1px solid #374151; border-radius: 8px; width: 100%; height: 420px; }
     /* Formatting helpers */
@@ -52,7 +52,6 @@
       <div id="underlyingSummary"></div>
     </div>
       <div class="card">
-          <h3>Открытые позиции</h3>
           <div id="positions" class="muted">Загрузка...</div>
       </div>
       <div class="card" style="grid-column: 1 / -1;">
@@ -67,11 +66,6 @@
               <option value="15m">15m</option>
               <option value="1h">1h</option>
             </select>
-          </div>
-          <div style="display:flex; align-items:center; gap:6px;">
-            <input type="checkbox" id="showTrades" />
-            <label for="showTrades" class="muted">Показывать сделки</label>
-            <button id="importTrades" title="Вставить JSON сделок для текущего тикера">Импорт</button>
           </div>
         </div>
       </div>

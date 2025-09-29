@@ -1,0 +1,23 @@
+# Ignore dependencies and build output
+node_modules/
+dist/
+coverage/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env and misc
+.env
+
+# Generated files
+**/*.d.ts
+
+# 3rd party SDK sources
+node_modules/
+
+# Public assets – lint JS only (handled via override). Ignore other files
+public/**/*.min.js
+public/**/*.css
+public/**/*.html

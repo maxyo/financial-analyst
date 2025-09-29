@@ -1,15 +1,46 @@
-// @ts-nocheck
-import express = require('express');
-import cors = require('cors')
-import type { Request, Response } from 'express';
-import * as path from 'path';
 import * as http from 'http';
-import { WebSocketServer } from 'ws';
-import { WebSocket, RawData } from 'ws';
+import * as path from 'path';
+
+import cors = require('cors');
 import { config as configDotenv } from 'dotenv';
-import { getSummaryByTicker, getTodayCandlesByTicker, findInstrument, getUnderlyingSummaryByTicker, getOpenPositions, getRecentTradesByTicker } from './api';
+import express = require('express');
+import { WebSocketServer, WebSocket } from 'ws';
+
+import { getSummaryByTicker, getTodayCandlesByTicker, findInstrument, getUnderlyingSummaryByTicker, getOpenPositions, getRecentTradesByTicker, getUserTradesByTicker } from './api';
+import {
+  computeMoexClearingInstants,
+  fundingRateEstAt,
+} from './lib/calculations';
+
+import type { CandlePoint, FundingOptions } from './api/types';
+import type { Request, Response } from 'express';
+import type { RawData } from 'ws';
 
 configDotenv();
+
+// Local helpers and types to avoid using 'any'
+interface ClearingPoint { t: string; fundingRateEst?: number }
+interface HeartbeatWS extends WebSocket { isAlive?: boolean }
+
+type WSMessageType = 'subscribe' | 'unsubscribe' | 'ping';
+interface WSMessage { type: WSMessageType; ticker?: string }
+
+const getQ = (req: Request, key: string): string | undefined => {
+  const v = (req.query as Record<string, unknown>)[key];
+  if (typeof v === 'string') return v;
+  if (Array.isArray(v)) return typeof v[0] === 'string' ? v[0] : String(v[0]);
+  return v != null ? String(v) : undefined;
+};
+
+const getN = (v: unknown): number | undefined => {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : undefined;
+};
+
+const errorMessage = (e: unknown, fallback = 'internal error'): string => {
+  if (e instanceof Error) return e.message;
+  return typeof e === 'string' ? e : fallback;
+};
 
 const rootDir = path.resolve(__dirname, '..');
 
@@ -30,55 +61,53 @@ app.get('/api/health', (_req: Request, res: Response) => {
 // Search instruments by query
 app.get('/api/search', async (req: Request, res: Response) => {
   try {
-    const query = String((req.query as any).query || '').trim();
+    const query = (getQ(req, 'query') || '').trim();
     if (!query) return res.status(400).json({ error: 'query required' });
     const inst = await findInstrument(query);
     if (!inst) return res.json({ instruments: [] });
     res.json({ instruments: [inst] });
-  } catch (e: any) {
-    res.status(500).json({ error: e?.message || 'internal error' });
+  } catch (e: unknown) {
+    res.status(500).json({ error: errorMessage(e) });
   }
 });
 
 // Summary endpoint
 app.get('/api/summary', async (req: Request, res: Response) => {
   try {
-    const q = req.query as any;
-    const ticker = String(q.ticker || '').trim();
+    const ticker = (getQ(req, 'ticker') || '').trim();
     if (!ticker) return res.status(400).json({ error: 'ticker required' });
 
     // Optional MoEx funding parameters
-    const opt: any = {};
-    const n = (x: any) => { const v = Number(x); return Number.isFinite(v) ? v : undefined; };
-    if (q.k1 != null) opt.k1 = n(q.k1);
-    if (q.k2 != null) opt.k2 = n(q.k2);
-    if (q.prevBasePrice != null) opt.prevBasePrice = n(q.prevBasePrice);
-    if (q.d != null) opt.d = n(q.d);
-    if (q.cbr != null) opt.cbr = n(q.cbr);
-    if (q.underlyingPrice != null) opt.underlyingPrice = n(q.underlyingPrice);
-    if (q.windowStart != null) opt.windowStart = String(q.windowStart);
-    if (q.windowEnd != null) opt.windowEnd = String(q.windowEnd);
-    if (q.mode != null) {
-      const m = String(q.mode);
-      if (m === 'generic' || m === 'currency' || m === 'manual') opt.mode = m;
-    }
+    const opt: FundingOptions = {};
+    const q = (k: string) => getQ(req, k);
+    const n = (k: string) => getN(q(k));
+    const m = q('mode');
+    opt.k1 = n('k1');
+    opt.k2 = n('k2');
+    opt.prevBasePrice = n('prevBasePrice');
+    opt.d = n('d');
+    opt.cbr = n('cbr');
+    opt.underlyingPrice = n('underlyingPrice');
+    const ws = q('windowStart'); if (ws) opt.windowStart = ws;
+    const we = q('windowEnd'); if (we) opt.windowEnd = we;
+    if (m === 'generic' || m === 'currency' || m === 'manual') opt.mode = m;
 
     const data = await getSummaryByTicker(ticker, opt);
     res.json(data);
-  } catch (e: any) {
-    res.status(500).json({ error: e?.message || 'internal error' });
+  } catch (e: unknown) {
+    res.status(500).json({ error: errorMessage(e) });
   }
 });
 
 // Underlying summary endpoint
 app.get('/api/underlying-summary', async (req: Request, res: Response) => {
   try {
-    const ticker = String((req.query as any).ticker || '').trim();
+    const ticker = (getQ(req, 'ticker') || '').trim();
     if (!ticker) return res.status(400).json({ error: 'ticker required' });
     const data = await getUnderlyingSummaryByTicker(ticker);
     res.json(data);
-  } catch (e: any) {
-    const msg = e?.message || 'failed to resolve underlying';
+  } catch (e: unknown) {
+    const msg = errorMessage(e, 'failed to resolve underlying');
     // If can't resolve underlying, return 404 so frontend can hide the panel
     res.status(404).json({ error: msg });
   }
@@ -87,35 +116,66 @@ app.get('/api/underlying-summary', async (req: Request, res: Response) => {
 // Candles endpoint
 app.get('/api/candles', async (req: Request, res: Response) => {
   try {
-    const ticker = String((req.query as any).ticker || '').trim();
+    const ticker = (getQ(req, 'ticker') || '').trim();
     if (!ticker) return res.status(400).json({ error: 'ticker required' });
-    const data = await getTodayCandlesByTicker(ticker);
-    res.json({ points: data });
-  } catch (e: any) {
-    res.status(500).json({ error: e?.message || 'internal error' });
+    const points = await getTodayCandlesByTicker(ticker);
+    // Compute clearing markers and funding at clearing based on intraday candles
+    let clearings: ClearingPoint[] = [];
+    try {
+      const instants = computeMoexClearingInstants();
+      clearings = instants.map((t) => ({ t, fundingRateEst: fundingRateEstAt(points, t) }));
+    } catch {
+      // ignore
+    }
+    res.json({ points, clearings });
+  } catch (e: unknown) {
+    res.status(500).json({ error: errorMessage(e) });
   }
 });
 
 // Open positions endpoint
 app.get('/api/positions', async (req: Request, res: Response) => {
   try {
-    const accountId = String((req.query as any).accountId || '').trim() || undefined;
-    const positions = await getOpenPositions(accountId);
+    const accountId = (getQ(req, 'accountId') || '').trim() || undefined;
+    const ticker = (getQ(req, 'ticker') || '').trim();
+    if(!ticker) {
+      throw new Error('ticker required');
+    }
+    const positions = await getOpenPositions(ticker, accountId);
     res.json({ positions });
-  } catch (e: any) {
-    res.status(500).json({ error: e?.message || 'internal error' });
+  } catch (e: unknown) {
+    res.status(500).json({ error: errorMessage(e) });
   }
 });
 
-// Trades endpoint (recent anonymized trades ~ last hour)
+// Trades endpoint: return user's own trades by default (last 24h); fallback to public if requested
 app.get('/api/trades', async (req: Request, res: Response) => {
   try {
-    const ticker = String((req.query as any).ticker || '').trim();
+    const ticker = (getQ(req, 'ticker') || '').trim();
     if (!ticker) return res.status(400).json({ error: 'ticker required' });
-    const trades = await getRecentTradesByTicker(ticker);
+    const accountId = (getQ(req, 'accountId') || '').trim() || undefined;
+    const hoursN = getN(getQ(req, 'hours'));
+    const lookback = hoursN && hoursN > 0 ? hoursN : 24;
+
+    // If explicit mode=public passed, return anonymized market trades for backward-compat
+    const mode = (getQ(req, 'mode') || '').toLowerCase();
+    if (mode === 'public') {
+      const trades = await getRecentTradesByTicker(ticker);
+      return res.json({ trades });
+    }
+
+    // Default: user's own executed trades for the account (or default account)
+    const trades = await getUserTradesByTicker(ticker, accountId, lookback);
     res.json({ trades });
-  } catch (e: any) {
-    res.status(500).json({ error: e?.message || 'internal error' });
+  } catch (e: unknown) {
+    // Best-effort fallback to public anonymized if user operations are unavailable
+    try {
+      const ticker = (getQ(req, 'ticker') || '').trim();
+      const trades = await getRecentTradesByTicker(ticker);
+      return res.json({ trades, fallback: true });
+    } catch (e2: unknown) {
+      res.status(500).json({ error: errorMessage(e) });
+    }
   }
 });
 
@@ -140,13 +200,22 @@ async function sendCandlesSnapshot(ws: WebSocket, ticker: string) {
     // update last sent marker
     const last = Array.isArray(points) && points.length ? points[points.length - 1] : null;
     if (last?.t) lastCandleTs.set(ticker, last.t);
-    const payload = JSON.stringify({ type: 'candles', ticker, mode: 'snapshot', points, ts: new Date().toISOString() });
+    // compute clearings similar to REST endpoint
+    let clearings: ClearingPoint[] = [];
+    try {
+      const { computeMoexClearingInstants, fundingRateEstAt } = await import('./lib/calculations');
+      const instants = computeMoexClearingInstants();
+      clearings = instants.map((t) => ({ t, fundingRateEst: fundingRateEstAt(points, t) }));
+    } catch {
+      // ignore
+    }
+    const payload = JSON.stringify({ type: 'candles', ticker, mode: 'snapshot', points, clearings, ts: new Date().toISOString() });
     if (ws.readyState === WebSocket.OPEN) {
       try { ws.send(payload); } catch {}
     }
-  } catch (e: any) {
+  } catch (e: unknown) {
     if (ws.readyState === WebSocket.OPEN) {
-      try { ws.send(JSON.stringify({ type: 'error', ticker, message: e?.message || 'failed to fetch candles' })); } catch {}
+      try { ws.send(JSON.stringify({ type: 'error', ticker, message: errorMessage(e, 'failed to fetch candles') })); } catch {}
     }
   }
 }
@@ -160,7 +229,7 @@ function subscribeClientTo(ws: WebSocket, ticker: string) {
   clientSubs.get(ws)!.add(t);
   ensurePoller(t);
   // Send initial candles snapshot to the newly subscribed client
-  try { sendCandlesSnapshot(ws, t); } catch {}
+  try { void sendCandlesSnapshot(ws, t); } catch {}
 }
 
 function unsubscribeClientFrom(ws: WebSocket, ticker: string) {
@@ -207,9 +276,9 @@ function ensurePoller(ticker: string) {
           }
         }
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       const clients = tickerSubs.get(ticker);
-      const payload = JSON.stringify({ type: 'error', ticker, message: e?.message || 'failed to fetch quote' });
+      const payload = JSON.stringify({ type: 'error', ticker, message: errorMessage(e, 'failed to fetch quote') });
       if (clients) {
         for (const c of clients) {
           if (c.readyState === WebSocket.OPEN) {
@@ -227,7 +296,7 @@ function ensurePoller(ticker: string) {
         const all = await getTodayCandlesByTicker(ticker);
         if (Array.isArray(all) && all.length) {
           const lastSentIso = lastCandleTs.get(ticker);
-          let toSend = [] as any[];
+          let toSend: CandlePoint[] = [];
           if (!lastSentIso) {
             // if no marker yet (e.g., server just started), send only the latest candle as an update
             toSend = [all[all.length - 1]];
@@ -252,9 +321,9 @@ function ensurePoller(ticker: string) {
           const last = all[all.length - 1];
           if (last?.t) lastCandleTs.set(ticker, last.t);
         }
-      } catch (e: any) {
+      } catch (e: unknown) {
         const clients = tickerSubs.get(ticker);
-        const payload = JSON.stringify({ type: 'error', ticker, message: e?.message || 'failed to fetch candles' });
+        const payload = JSON.stringify({ type: 'error', ticker, message: errorMessage(e, 'failed to fetch candles') });
         if (clients) {
           for (const c of clients) {
             if (c.readyState === WebSocket.OPEN) {
@@ -270,13 +339,13 @@ function ensurePoller(ticker: string) {
   pollers.set(ticker, h);
 }
 
-wss.on('connection', (ws: WebSocket) => {
-  (ws as any).isAlive = true;
-  ws.on('pong', () => { (ws as any).isAlive = true; });
+wss.on('connection', (ws: HeartbeatWS) => {
+  ws.isAlive = true;
+  ws.on('pong', () => { ws.isAlive = true; });
 
   ws.on('message', (raw: RawData) => {
     try {
-      const msg = JSON.parse(String(raw));
+      const msg: WSMessage = JSON.parse(String(raw));
       if (msg?.type === 'subscribe' && typeof msg.ticker === 'string') {
         subscribeClientTo(ws, msg.ticker);
         ws.send(JSON.stringify({ type: 'subscribed', ticker: String(msg.ticker).toUpperCase() }));
@@ -288,8 +357,8 @@ wss.on('connection', (ws: WebSocket) => {
       } else {
         ws.send(JSON.stringify({ type: 'error', message: 'unknown message' }));
       }
-    } catch (e: any) {
-      ws.send(JSON.stringify({ type: 'error', message: e?.message || 'bad message' }));
+    } catch (e: unknown) {
+      ws.send(JSON.stringify({ type: 'error', message: errorMessage(e, 'bad message') }));
     }
   });
 
@@ -303,10 +372,10 @@ wss.on('connection', (ws: WebSocket) => {
 });
 
 const heartbeat = setInterval(() => {
-  for (const ws of wss.clients) {
-    const alive = (ws as any).isAlive;
+  for (const ws of wss.clients as Set<HeartbeatWS>) {
+    const alive = ws.isAlive;
     if (alive === false) { try { ws.terminate(); } catch {} continue; }
-    (ws as any).isAlive = false;
+    ws.isAlive = false;
     try { ws.ping(); } catch {}
   }
 }, 30000);

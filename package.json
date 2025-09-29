@@ -7,7 +7,9 @@
     "dev": "ts-node src/server.ts",
     "build": "tsc --noEmit",
     "start": "ts-node --transpile-only src/server.ts",
-    "cli": "ts-node src/main.ts"
+    "cli": "ts-node src/main.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
@@ -16,7 +18,12 @@
     "@types/ws": "^8.5.10",
     "prettier": "^3.3.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-config-prettier": "^10.1.8"
   },
   "dependencies": {
     "cors": "^2.8.5",
