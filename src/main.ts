@@ -1,33 +1,116 @@
-//TIP With Search Everywhere, you can find any action, file, or symbol in your project. Press <shortcut actionId="Shift"/> <shortcut actionId="Shift"/>, type in <b>terminal</b>, and press <shortcut actionId="EditorEnter"/>. Then run <shortcut raw="npm run dev"/> in the terminal and click the link in its output to open the app in the browser.
-export function setupCounter(element: HTMLElement) {
-  //TIP Try <shortcut actionId="GotoDeclaration"/> on <shortcut raw="counter"/> to see its usages. You can also use this shortcut to jump to a declaration – try it on <shortcut raw="counter"/> on line 13.
-  let counter = 0;
+import { TinkoffInvestApi, Helpers } from 'tinkoff-invest-api';
+import { config as configDotenv } from 'dotenv';
+import { CandleInterval } from 'tinkoff-invest-api/dist/generated/marketdata';
 
-  const adjustCounterValue = (value: number)  => {
-    if (value >= 100) return value - 100;
-    if (value <= -100) return value + 100;
-    return value;
-  };
+// Simple UI wiring
+const write = (msg: string) => {
+  console.log(msg);
+};
 
-  const setCounter = (value: number) => {
-    counter = adjustCounterValue(value);
-    //TIP WebStorm has lots of inspections to help you catch issues in your project. It also has quick fixes to help you resolve them. Press <shortcut actionId="ShowIntentionActions"/> on <shortcut raw="text"/> and choose <b>Inline variable</b> to clean up the redundant code.
-    const text = `${counter}`;
-    element.innerHTML = text;
-  };
+// Load environment variables from project root .env
+configDotenv();
 
-  document.getElementById('increaseByOne')?.addEventListener('click', () => setCounter(counter + 1));
-  document.getElementById('decreaseByOne')?.addEventListener('click', () => setCounter(counter - 1));
-  document.getElementById('increaseByTwo')?.addEventListener('click', () => setCounter(counter + 2));
+// Main: connect to Tinkoff Invest API and compute parameters for CNYRUBF
+async function main() {
+  try {
+    // Token handling: use ?token=... from URL or TINKOFF_TOKEN env injected by Vite define
+    const envToken = (process)?.env?.TINKOFF_TOKEN;
+    const token = envToken;
 
-  //TIP In the app running in the browser, you’ll find that clicking <b>-2</b> doesn't work. To fix that, rewrite it using the code from lines 19 - 21 as examples of the logic.
-  document.getElementById('decreaseByTwo')
+    if (!token) {
+      write('Укажите токен Tinkoff Invest: добавьте ?token=YOUR_TOKEN к URL, либо определите Vite define TINKOFF_TOKEN.');
+      return;
+    }
 
-  //TIP Let’s see how to review and commit your changes. Press <shortcut actionId="GotoAction"/> and look for <b>commit</b>. Try checking the diff for a file – double-click main.ts to do that.
-  setCounter(0);
+    write('Подключение к Tinkoff Invest API...');
+    const api = new TinkoffInvestApi({ token });
+
+    // Resolve instrument by ticker CNYRUBF on MOEX (class_code may be needed)
+    // Use findInstrument to be robust
+    const found = await api.instruments.findInstrument({ query: 'CNYRUBF' });
+    const instrument = found.instruments.find(i => i.ticker === 'CNYRUBF') || found.instruments[0];
+
+    if (!instrument) {
+      write('Инструмент CNYRUBF не найден.');
+      return;
+    }
+
+    const { figi, lot, name, ticker } = instrument;
+
+    // Fetch last price, orderbook (for bid/ask), and today candles to compute change/high/low
+    const [lastPriceResp, orderBook] = await Promise.all([
+      api.marketdata.getLastPrices({ figi: [], instrumentId: [figi], lastPriceType: 0 }),
+      api.marketdata.getOrderBook({ instrumentId: figi, depth: 10 }),
+    ]);
+
+    const lastPrice = lastPriceResp.lastPrices?.[0]?.price ? Helpers.toNumber(lastPriceResp.lastPrices[0].price) : undefined;
+
+    let bestBid: number | undefined;
+    let bestAsk: number | undefined;
+    if (orderBook) {
+      bestBid = orderBook.bids?.[0]?.price ? Helpers.toNumber(orderBook.bids[0].price) : undefined;
+      bestAsk = orderBook.asks?.[0]?.price ? Helpers.toNumber(orderBook.asks[0].price) : undefined;
+    }
+
+    const spread = bestBid != null && bestAsk != null ? bestAsk - bestBid : undefined;
+
+    // Today period in exchange time zone; use from start of day to now
+    const now = new Date();
+    const from = new Date(now);
+    from.setHours(0, 0, 0, 0);
+
+    let dayHigh: number | undefined;
+    let dayLow: number | undefined;
+    let dayOpen: number | undefined;
+    let volumeSum = 0;
+
+    try {
+      const candles = await api.marketdata.getCandles({
+        instrumentId: figi,
+        from,
+        to: now,
+        interval: CandleInterval.CANDLE_INTERVAL_1_MIN, // CandleInterval.CANDLE_INTERVAL_1_MIN
+      });
+      if (candles?.candles?.length) {
+        const hs: number[] = [];
+        const ls: number[] = [];
+        for (const c of candles.candles) {
+          const h = Helpers.toNumber(c.high as any);
+          const l = Helpers.toNumber(c.low as any);
+          if (h != null) hs.push(h);
+          if (l != null) ls.push(l);
+          volumeSum += Number(c.volume || 0);
+        }
+        if (hs.length) dayHigh = Math.max(...hs);
+        if (ls.length) dayLow = Math.min(...ls);
+        const first = candles.candles[0];
+        dayOpen = first ? Helpers.toNumber(first.open as any) : undefined;
+      }
+    } catch (e) {
+      console.warn('Ошибка загрузки свечей:', e);
+    }
+
+    const changeAbs = lastPrice != null && dayOpen != null ? lastPrice - dayOpen : undefined;
+    const changePct = changeAbs != null && dayOpen ? (changeAbs / dayOpen) * 100 : undefined;
+
+    // Render summary
+    const lines: string[] = [];
+    lines.push(`Инструмент: ${name} (${ticker}) FIGI=${figi}`);
+    lines.push(`Лот: ${lot}`);
+    if (lastPrice != null) lines.push(`Текущая цена: ${lastPrice}`);
+    if (bestBid != null) lines.push(`Лучшая покупка (bid): ${bestBid}`);
+    if (bestAsk != null) lines.push(`Лучшая продажа (ask): ${bestAsk}`);
+    if (spread != null) lines.push(`Спред: ${spread}`);
+    if (dayHigh != null) lines.push(`Макс за день: ${dayHigh}`);
+    if (dayLow != null) lines.push(`Мин за день: ${dayLow}`);
+    if (changeAbs != null && changePct != null) lines.push(`Изменение за день: ${changeAbs.toFixed(4)} (${changePct.toFixed(2)}%)`);
+    if (volumeSum) lines.push(`Суммарный объем (1m свечи с начала дня): ${volumeSum}`);
+
+    write(lines.join('\n'));
+  } catch (err) {
+    console.error(err);
+    write('Ошибка при работе с Tinkoff Invest API. Подробнее в консоли.');
+  }
 }
 
-//TIP To find text strings in your project, you can use the <shortcut actionId="FindInPath"/> shortcut. Press it and type in <b>counter</b> – you’ll get all matches in one place.
-setupCounter(document.getElementById('counter-value') as HTMLElement);
-
-//TIP There's much more in WebStorm to help you be more productive. Press <shortcut actionId="Shift"/> <shortcut actionId="Shift"/> and search for <b>Learn WebStorm</b> to open our learning hub with more things for you to try.
+void main();

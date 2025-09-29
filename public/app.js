@@ -273,14 +273,27 @@ const apiUrl = 'http://localhost:3000';
         const pnlRaw = p.pnl != null ? Number(p.pnl) : null;
         const pnl = pnlRaw != null ? fmt(pnlRaw, 2) : '-';
         const pnlCls = signClass(pnlRaw);
+        const effLot = Number(p.effectiveLot || p.lot || 0);
+        const isFutures = (p.instrumentType || '').toLowerCase().includes('futures') || (p.instrumentType || '').toLowerCase().includes('future');
+        const units = p.positionUnits != null ? fmtInt(p.positionUnits) : (effLot && p.quantity != null ? fmtInt(Number(p.quantity) * effLot) : null);
+        const notional = p.notional != null && isFinite(Number(p.notional)) ? fmt(Number(p.notional), 2) : null;
         const rows = [
           ['Тикер', t],
           ['Название', name],
-          ['Кол-во', qty],
-          ['Средняя', avg],
-          ['Текущая', last],
-          ['PnL', pnl, pnlCls],
+          ['Кол-во (контракты/шт.)', qty],
         ];
+        if (isFutures && effLot) {
+          const ul = p.underlyingLot != null ? fmtInt(p.underlyingLot) : '-';
+          const fl = p.futuresLot != null ? fmtInt(p.futuresLot) : '-';
+          rows.push(['Эффективный лот', `${ul} × ${fl} = ${fmtInt(effLot)}`]);
+        } else if (effLot) {
+          rows.push(['Лот', fmtInt(effLot)]);
+        }
+        if (units) rows.push(['Размер позиции (ед.)', units]);
+        rows.push(['Средняя', avg]);
+        rows.push(['Текущая', last]);
+        if (notional) rows.push(['Нотионал', notional]);
+        rows.push(['PnL', pnl, pnlCls]);
         return `<div class="card" style="padding:8px; height:auto;">
           <div style="font-weight:600; margin-bottom:6px;">${name} <span class="badge">${t}</span></div>
           ${kvTable(rows)}
@@ -620,6 +633,43 @@ const apiUrl = 'http://localhost:3000';
     scaleSelect.addEventListener('change', () => {
       currentScale = scaleSelect.value || '1m';
       updateChart();
+    });
+  }
+
+  // Wire up trades checkbox to toggle overlay
+  if (showTradesCheckbox) {
+    showTradesCheckbox.addEventListener('change', () => {
+      if (showTradesCheckbox.checked) {
+        showTrades();
+      } else {
+        hideTrades();
+      }
+    });
+  }
+
+  // Wire up import button to allow pasting JSON trades
+  if (importTradesBtn) {
+    importTradesBtn.addEventListener('click', async () => {
+      try {
+        const example = '[{"t":"2025-09-29T10:00:15.000Z","p":12.34,"q":1,"side":"buy"}]';
+        const txt = prompt('Вставьте JSON массива сделок (формат: [{t, p, q?, side?}])', example);
+        if (!txt) return;
+        const parsed = JSON.parse(txt);
+        if (!Array.isArray(parsed)) throw new Error('Ожидался массив');
+        // Basic shape normalization
+        const norm = parsed.map(x => ({
+          t: x.t || x.time || new Date().toISOString(),
+          p: Number(x.p ?? x.price),
+          q: x.q != null ? Number(x.q ?? x.quantity) : undefined,
+          side: x.side === 'buy' || x.side === 'sell' ? x.side : 'unspecified',
+        })).filter(x => x.t && Number.isFinite(x.p));
+        setTrades(norm);
+        if (showTradesCheckbox && showTradesCheckbox.checked) {
+          showTrades();
+        }
+      } catch (e) {
+        alert('Неверный формат JSON: ' + (e && e.message ? e.message : e));
+      }
     });
   }
 

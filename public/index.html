@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Инструменты Tinkoff Invest</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 16px; background: #0f172a; color: #e2e8f0; }
+    header { margin-bottom: 16px; }
+    .panel { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    input, select { padding: 8px; border-radius: 6px; border: 1px solid #334155; background: #0b1222; color: #e2e8f0; }
+    button { padding: 8px 12px; border-radius: 6px; border: 1px solid #334155; background: #1e293b; color: #e2e8f0; cursor: pointer; }
+    button:hover { background: #0b1222; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 12px; }
+    .card { background: #111827; border: 1px solid #374151; border-radius: 8px; padding: 12px; height: 500px }
+    .muted { color: #94a3b8; font-size: 12px; }
+    #chart { background: #0b1222; border: 1px solid #374151; border-radius: 8px; width: 100%; height: 420px; }
+    /* Formatting helpers */
+    .num { text-align: right; font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; }
+    .pos { color: #22c55e; }
+    .neg { color: #ef4444; }
+    .badge { display:inline-block; padding:2px 6px; border-radius:6px; background:#0b1222; border:1px solid #334155; color:#e2e8f0; font-size:12px; }
+    .kv { width: 100%; border-collapse: separate; border-spacing: 0 6px; }
+    .kv td { padding: 4px 0; border-bottom: 1px dashed #334155; }
+    .kv td:first-child { color:#94a3b8; font-size:12px; padding-right:8px; }
+    .kv td.num { text-align: right; }
+  </style>
+  <link rel="stylesheet" href="https://cdn.anychart.com/releases/8.12.1/css/anychart-ui.min.css" />
+  <script src="https://cdn.anychart.com/releases/8.12.1/js/anychart-base.min.js"></script>
+  <script src="https://cdn.anychart.com/releases/8.12.1/js/anychart-stock.min.js"></script>
+  <script src="https://cdn.anychart.com/releases/8.12.1/js/anychart-exports.min.js"></script>
+  <script src="https://cdn.anychart.com/releases/8.12.1/locales/ru-ru.js"></script>
+</head>
+<body>
+  <header>
+    <h2>Панель инструментов</h2>
+    <div class="panel">
+      <label for="ticker">Тикер:</label>
+      <input id="ticker" placeholder="например, CNYRUBF" value="CNYRUBF" />
+      <button id="load">Загрузить</button>
+      <span id="status" class="muted"></span>
+    </div>
+  </header>
+
+  <section class="grid">
+    <div class="card">
+      <h3 id="title">Инструмент</h3>
+      <div id="summary"></div>
+    </div>
+    <div id="underlyingCard" class="card" style="height:auto; display:none;">
+      <h3 id="underlyingTitle">Базовый актив</h3>
+      <div id="underlyingSummary"></div>
+    </div>
+      <div class="card">
+          <h3>Открытые позиции</h3>
+          <div id="positions" class="muted">Загрузка...</div>
+      </div>
+      <div class="card" style="grid-column: 1 / -1;">
+      <div class="panel" style="justify-content: space-between; align-items: center;">
+        <h3 id="chartTitle">Свечи (1m, сегодня)</h3>
+        <div style="display:flex; align-items:center; gap: 12px;">
+          <div>
+            <label for="scale" class="muted">Масштаб:</label>
+            <select id="scale">
+              <option value="1m" selected>1m</option>
+              <option value="5m">5m</option>
+              <option value="15m">15m</option>
+              <option value="1h">1h</option>
+            </select>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <input type="checkbox" id="showTrades" />
+            <label for="showTrades" class="muted">Показывать сделки</label>
+            <button id="importTrades" title="Вставить JSON сделок для текущего тикера">Импорт</button>
+          </div>
+        </div>
+      </div>
+      <div id="chart"></div>
+    </div>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
