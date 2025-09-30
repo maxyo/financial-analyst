@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+/frontend/build/
+/data/
+/packages/frontend/build/
+/packages/backend/data/

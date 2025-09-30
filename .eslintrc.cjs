@@ -1,4 +1,4 @@
-/* ESLint configuration for Node + TypeScript project with a small browser client under public/.
+/* ESLint configuration for Node + TypeScript project with a small browser client under frontend/.
  * Type-aware rules are enabled only for TS sources to avoid parsing JS/config files with TS program.
  */
 module.exports = {
@@ -83,9 +83,9 @@ module.exports = {
         'no-empty': ['error', { allowEmptyCatch: true }],
       },
     },
-    // Browser client JS under public/
+    // Browser client JS under frontend/
     {
-      files: ['public/**/*.js'],
+      files: ['frontend/**/*.js'],
       env: { browser: true, node: false },
       parser: null, // plain JS
       parserOptions: { project: false },
@@ -95,9 +95,6 @@ module.exports = {
         'no-console': 'off',
         'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
         'no-empty': ['error', { allowEmptyCatch: true }],
-      },
-      globals: {
-        anychart: 'readonly',
       },
     },
     // Tests (Node test runner)
@@ -113,7 +110,7 @@ module.exports = {
     // Tooling and config files
     {
       files: ['*.cjs', '*.js'],
-      excludedFiles: ['public/**/*.js', 'tests/**/*.test.js', 'tests/**/*.spec.js'],
+      excludedFiles: ['frontend/**/*.js', 'tests/**/*.test.js', 'tests/**/*.spec.js'],
       env: { node: true },
       parser: null,
       parserOptions: { project: false },
