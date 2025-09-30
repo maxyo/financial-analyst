@@ -1,7 +1,4 @@
-import { Helpers } from 'tinkoff-invest-api';
-import { CandleInterval } from 'tinkoff-invest-api/dist/generated/marketdata';
-
-import { getApi } from '../../api/client';
+import { getApi, Helpers, CandleInterval } from '../../integrations/tinkoff';
 import { computeFunding, computeL1L2, vwapInWindow } from '../calculations';
 import { instrumentService } from '../instrument';
 

@@ -1,5 +1,4 @@
-import { Helpers } from 'tinkoff-invest-api';
-import { CandleInterval } from 'tinkoff-invest-api/dist/generated/marketdata';
+import { Helpers, CandleInterval, InstrumentIdType } from '../integrations/tinkoff';
 
 import { getApi } from './client';
 import { computeAccurateFunding } from '../lib/funding';
@@ -26,9 +25,6 @@ export async function getUnderlyingSummaryByTicker(
   }
 
   try {
-    const { InstrumentIdType } = await import(
-      'tinkoff-invest-api/dist/generated/instruments.js'
-    );
     const futureResp = await api.instruments.futureBy({
       idType: InstrumentIdType.INSTRUMENT_ID_TYPE_TICKER,
       classCode: (instrument).classCode || '',

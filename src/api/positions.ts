@@ -1,4 +1,4 @@
-import { Helpers } from 'tinkoff-invest-api';
+import { Helpers, InstrumentIdType } from '../integrations/tinkoff';
 
 import { getApi } from './client';
 import { instrumentService } from '../lib/instrument';
@@ -38,9 +38,7 @@ export async function getOpenPositions(
 
     const ids: string[] = [];
     const byIdx: Record<string, any> = {};
-    const idTypeEnum = (
-      await import('tinkoff-invest-api/dist/generated/instruments.js')
-    ).InstrumentIdType;
+    const idTypeEnum = InstrumentIdType;
 
     for (const p of positionsRaw) {
       const figi = (p).figi;

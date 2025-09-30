@@ -1,5 +1,4 @@
-import { Helpers } from 'tinkoff-invest-api';
-import { OperationType } from 'tinkoff-invest-api/dist/generated/operations';
+import { Helpers, OperationType } from '../integrations/tinkoff';
 
 import { getApi } from './client';
 

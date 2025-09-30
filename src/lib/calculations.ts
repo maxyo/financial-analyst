@@ -1,5 +1,5 @@
-import { Helpers } from 'tinkoff-invest-api';
-import { Quotation } from 'tinkoff-invest-api/dist/generated/common';
+import { Helpers } from '../integrations/tinkoff';
+import type { Quotation } from '../integrations/tinkoff';
 
 // Flexible input shapes for candles/points coming from different layers
 export interface CandleLike {

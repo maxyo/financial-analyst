@@ -1,10 +1,7 @@
-import { getApi } from '../api';
+import { getApi, InstrumentIdType } from '../integrations/tinkoff';
 
 class Instrument {
   async getBaseInstrument(derivativeInstrumentUid: string) {
-    const { InstrumentIdType } = await import(
-      'tinkoff-invest-api/dist/generated/instruments.js'
-    );
     const api = getApi();
     // Resolve instrument to get classCode for futureBy
     const { instrument } = await api.instruments.getInstrumentBy({
