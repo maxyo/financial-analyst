@@ -16,17 +16,17 @@ export async function getRecentTradesByTicker(
     ) || found.instruments[0];
   if (!instrument)
     {throw new Error(`Инструмент не найден по запросу: ${ticker}`);}
-  const { figi } = instrument as any;
+  const { figi } = instrument;
 
   const now = new Date();
   // const from = new Date(now.getTime() - 60 * 60 * 1000); // last hour (not used by API call here)
 
-  const resp: any = await (api as any).marketdata.getLastTrades({
+  const resp: any = await (api).marketdata.getLastTrades({
     instrumentId: figi,
     // from,
     to: now,
     tradeSource: 3, // TRADE_SOURCE_ALL
-  } as any);
+  });
 
   const arr = Array.isArray(resp?.trades) ? resp.trades : [];
   const out: TradePoint[] = [];
@@ -61,9 +61,8 @@ export async function getUserTradesByTicker(
     ) || found.instruments[0];
   if (!instrument)
     {throw new Error(`Инструмент не найден по запросу: ${ticker}`);}
-  const figi = (instrument as any).figi as string;
-  const instrumentUid =
-    (instrument as any).instrumentUid || (instrument as any).uid;
+  const figi = (instrument).figi;
+  const instrumentUid = (instrument).uid;
 
   const acc =
     accountId ||
@@ -90,7 +89,7 @@ export async function getUserTradesByTicker(
     if (Array.isArray(arr)) items = arr;
   } catch (_) {
     try {
-      const resp: any = await (api as any).operations.getOperations({
+      const resp: any = await (api).operations.getOperations({
         accountId: acc,
         from,
         to: now,

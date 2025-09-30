@@ -16,20 +16,18 @@ class Instrument {
     try {
       const futureResp = await api.instruments.futureBy({
         idType: InstrumentIdType.INSTRUMENT_ID_TYPE_TICKER,
-        classCode: (instrument as any).classCode || '',
+        classCode: (instrument).classCode || '',
         id: instrument.ticker,
-      } as any);
+      });
       const fut =
-        (futureResp as any)?.instrument ||
-        (futureResp as any)?.future ||
-        (futureResp as any);
+        (futureResp)?.instrument;
       const posUid = fut?.basicAssetPositionUid;
       if (!posUid) return null;
 
       const instrResp = await api.instruments.getInstrumentBy({
         idType: InstrumentIdType.INSTRUMENT_ID_TYPE_POSITION_UID,
         id: posUid,
-      } as any);
+      });
 
       return instrResp.instrument;
 

@@ -21,6 +21,8 @@ const anychart = window.anychart;
   let dataTable = null;
   let rawCandles = [];
   let rawTrades = [];
+  // Keep last loaded summary to use its funding info in positions panel
+  let currentSummary = null;
   let currentScale =
     scaleSelect && scaleSelect.value ? scaleSelect.value : '1m';
   // Clearing markers and event markers state
@@ -382,6 +384,25 @@ const anychart = window.anychart;
           rows.push(['Текущая', last]);
           if (notional) rows.push(['Notional', notional]);
           rows.push(['PnL', pnl, pnlCls]);
+          // Expected funding for current position (uses latest summary fundingPerUnit)
+          try {
+            const st = (currentSummary && currentSummary.ticker) ? String(currentSummary.ticker).toUpperCase() : null;
+            const pt = t ? String(t).toUpperCase() : null;
+            const fpu = currentSummary && currentSummary.fundingPerUnit != null ? Number(currentSummary.fundingPerUnit) : null;
+            if (st && pt && st === pt && fpu != null) {
+              const posUnits = p.positionUnits != null
+                ? Number(p.positionUnits)
+                : (effLot && p.quantity != null ? Number(p.quantity) * effLot : null);
+              if (posUnits != null && isFinite(posUnits)) {
+                const cashFlow = -fpu * Number(posUnits); // положительный фандинг: лонги платят шортам
+                if (isFinite(cashFlow)) {
+                  rows.push(['Ожидаемый фандинг по позиции', `${fmt(cashFlow, 2)}`, signClass(cashFlow)]);
+                }
+              }
+            }
+          } catch (e) {
+            // ignore rendering funding errors
+          }
           return `<div class="card" style="padding:8px; height:auto;">
           <div style="font-weight:600; margin-bottom:6px;">${name} <span class="badge">${t}</span></div>
           ${kvTable(rows)}
@@ -484,21 +505,8 @@ const anychart = window.anychart;
       );
       renderUnderlyingSummary(s);
       underlyingTicker = s && s.ticker ? s.ticker : null;
-      // Poll underlying quotes via summary endpoint every 5s
+      // Stop REST polling; underlying will update via WS 'quote.underlying'
       clearUnderlyingTimer();
-      if (underlyingTicker) {
-        underlyingTimer = setInterval(async () => {
-          try {
-            const ss = await fetchJSON(
-              `/api/summary?ticker=${encodeURIComponent(underlyingTicker)}`,
-            );
-            renderUnderlyingSummary(ss);
-          } catch (e) {
-            // Do not hide immediately, just log
-            console.warn('Underlying refresh failed', e);
-          }
-        }, 5000);
-      }
     } catch (e) {
       // If cannot resolve underlying (e.g., not a future), hide the card
       hideUnderlying();
@@ -506,6 +514,7 @@ const anychart = window.anychart;
   }
 
   function renderSummary(s) {
+    currentSummary = s;
     titleEl.textContent = `${s.name} (${s.ticker}) FIGI=${s.figi}`;
     const rows = [];
     if (s.lot != null) rows.push(['Лот', fmtInt(s.lot)]);
@@ -528,7 +537,7 @@ const anychart = window.anychart;
       rows.push(['Премия к VWAP', fmtPct(s.premium, 2), signClass(s.premium)]);
     if (s.fundingRateEst != null)
       rows.push([
-        'Оценка фандинга/8ч',
+        'Оценка дневного фандинга',
         fmtPct(s.fundingRateEst, 3),
         signClass(s.fundingRateEst),
       ]);
@@ -537,7 +546,7 @@ const anychart = window.anychart;
       const mins =
         s.minutesToFunding != null ? `${fmtInt(s.minutesToFunding)} мин` : '-';
       rows.push([
-        'След. фандинг (UTC 00:00/08:00/16:00)',
+        'След. фандинг (ежедневно 19:00 МСК)',
         `${when} (через ~${mins})`,
       ]);
     }
@@ -709,8 +718,19 @@ const anychart = window.anychart;
           ) {
             renderSummary(msg.summary);
             upsertLiveFromQuote(msg.summary, msg.ts);
+            // If server provided underlying summary, update the underlying card without REST polling
+            if (msg.underlying) {
+              try { renderUnderlyingSummary(msg.underlying); } catch (e) { /* ignore */ }
+            }
             updateChart();
             setStatus(`Обновлено: ${new Date().toLocaleTimeString('ru-RU')}`);
+          }
+        } else if (msg.type === 'trades' && msg.ticker) {
+          if (
+            !desiredTicker ||
+            msg.ticker.toUpperCase() === String(desiredTicker).toUpperCase()
+          ) {
+            try { setTrades(Array.isArray(msg.trades) ? msg.trades : []); } catch (e) { /* ignore */ }
           }
         } else if (msg.type === 'candles' && msg.ticker) {
           if (

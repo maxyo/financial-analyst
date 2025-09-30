@@ -99,40 +99,59 @@ export function computeMoexClearingInstants(date?: Date): string[] {
   return [first.toISOString(), second.toISOString()];
 }
 
-// Compute heuristic funding rate estimate (fraction) at a given cutoff time using intraday candles
-// points: [{ t: ISO, c: number, v?: number }]; untilIso: ISO timestamp (inclusive)
-export function fundingRateEstAt(points: readonly PricePointLike[], untilIso: string): number | undefined {
-  if (!Array.isArray(points) || points.length === 0) return undefined;
-  const until = new Date(untilIso).getTime();
-  if (!Number.isFinite(until)) return undefined;
+
+
+export function fundingRateEstAt(
+  points: readonly PricePointLike[],
+  cutoffIso: string,
+): number {
+  if (!Array.isArray(points) || points.length === 0) return 0;
+  const cutoff = new Date(cutoffIso).getTime();
+  if (!Number.isFinite(cutoff)) return 0;
+
+  // VWAP strictly before cutoff
   let pv = 0;
-  let v = 0;
-  let lastClose: number | undefined;
-  let lastTs = -Infinity;
+  let volSum = 0;
   for (const p of points) {
-    if (!p || !p.t) continue;
-    const ts = new Date(p.t).getTime();
-    if (!Number.isFinite(ts) || ts > until) continue;
-    const cRaw = (p as PricePointLike).c ?? (p as PricePointLike).close;
-    const vol = Number((p as PricePointLike).v ?? (p as PricePointLike).volume ?? 0);
-    const c = typeof cRaw === 'number' ? cRaw : Number(cRaw);
-    if (Number.isFinite(c) && vol > 0) {
-      pv += c * vol;
-      v += vol;
-    }
-    // track last close at or before until
-    if (Number.isFinite(c) && ts >= lastTs) {
-      lastTs = ts;
-      lastClose = c;
+    const tStr = (p as PricePointLike).t as any;
+    const t = tStr != null ? new Date(tStr).getTime() : NaN;
+    if (!Number.isFinite(t) || t >= cutoff) continue;
+    const closeRaw = (p as PricePointLike).c ?? (p as PricePointLike).close;
+    const close = closeRaw != null ? Number(closeRaw) : undefined;
+    const vRaw = (p as PricePointLike).v ?? (p as PricePointLike).volume;
+    const w = Math.max(0, Number(vRaw ?? 1)) || 1;
+    if (typeof close === 'number' && Number.isFinite(close) && w > 0) {
+      pv += close * w;
+      volSum += w;
     }
   }
-  if (!Number.isFinite(v) || v <= 0) return undefined;
-  if (!Number.isFinite(lastClose as number)) return undefined;
-  const vwap = pv / v;
-  if (vwap <= 0) return undefined;
-  const premium = ((lastClose as number) - vwap) / vwap;
+  if (volSum <= 0) return 0;
+  const vwap = pv / volSum;
+
+  // Last close at cutoff (prefer exact match), fallback to last <= cutoff
+  let lastClose: number | undefined;
+  let lastTime = -Infinity;
+  for (const p of points) {
+    const tStr = (p as PricePointLike).t as any;
+    const t = tStr != null ? new Date(tStr).getTime() : NaN;
+    const closeRaw = (p as PricePointLike).c ?? (p as PricePointLike).close;
+    const close = closeRaw != null ? Number(closeRaw) : undefined;
+    if (typeof close !== 'number' || !Number.isFinite(close) || !Number.isFinite(t)) continue;
+    if (t === cutoff) {
+      lastClose = close;
+      lastTime = t;
+      break;
+    }
+    if (t < cutoff && t > lastTime) {
+      lastClose = close;
+      lastTime = t;
+    }
+  }
+  if (lastClose == null || !Number.isFinite(vwap) || vwap === 0) return 0;
+
+  const premium = lastClose / vwap - 1;
   const clamped = Math.max(-0.003, Math.min(0.003, premium));
-  return clamped;
+  return Math.abs(clamped) < 1e-12 ? 0 : clamped;
 }
 
 export default {

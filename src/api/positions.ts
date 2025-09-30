@@ -25,13 +25,13 @@ export async function getOpenPositions(
 
     let positionsRaw: any[] = [];
     try {
-      const p = await api.operations.getPortfolio({ accountId: acc } as any);
+      const p = await api.operations.getPortfolio({ accountId: acc });
       positionsRaw =
-        (p as any).positions || (p as any).portfolio?.positions || [];
+        (p).positions || [];
     } catch {
       try {
-        const p2 = await api.operations.getPositions({ accountId: acc } as any);
-        positionsRaw = (p2 as any).securities || (p2 as any).positions || [];
+        const p2 = await api.operations.getPositions({ accountId: acc });
+        positionsRaw = (p2).securities || [];
       } catch {}
     }
     if (!Array.isArray(positionsRaw) || positionsRaw.length === 0) return [];
@@ -47,7 +47,7 @@ export async function getOpenPositions(
       const instrumentId =
         (p).instrumentId || (p).instrumentUid || undefined;
       const key = instrumentId || figi;
-      if (p.instrumentUid !== (instrument as any).uid) continue;
+      if (p.instrumentUid !== (instrument).uid) continue;
       if (!key) continue;
       if (!ids.includes(key)) ids.push(key);
       byIdx[key] = p;
@@ -62,12 +62,12 @@ export async function getOpenPositions(
           resp = await api.instruments.getInstrumentBy({
             idType: idTypeEnum.INSTRUMENT_ID_TYPE_FIGI,
             id: key,
-          } as any);
+          });
         } else {
           resp = await api.instruments.getInstrumentBy({
             idType: idTypeEnum.INSTRUMENT_ID_TYPE_UID,
             id: key,
-          } as any);
+          });
         }
         const inst = (resp)?.instrument;
         if (inst) details[key] = inst;
@@ -78,10 +78,10 @@ export async function getOpenPositions(
       figi: [],
       instrumentId: ids,
       lastPriceType: 0,
-    } as any);
+    });
     const lastMap: Record<string, number> = {};
-    for (const lp of (lastPricesResp as any).lastPrices || []) {
-      const id = lp.instrumentId || lp.instrumentUid || lp.figi;
+    for (const lp of (lastPricesResp).lastPrices || []) {
+      const id = lp.instrumentUid || lp.figi;
       if (!id) continue;
       const price = lp.price ? Helpers.toNumber(lp.price) : undefined;
       if (price != null) lastMap[id] = price;

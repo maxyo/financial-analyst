@@ -9,10 +9,9 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { getSummaryByTicker, getTodayCandlesByTicker, findInstrument, getUnderlyingSummaryByTicker, getOpenPositions, getRecentTradesByTicker, getUserTradesByTicker } from './api';
 import {
   computeMoexClearingInstants,
-  fundingRateEstAt,
 } from './lib/calculations';
 
-import type { CandlePoint, FundingOptions } from './api/types';
+import type { CandlePoint } from './api/types';
 import type { Request, Response } from 'express';
 import type { RawData } from 'ws';
 
@@ -77,22 +76,11 @@ app.get('/api/summary', async (req: Request, res: Response) => {
     const ticker = (getQ(req, 'ticker') || '').trim();
     if (!ticker) return res.status(400).json({ error: 'ticker required' });
 
-    // Optional MoEx funding parameters
-    const opt: FundingOptions = {};
     const q = (k: string) => getQ(req, k);
-    const n = (k: string) => getN(q(k));
-    const m = q('mode');
-    opt.k1 = n('k1');
-    opt.k2 = n('k2');
-    opt.prevBasePrice = n('prevBasePrice');
-    opt.d = n('d');
-    opt.cbr = n('cbr');
-    opt.underlyingPrice = n('underlyingPrice');
-    const ws = q('windowStart'); if (ws) opt.windowStart = ws;
-    const we = q('windowEnd'); if (we) opt.windowEnd = we;
-    if (m === 'generic' || m === 'currency' || m === 'manual') opt.mode = m;
+    const ws = q('windowStart');
+    const we = q('windowEnd');
 
-    const data = await getSummaryByTicker(ticker, opt);
+    const data = await getSummaryByTicker(ticker, ws, we);
     res.json(data);
   } catch (e: unknown) {
     res.status(500).json({ error: errorMessage(e) });
@@ -118,12 +106,25 @@ app.get('/api/candles', async (req: Request, res: Response) => {
   try {
     const ticker = (getQ(req, 'ticker') || '').trim();
     if (!ticker) return res.status(400).json({ error: 'ticker required' });
-    const points = await getTodayCandlesByTicker(ticker);
-    // Compute clearing markers and funding at clearing based on intraday candles
+    const interval = (getQ(req, 'interval') || '').trim() || undefined;
+    const points = await getTodayCandlesByTicker(ticker, interval);
+    // Compute clearing markers and funding at clearing based on computeAccurateFunding
     let clearings: ClearingPoint[] = [];
     try {
       const instants = computeMoexClearingInstants();
-      clearings = instants.map((t) => ({ t, fundingRateEst: fundingRateEstAt(points, t) }));
+      // Derive funding fraction from current summary via computeAccurateFunding
+      const s = await getSummaryByTicker(ticker);
+      const envK2 = process.env.FUNDING_K2;
+      const k2 = envK2 != null ? Number(envK2) : undefined;
+      let basePrice: number | undefined;
+      if (s.fundingL2 != null && k2) basePrice = Number(s.fundingL2) / Number(k2);
+      if (basePrice == null || !Number.isFinite(basePrice) || basePrice <= 0) {
+        basePrice = s.vwap != null ? Number(s.vwap) : s.lastPrice != null ? Number(s.lastPrice) : undefined;
+      }
+      const fundingFraction = s.fundingPerUnit != null && basePrice != null && Number(basePrice) > 0
+        ? Number(s.fundingPerUnit) / Number(basePrice)
+        : s.fundingRateEst;
+      clearings = instants.map((t) => ({ t, fundingRateEst: fundingFraction }));
     } catch {
       // ignore
     }
@@ -193,6 +194,9 @@ const INTERVAL_MS = Number(process.env.QUOTE_POLL_MS || 2000);
 const CANDLES_POLL_MS = Number(process.env.CANDLES_POLL_MS || 5000);
 const lastCandleTs = new Map<string, string>(); // ticker -> last sent candle ISO time
 const lastCandlesPollAt = new Map<string, number>(); // ticker -> last poll timestamp
+// Trades polling control
+const TRADES_POLL_MS = Number(process.env.TRADES_POLL_MS || 10000);
+const lastTradesPollAt = new Map<string, number>(); // ticker -> last poll timestamp
 
 async function sendCandlesSnapshot(ws: WebSocket, ticker: string) {
   try {
@@ -200,12 +204,22 @@ async function sendCandlesSnapshot(ws: WebSocket, ticker: string) {
     // update last sent marker
     const last = Array.isArray(points) && points.length ? points[points.length - 1] : null;
     if (last?.t) lastCandleTs.set(ticker, last.t);
-    // compute clearings similar to REST endpoint
+    // compute clearings similar to REST endpoint using computeAccurateFunding result
     let clearings: ClearingPoint[] = [];
     try {
-      const { computeMoexClearingInstants, fundingRateEstAt } = await import('./lib/calculations');
       const instants = computeMoexClearingInstants();
-      clearings = instants.map((t) => ({ t, fundingRateEst: fundingRateEstAt(points, t) }));
+      const s = await getSummaryByTicker(ticker);
+      const envK2 = process.env.FUNDING_K2;
+      const k2 = envK2 != null ? Number(envK2) : undefined;
+      let basePrice: number | undefined;
+      if (s.fundingL2 != null && k2) basePrice = Number(s.fundingL2) / Number(k2);
+      if (basePrice == null || !Number.isFinite(basePrice) || basePrice <= 0) {
+        basePrice = s.vwap != null ? Number(s.vwap) : s.lastPrice != null ? Number(s.lastPrice) : undefined;
+      }
+      const fundingFraction = s.fundingPerUnit != null && basePrice != null && Number(basePrice) > 0
+        ? Number(s.fundingPerUnit) / Number(basePrice)
+        : s.fundingRateEst;
+      clearings = instants.map((t) => ({ t, fundingRateEst: fundingFraction }));
     } catch {
       // ignore
     }
@@ -267,7 +281,14 @@ function ensurePoller(ticker: string) {
     // 1) Quotes update
     try {
       const data = await getSummaryByTicker(ticker);
-      const payload = JSON.stringify({ type: 'quote', ticker, summary: data, ts: new Date().toISOString() });
+      // Try to enrich with underlying summary (if applicable)
+      let underlying: any = undefined;
+      try {
+        underlying = await getUnderlyingSummaryByTicker(ticker);
+      } catch (_) {
+        underlying = undefined;
+      }
+      const payload = JSON.stringify({ type: 'quote', ticker, summary: data, underlying, ts: new Date().toISOString() });
       const clients = tickerSubs.get(ticker);
       if (clients) {
         for (const c of clients) {
@@ -333,6 +354,36 @@ function ensurePoller(ticker: string) {
         }
       } finally {
         lastCandlesPollAt.set(ticker, now);
+      }
+    }
+
+    // 3) Trades update (rate-limited)
+    const nowTrades = Date.now();
+    const lastTradesAt = lastTradesPollAt.get(ticker) || 0;
+    if (nowTrades - lastTradesAt >= TRADES_POLL_MS) {
+      try {
+        const trades = await getRecentTradesByTicker(ticker);
+        const payload3 = JSON.stringify({ type: 'trades', ticker, trades, ts: new Date().toISOString() });
+        const clients = tickerSubs.get(ticker);
+        if (clients) {
+          for (const c of clients) {
+            if (c.readyState === WebSocket.OPEN) {
+              try { c.send(payload3); } catch {}
+            }
+          }
+        }
+      } catch (e: unknown) {
+        const clients = tickerSubs.get(ticker);
+        const payload = JSON.stringify({ type: 'error', ticker, message: errorMessage(e, 'failed to fetch trades') });
+        if (clients) {
+          for (const c of clients) {
+            if (c.readyState === WebSocket.OPEN) {
+              try { c.send(payload); } catch {}
+            }
+          }
+        }
+      } finally {
+        lastTradesPollAt.set(ticker, nowTrades);
       }
     }
   }, INTERVAL_MS);

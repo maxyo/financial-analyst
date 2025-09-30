@@ -2,8 +2,7 @@ import { Helpers } from 'tinkoff-invest-api';
 import { CandleInterval } from 'tinkoff-invest-api/dist/generated/marketdata';
 
 import { getApi } from './client';
-import { computeFunding, computeL1L2, vwapInWindow } from '../lib/calculations';
-import { instrumentService } from '../lib/instrument';
+import { computeAccurateFunding } from '../lib/funding';
 
 import type { FundingOptions, Summary } from './types';
 
@@ -22,8 +21,9 @@ export async function getUnderlyingSummaryByTicker(
     found.instruments.find(
       (i) => i.ticker.toUpperCase() === ticker.toUpperCase(),
     ) || found.instruments[0];
-  if (!instrument)
-    {throw new Error(`Инструмент не найден по запросу: ${ticker}`);}
+  if (!instrument) {
+    throw new Error(`Инструмент не найден по запросу: ${ticker}`);
+  }
 
   try {
     const { InstrumentIdType } = await import(
@@ -31,23 +31,21 @@ export async function getUnderlyingSummaryByTicker(
     );
     const futureResp = await api.instruments.futureBy({
       idType: InstrumentIdType.INSTRUMENT_ID_TYPE_TICKER,
-      classCode: (instrument as any).classCode || '',
+      classCode: (instrument).classCode || '',
       id: instrument.ticker,
-    } as any);
-    const fut =
-      (futureResp as any)?.instrument ||
-      (futureResp as any)?.future ||
-      (futureResp as any);
+    });
+    const fut = futureResp?.instrument;
     const posUid = fut?.basicAssetPositionUid;
     if (!posUid) throw new Error('basicAssetPositionUid not found');
 
     const instrResp = await api.instruments.getInstrumentBy({
       idType: InstrumentIdType.INSTRUMENT_ID_TYPE_POSITION_UID,
       id: posUid,
-    } as any);
-    const under = (instrResp as any)?.instrument;
-    if (!under || !under.ticker)
-      {throw new Error('Underlying instrument not found');}
+    });
+    const under = (instrResp)?.instrument;
+    if (!under || !under.ticker) {
+      throw new Error('Underlying instrument not found');
+    }
 
     return await getSummaryByTicker(under.ticker);
   } catch (e) {
@@ -57,21 +55,21 @@ export async function getUnderlyingSummaryByTicker(
   }
 }
 
-export async function getSummaryByTicker(
-  ticker: string,
-  fundingOpts?: FundingOptions,
-): Promise<Summary> {
+export async function getInstrumentByTicker(ticker: string) {
   const api = getApi();
   const found = await api.instruments.findInstrument({ query: ticker });
   const instrument =
     found.instruments.find(
       (i) => i.ticker.toUpperCase() === ticker.toUpperCase(),
     ) || found.instruments[0];
-  if (!instrument)
-    {throw new Error(`Инструмент не найден по запросу: ${ticker}`);}
+  if (!instrument) {
+    throw new Error(`Инструмент не найден по запросу: ${ticker}`);
+  }
+  return instrument;
+}
 
-  const { figi, lot, name } = instrument;
-
+export async function getLastPriceAndOrderBook(figi: string) {
+  const api = getApi();
   const [lastPriceResp, orderBook] = await Promise.all([
     api.marketdata.getLastPrices({
       figi: [],
@@ -99,6 +97,11 @@ export async function getSummaryByTicker(
   const spread =
     bestBid != null && bestAsk != null ? bestAsk - bestBid : undefined;
 
+  return { lastPrice, bestBid, bestAsk, spread } as const;
+}
+
+export async function getTodayIntradayStats(figi: string) {
+  const api = getApi();
   const now = new Date();
   const from = new Date(now);
   from.setHours(0, 0, 0, 0);
@@ -140,12 +143,10 @@ export async function getSummaryByTicker(
       if (vSum > 0) vwap = pvSum / vSum;
     }
   } catch {}
+  return { dayHigh, dayLow, dayOpen, volumeSum, vwap } as const;
+}
 
-  const changeAbs =
-    lastPrice != null && dayOpen != null ? lastPrice - dayOpen : undefined;
-  const changePct =
-    changeAbs != null && dayOpen ? changeAbs / dayOpen : undefined;
-
+export function computePremiumAndEstimate(vwap?: number, lastPrice?: number) {
   let premium: number | undefined;
   let fundingRateEst: number | undefined;
   if (vwap != null && lastPrice != null && vwap > 0) {
@@ -154,176 +155,70 @@ export async function getSummaryByTicker(
     const clamped = Math.max(-0.003, Math.min(0.003, raw));
     fundingRateEst = clamped;
   }
+  return { premium, fundingRateEst } as const;
+}
 
-  // Accurate MoEx funding (per 1 unit)
-  let fundingPerUnit: number | undefined;
-  let fundingD: number | undefined;
-  let fundingL1: number | undefined;
-  let fundingL2: number | undefined;
-  let fundingMode: string | undefined;
-  try {
-    if (
-      fundingOpts &&
-      fundingOpts.k1 != null &&
-      fundingOpts.k2 != null &&
-      fundingOpts.prevBasePrice != null
-    ) {
-      const { L1, L2 } = computeL1L2(
-        Number(fundingOpts.prevBasePrice),
-        Number(fundingOpts.k1),
-        Number(fundingOpts.k2),
-      );
-      fundingL1 = L1;
-      fundingL2 = L2;
-      const mode = (fundingOpts.mode || 'manual');
-      fundingMode = mode;
-      if (mode === 'manual' && fundingOpts.d != null) {
-        fundingD = Number(fundingOpts.d);
-      } else if (mode === 'currency') {
-        const now2 = new Date();
-        const from2 = new Date(now2);
-        from2.setHours(0, 0, 0, 0);
-        const candles2 = await api.marketdata.getCandles({
-          instrumentId: figi,
-          from: from2,
-          to: now2,
-          interval: CandleInterval.CANDLE_INTERVAL_1_MIN,
-        });
-        const v = vwapInWindow(
-          candles2?.candles || [],
-          fundingOpts.windowStart,
-          fundingOpts.windowEnd,
-        );
-        if (v != null && fundingOpts.cbr != null)
-          {fundingD = v - Number(fundingOpts.cbr);}
-      } else if (mode === 'generic') {
-        try {
-          const underlying = await instrumentService.getBaseInstrument(
-            (instrument as any).uid || (instrument as any).instrumentId || figi,
-          );
-          let vwapF: number | undefined = undefined;
-          let vwapS: number | undefined = undefined;
 
-          try {
-            const now2 = new Date();
-            const from2 = new Date(now2);
-            from2.setHours(0, 0, 0, 0);
-            const candlesF = await api.marketdata.getCandles({
-              instrumentId: figi,
-              from: from2,
-              to: now2,
-              interval: CandleInterval.CANDLE_INTERVAL_1_MIN,
-            });
-            vwapF = vwapInWindow(
-              candlesF?.candles || [],
-              fundingOpts.windowStart,
-              fundingOpts.windowEnd,
-            );
-          } catch {}
-
-          if (underlying) {
-            try {
-              const underId: string =
-                (underlying as any).figi ||
-                (underlying as any).uid ||
-                (underlying as any).instrumentId;
-              if (underId) {
-                const now3 = new Date();
-                const from3 = new Date(now3);
-                from3.setHours(0, 0, 0, 0);
-                const candlesS = await api.marketdata.getCandles({
-                  instrumentId: underId,
-                  from: from3,
-                  to: now3,
-                  interval: CandleInterval.CANDLE_INTERVAL_1_MIN,
-                });
-                vwapS = vwapInWindow(
-                  candlesS?.candles || [],
-                  fundingOpts.windowStart,
-                  fundingOpts.windowEnd,
-                );
-              }
-            } catch {}
-          }
-
-          if (vwapF != null && vwapS != null) {
-            fundingD = vwapF - vwapS;
-          }
-
-          if (
-            fundingD == null &&
-            vwapF != null &&
-            fundingOpts.underlyingPrice != null
-          ) {
-            fundingD = vwapF - Number(fundingOpts.underlyingPrice);
-          }
-          if (fundingD == null) {
-            try {
-              const ids: string[] = [];
-              if (underlying) {
-                const underId2: string =
-                  (underlying as any).instrumentId ||
-                  (underlying as any).uid ||
-                  (underlying as any).figi;
-                if (underId2) ids.push(underId2);
-              }
-              let lastSpot: number | undefined;
-              if (ids.length) {
-                const lastResp = await api.marketdata.getLastPrices({
-                  figi: [],
-                  instrumentId: ids,
-                  lastPriceType: 0,
-                } as any);
-                const lp = (lastResp as any)?.lastPrices?.[0]?.price;
-                if (lp) lastSpot = Helpers.toNumber(lp);
-              }
-              if (lastSpot != null && lastPrice != null) {
-                fundingD = lastPrice - lastSpot;
-              }
-            } catch {}
-          }
-        } catch {}
-        if (
-          fundingD == null &&
-          fundingOpts.underlyingPrice != null &&
-          vwap != null
-        ) {
-          fundingD = vwap - Number(fundingOpts.underlyingPrice);
-        }
-      }
-      if (fundingD != null) {
-        fundingPerUnit = computeFunding(
-          Number(fundingD),
-          Number(fundingL1),
-          Number(fundingL2),
-        );
-      }
-    }
-  } catch {}
-
-  // Next funding cut at 00:00, 08:00, 16:00 UTC
+export function getNextFundingWindow() {
+  // Next funding accrual once per day at 19:00 MSK (UTC+3), i.e., 16:00 UTC
   const utcNow = new Date();
-  const hour = utcNow.getUTCHours();
-  const targets = [0, 8, 16];
-  let nextHour = targets.find((h) => h > hour);
-  if (nextHour == null) nextHour = 24; // next day 00:00
-  const next = new Date(
-    Date.UTC(
-      utcNow.getUTCFullYear(),
-      utcNow.getUTCMonth(),
-      utcNow.getUTCDate(),
-      nextHour === 24 ? 0 : nextHour,
-      0,
-      0,
-      0,
-    ),
-  );
-  if (nextHour === 24) {
-    next.setUTCDate(next.getUTCDate() + 1);
+  const year = utcNow.getUTCFullYear();
+  const month = utcNow.getUTCMonth();
+  const date = utcNow.getUTCDate();
+  // Target today at 16:00:00 UTC
+  let next = new Date(Date.UTC(year, month, date, 16, 0, 0, 0));
+  if (utcNow.getTime() >= next.getTime()) {
+    // If already past today's cut, use tomorrow 16:00 UTC
+    next = new Date(Date.UTC(year, month, date + 1, 16, 0, 0, 0));
   }
   const nextFundingTime = next.toISOString();
   const diffMs = next.getTime() - utcNow.getTime();
   const minutesToFunding = Math.max(0, Math.round(diffMs / 60000));
+  return { nextFundingTime, minutesToFunding } as const;
+}
+
+export async function getSummaryByTicker(
+  ticker: string,
+  windowStart?: string,
+  windowEnd?: string,
+): Promise<Summary> {
+  const instrument = await getInstrumentByTicker(ticker);
+  const { figi, lot, name } = instrument as any;
+
+  const { lastPrice, bestBid, bestAsk, spread } =
+    await getLastPriceAndOrderBook(figi);
+
+  const { dayHigh, dayLow, dayOpen, volumeSum, vwap } =
+    await getTodayIntradayStats(figi);
+
+  const changeAbs =
+    lastPrice != null && dayOpen != null ? lastPrice - dayOpen : undefined;
+  const changePct = changeAbs != null && dayOpen ? changeAbs / dayOpen : undefined;
+
+  const { premium, fundingRateEst } = computePremiumAndEstimate(vwap, lastPrice);
+
+  // Funding window configuration (MoEx daily window)
+  // Default funding window per requirement: 10:00–18:50 MSK
+  const ws = windowStart || '10:00';
+  const we = windowEnd || '18:50';
+
+  // Always try to fetch MoEx funding per unit; k1/k2 are optional and used only by generic mode
+  const internalFundingOpts: FundingOptions = {
+    mode: 'moex',
+    windowStart: ws,
+    windowEnd: we,
+  };
+
+  const { fundingPerUnit, fundingD, fundingL1, fundingL2, fundingMode } =
+    await computeAccurateFunding(
+      instrument,
+      figi,
+      lastPrice,
+      vwap,
+      internalFundingOpts,
+    );
+
+  const { nextFundingTime, minutesToFunding } = getNextFundingWindow();
 
   return {
     name,

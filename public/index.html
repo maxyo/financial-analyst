@@ -30,49 +30,13 @@
   <script src="https://cdn.anychart.com/releases/8.12.1/js/anychart-stock.min.js"></script>
   <script src="https://cdn.anychart.com/releases/8.12.1/js/anychart-exports.min.js"></script>
   <script src="https://cdn.anychart.com/releases/8.12.1/locales/ru-ru.js"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
-  <header>
-    <h2>Панель инструментов</h2>
-    <div class="panel">
-      <label for="ticker">Тикер:</label>
-      <input id="ticker" placeholder="например, CNYRUBF" value="CNYRUBF" />
-      <button id="load">Загрузить</button>
-      <span id="status" class="muted"></span>
-    </div>
-  </header>
-
-  <section class="grid">
-    <div class="card">
-      <h3 id="title">Инструмент</h3>
-      <div id="summary"></div>
-    </div>
-    <div id="underlyingCard" class="card" style="height:auto; display:none;">
-      <h3 id="underlyingTitle">Базовый актив</h3>
-      <div id="underlyingSummary"></div>
-    </div>
-      <div class="card">
-          <div id="positions" class="muted">Загрузка...</div>
-      </div>
-      <div class="card" style="grid-column: 1 / -1;">
-      <div class="panel" style="justify-content: space-between; align-items: center;">
-        <h3 id="chartTitle">Свечи (1m, сегодня)</h3>
-        <div style="display:flex; align-items:center; gap: 12px;">
-          <div>
-            <label for="scale" class="muted">Масштаб:</label>
-            <select id="scale">
-              <option value="1m" selected>1m</option>
-              <option value="5m">5m</option>
-              <option value="15m">15m</option>
-              <option value="1h">1h</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div id="chart"></div>
-    </div>
-  </section>
-
+  <div id="root"></div>
+  <script type="text/babel" src="react-app.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

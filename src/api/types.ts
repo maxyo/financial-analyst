@@ -5,7 +5,7 @@ export interface FundingOptions {
   k2?: number; // fraction, e.g., 0.0015 for 0.15%
   prevBasePrice?: number; // previous evening clearing base price
   d?: number; // deviation D (manual)
-  mode?: 'generic' | 'currency' | 'manual';
+  mode?: 'generic' | 'moex';
   cbr?: number; // Central Bank rate (for currency mode)
   windowStart?: string; // e.g., '10:00' (local time)
   windowEnd?: string; // e.g., '15:30' (local time)
@@ -30,9 +30,9 @@ export interface Summary {
   // Funding-related fields (heuristic estimation)
   vwap?: number; // intraday VWAP based on today's 1m candles
   premium?: number; // (lastPrice - vwap) / vwap
-  fundingRateEst?: number; // estimated funding per 8h (fraction)
-  nextFundingTime?: string; // ISO string for next 00:00/08:00/16:00 UTC cut
-  minutesToFunding?: number; // minutes until next funding cut from now
+  fundingRateEst?: number; // estimated daily funding (fraction), heuristic
+  nextFundingTime?: string; // ISO of next daily funding at 19:00 MSK (16:00 UTC)
+  minutesToFunding?: number; // minutes until next daily funding cut from now
   // MoEx funding per documentation (per 1 unit of underlying)
   fundingPerUnit?: number;
   fundingD?: number;
