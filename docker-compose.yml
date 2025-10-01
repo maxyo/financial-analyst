@@ -1,0 +1,37 @@
+# Infrastructure-only docker-compose for the project
+# Currently includes only Redis. Extend this file as new infra services are added.
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: trade-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - trade-net
+
+# Named volumes for data persistence
+volumes:
+  redis-data:
+
+# Dedicated network to isolate project services
+networks:
+  trade-net:
+    driver: bridge
+
+# Usage:
+#  - Start infra:    docker compose up -d
+#  - Stop infra:     docker compose down
+#  - Purge data:     docker volume rm $(docker volume ls -q | grep redis-data)  # or: docker volume rm trade_redis-data if project name is default
+# Backend config (optional):
+#  - Set CACHE_BACKEND=redis and REDIS_URL=redis://redis:6379 for containers on the same network.
+#  - From host, REDIS_URL=redis://localhost:6379
