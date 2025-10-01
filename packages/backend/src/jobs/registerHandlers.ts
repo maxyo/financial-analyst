@@ -1,5 +1,7 @@
 import { JobsProcessor } from '../modules/jobs/processor';
 import { getRepositories } from '../repositories';
+import { getUserTradesByTicker } from '../api';
+import { listInstruments, type InstrumentCategory } from '../api/tinkoff/instruments';
 
 export function registerJobHandlers(jobsProcessor: JobsProcessor) {
   // Default noop handler
@@ -97,5 +99,105 @@ export function registerJobHandlers(jobsProcessor: JobsProcessor) {
     }
 
     return { processed, summarized, skipped };
+  });
+
+  // Trades: fetch user trades by ticker(s)
+  jobsProcessor.register('trades.fetch-by-user', async (job) => {
+    const repos = getRepositories();
+    const payload: any = job.payload || {};
+
+    // Normalize tickers from payload: allow ticker, tickers (array or comma-separated string)
+    let tickers: string[] = [];
+    if (Array.isArray(payload.tickers)) {
+      tickers = payload.tickers.map((s: any) => String(s).trim()).filter(Boolean);
+    } else if (typeof payload.tickers === 'string') {
+      tickers = payload.tickers
+        .split(/[\s,]+/)
+        .map((s: string) => s.trim())
+        .filter(Boolean);
+    }
+    const singleTicker = (payload.ticker || payload.symbol || '').trim?.() || '';
+    if (singleTicker) tickers.push(singleTicker);
+
+    // Deduplicate and normalize case
+    tickers = Array.from(new Set(tickers.map((t) => t.toUpperCase())));
+    if (tickers.length === 0) {
+      throw new Error('ticker(s) required');
+    }
+
+    const accountId: string | undefined = (payload.accountId || payload.account_id || '').trim?.() || undefined;
+    const hoursN = Number(payload.hours);
+    const hours = Number.isFinite(hoursN) && hoursN > 0 ? Math.floor(hoursN) : 24;
+
+    let totalFetched = 0;
+    let totalSavedApprox = 0;
+    const perTicker: Array<{ ticker: string; fetched: number; savedApprox: number }> = [];
+    const errors: Array<{ ticker: string; error: string }> = [];
+
+    for (const ticker of tickers) {
+      try {
+        const trades = await getUserTradesByTicker(ticker, accountId, hours);
+        totalFetched += trades.length;
+        repos.trades.upsertUser(ticker, accountId, trades);
+        totalSavedApprox += trades.length; // approximate due to INSERT OR IGNORE
+        perTicker.push({ ticker, fetched: trades.length, savedApprox: trades.length });
+      } catch (e: any) {
+        errors.push({ ticker, error: e?.message || String(e) });
+      }
+    }
+
+    return {
+      tickers,
+      accountId: accountId ?? null,
+      hours,
+      totals: { fetched: totalFetched, savedApprox: totalSavedApprox },
+      perTicker,
+      errors,
+    };
+  });
+
+  // Instruments: import from Tinkoff provider and save to DB
+  jobsProcessor.register('instruments.import.tinkoff', async (job) => {
+    const repos = getRepositories();
+    const payload: any = job.payload || {};
+
+    // Normalize categories (types) from payload
+    const rawTypes: any = payload.types || payload.categories || payload.kinds;
+    const allowed: InstrumentCategory[] = ['shares', 'futures', 'bonds', 'etfs', 'currencies'];
+    let categories: InstrumentCategory[] | undefined = undefined;
+    if (Array.isArray(rawTypes)) {
+      const norm = rawTypes.map((x) => String(x).toLowerCase().trim());
+      categories = allowed.filter((k) => norm.includes(k));
+      if (categories.length === 0) categories = undefined;
+    } else if (typeof rawTypes === 'string' && rawTypes.trim()) {
+      const norm = rawTypes
+        .split(/[,\s]+/)
+        .map((s: string) => s.toLowerCase().trim())
+        .filter(Boolean);
+      categories = allowed.filter((k) => norm.includes(k));
+      if (categories.length === 0) categories = undefined;
+    }
+
+    const dryRun = Boolean(payload.dryRun || payload.dry_run);
+
+    const rows = await listInstruments(categories);
+    let upserts = 0;
+
+    if (!dryRun) {
+      for (const r of rows) {
+        // Skip invalid ticker rows just in case
+        if (!r.ticker) continue;
+        repos.instruments.upsert(r);
+        upserts++;
+      }
+    }
+
+    return {
+      provider: 'tinkoff',
+      categories: categories ?? allowed,
+      dryRun,
+      fetched: rows.length,
+      upserted: dryRun ? 0 : upserts,
+    };
   });
 }
