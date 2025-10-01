@@ -1,16 +1,15 @@
 import * as http from 'http';
-import { WebSocketServer, WebSocket } from 'ws';
-import type { RawData } from 'ws';
 
-import {
-  getSummaryByTicker,
-  getTodayCandlesByTicker,
-  getUnderlyingSummaryByTicker,
-  getRecentTradesByTicker,
-} from '../api';
+import { WebSocket, WebSocketServer } from 'ws';
+
+import { getSummaryByTicker, getUnderlyingSummaryByTicker } from '../api';
 import { computeMoexClearingInstants } from '../lib/calculations';
+import { candlesService } from '../services/candles';
+import { tradesService } from '../services/trades';
 import { errorMessage } from '../utils/http';
-import type { CandlePoint } from '../api/tinkoff/types';
+
+import type { CandlePoint } from '../modules/market-prodivers/tinkoff/types';
+import type { RawData } from 'ws';
 
 interface ClearingPoint {
   t: string;
@@ -43,8 +42,11 @@ export function setupWebSocket(server: http.Server) {
 
   async function sendCandlesSnapshot(ws: WebSocket, ticker: string) {
     try {
-      const points = await getTodayCandlesByTicker(ticker);
-      const last = Array.isArray(points) && points.length ? points[points.length - 1] : null;
+      const points = await candlesService.getTodayCandlesByTicker(ticker);
+      const last =
+        Array.isArray(points) && points.length
+          ? points[points.length - 1]
+          : null;
       if (last?.t) lastCandleTs.set(ticker, last.t);
       let clearings: ClearingPoint[] = [];
       try {
@@ -53,19 +55,39 @@ export function setupWebSocket(server: http.Server) {
         const envK2 = process.env.FUNDING_K2;
         const k2 = envK2 != null ? Number(envK2) : undefined;
         let basePrice: number | undefined;
-        if (s.fundingL2 != null && k2) basePrice = Number(s.fundingL2) / Number(k2);
-        if (basePrice == null || !Number.isFinite(basePrice) || basePrice <= 0) {
-          basePrice = s.vwap != null ? Number(s.vwap) : s.lastPrice != null ? Number(s.lastPrice) : undefined;
+        if (s.fundingL2 != null && k2)
+          {basePrice = Number(s.fundingL2) / Number(k2);}
+        if (
+          basePrice == null ||
+          !Number.isFinite(basePrice) ||
+          basePrice <= 0
+        ) {
+          basePrice =
+            s.vwap != null
+              ? Number(s.vwap)
+              : s.lastPrice != null
+                ? Number(s.lastPrice)
+                : undefined;
         }
         const fundingFraction =
           s.fundingPerUnit != null && basePrice != null && Number(basePrice) > 0
             ? Number(s.fundingPerUnit) / Number(basePrice)
             : s.fundingRateEst;
-        clearings = instants.map((t) => ({ t, fundingRateEst: fundingFraction }));
+        clearings = instants.map((t) => ({
+          t,
+          fundingRateEst: fundingFraction,
+        }));
       } catch {
         // ignore
       }
-      const payload = JSON.stringify({ type: 'candles', ticker, mode: 'snapshot', points, clearings, ts: new Date().toISOString() });
+      const payload = JSON.stringify({
+        type: 'candles',
+        ticker,
+        mode: 'snapshot',
+        points,
+        clearings,
+        ts: new Date().toISOString(),
+      });
       if (ws.readyState === WebSocket.OPEN) {
         try {
           ws.send(payload);
@@ -75,7 +97,11 @@ export function setupWebSocket(server: http.Server) {
       if (ws.readyState === WebSocket.OPEN) {
         try {
           ws.send(
-            JSON.stringify({ type: 'error', ticker, message: errorMessage(e, 'failed to fetch candles') }),
+            JSON.stringify({
+              type: 'error',
+              ticker,
+              message: errorMessage(e, 'failed to fetch candles'),
+            }),
           );
         } catch {}
       }
@@ -136,7 +162,13 @@ export function setupWebSocket(server: http.Server) {
         } catch (_) {
           underlying = undefined;
         }
-        const payload = JSON.stringify({ type: 'quote', ticker, summary: data, underlying, ts: new Date().toISOString() });
+        const payload = JSON.stringify({
+          type: 'quote',
+          ticker,
+          summary: data,
+          underlying,
+          ts: new Date().toISOString(),
+        });
         const clients = tickerSubs.get(ticker);
         if (clients) {
           for (const c of clients) {
@@ -149,7 +181,11 @@ export function setupWebSocket(server: http.Server) {
         }
       } catch (e: unknown) {
         const clients = tickerSubs.get(ticker);
-        const payload = JSON.stringify({ type: 'error', ticker, message: errorMessage(e, 'failed to fetch quote') });
+        const payload = JSON.stringify({
+          type: 'error',
+          ticker,
+          message: errorMessage(e, 'failed to fetch quote'),
+        });
         if (clients) {
           for (const c of clients) {
             if (c.readyState === WebSocket.OPEN) {
@@ -166,7 +202,7 @@ export function setupWebSocket(server: http.Server) {
       const lastAt = lastCandlesPollAt.get(ticker) || 0;
       if (now - lastAt >= CANDLES_POLL_MS) {
         try {
-          const all = await getTodayCandlesByTicker(ticker);
+          const all = await candlesService.getTodayCandlesByTicker(ticker);
           if (Array.isArray(all) && all.length) {
             const lastSentIso = lastCandleTs.get(ticker);
             let toSend: CandlePoint[] = [];
@@ -180,7 +216,13 @@ export function setupWebSocket(server: http.Server) {
               });
             }
             if (toSend.length) {
-              const payload2 = JSON.stringify({ type: 'candles', ticker, mode: 'update', points: toSend, ts: new Date().toISOString() });
+              const payload2 = JSON.stringify({
+                type: 'candles',
+                ticker,
+                mode: 'update',
+                points: toSend,
+                ts: new Date().toISOString(),
+              });
               const clients = tickerSubs.get(ticker);
               if (clients) {
                 for (const c of clients) {
@@ -197,7 +239,11 @@ export function setupWebSocket(server: http.Server) {
           }
         } catch (e: unknown) {
           const clients = tickerSubs.get(ticker);
-          const payload = JSON.stringify({ type: 'error', ticker, message: errorMessage(e, 'failed to fetch candles') });
+          const payload = JSON.stringify({
+            type: 'error',
+            ticker,
+            message: errorMessage(e, 'failed to fetch candles'),
+          });
           if (clients) {
             for (const c of clients) {
               if (c.readyState === WebSocket.OPEN) {
@@ -217,8 +263,13 @@ export function setupWebSocket(server: http.Server) {
       const lastTradesAt = lastTradesPollAt.get(ticker) || 0;
       if (nowTrades - lastTradesAt >= TRADES_POLL_MS) {
         try {
-          const trades = await getRecentTradesByTicker(ticker);
-          const payload3 = JSON.stringify({ type: 'trades', ticker, trades, ts: new Date().toISOString() });
+          const trades = tradesService.getPublicTrades(ticker);
+          const payload3 = JSON.stringify({
+            type: 'trades',
+            ticker,
+            trades,
+            ts: new Date().toISOString(),
+          });
           const clients = tickerSubs.get(ticker);
           if (clients) {
             for (const c of clients) {
@@ -231,7 +282,11 @@ export function setupWebSocket(server: http.Server) {
           }
         } catch (e: unknown) {
           const clients = tickerSubs.get(ticker);
-          const payload = JSON.stringify({ type: 'error', ticker, message: errorMessage(e, 'failed to fetch trades') });
+          const payload = JSON.stringify({
+            type: 'error',
+            ticker,
+            message: errorMessage(e, 'failed to fetch trades'),
+          });
           if (clients) {
             for (const c of clients) {
               if (c.readyState === WebSocket.OPEN) {
@@ -261,21 +316,37 @@ export function setupWebSocket(server: http.Server) {
         if (msg?.type === 'subscribe' && typeof msg.ticker === 'string') {
           subscribeClientTo(ws, msg.ticker);
           ws.send(
-            JSON.stringify({ type: 'subscribed', ticker: String(msg.ticker).toUpperCase() }),
+            JSON.stringify({
+              type: 'subscribed',
+              ticker: String(msg.ticker).toUpperCase(),
+            }),
           );
-        } else if (msg?.type === 'unsubscribe' && typeof msg.ticker === 'string') {
+        } else if (
+          msg?.type === 'unsubscribe' &&
+          typeof msg.ticker === 'string'
+        ) {
           unsubscribeClientFrom(ws, msg.ticker);
           ws.send(
-            JSON.stringify({ type: 'unsubscribed', ticker: String(msg.ticker).toUpperCase() }),
+            JSON.stringify({
+              type: 'unsubscribed',
+              ticker: String(msg.ticker).toUpperCase(),
+            }),
           );
         } else if (msg?.type === 'ping') {
-          ws.send(JSON.stringify({ type: 'pong', ts: new Date().toISOString() }));
+          ws.send(
+            JSON.stringify({ type: 'pong', ts: new Date().toISOString() }),
+          );
         } else {
-          ws.send(JSON.stringify({ type: 'error', message: 'unknown message' }));
+          ws.send(
+            JSON.stringify({ type: 'error', message: 'unknown message' }),
+          );
         }
       } catch (e: unknown) {
         ws.send(
-          JSON.stringify({ type: 'error', message: errorMessage(e, 'bad message') }),
+          JSON.stringify({
+            type: 'error',
+            message: errorMessage(e, 'bad message'),
+          }),
         );
       }
     });

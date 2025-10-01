@@ -24,7 +24,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 function toTs(x: number | string | Date | undefined, fallback: number): number {
   if (x == null) return Math.trunc(fallback);
   if (typeof x === 'number') return Math.trunc(x);
-  const d = new Date(x as any);
+  const d = new Date(x);
   const t = d.getTime();
   return Number.isFinite(t) ? Math.trunc(t) : Math.trunc(fallback);
 }
@@ -33,7 +33,7 @@ function appIntervalToCacheString(i?: AppCandleInterval | string | null): Interv
   if (!i) return '1m';
   // accept enum or textual
   if (typeof i === 'string') {
-    if ((i as any) in AppCandleInterval) {
+    if ((i) in AppCandleInterval) {
       switch (i as AppCandleInterval) {
         case AppCandleInterval.M1:
           return '1m';
