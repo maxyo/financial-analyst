@@ -4,8 +4,8 @@ export function useWebSocket(ticker: string, onMessage?: (msg: any) => void) {
   const useRef = React.useRef;
   const useEffect = React.useEffect;
 
-  const wsRef = useRef(null as any);
-  const tickerRef = useRef(ticker as any);
+  const wsRef = useRef<WebSocket>(null);
+  const tickerRef = useRef(ticker);
   tickerRef.current = ticker;
 
   useEffect(() => {
@@ -15,12 +15,21 @@ export function useWebSocket(ticker: string, onMessage?: (msg: any) => void) {
       const proto = loc.protocol === 'https:' ? 'wss:' : 'ws:';
       return `${proto}//${loc.host}/ws`;
     }
+
+    if (
+      wsRef.current?.readyState === WebSocket.OPEN ||
+      wsRef.current?.readyState === WebSocket.OPEN
+    ) {
+      return;
+    }
     const ws = new WebSocket(wsUrl());
     wsRef.current = ws;
 
     ws.onopen = () => {
       if (tickerRef.current) {
-        ws.send(JSON.stringify({ type: 'subscribe', ticker: tickerRef.current }));
+        ws.send(
+          JSON.stringify({ type: 'subscribe', ticker: tickerRef.current }),
+        );
       }
     };
     ws.onmessage = (ev) => {
@@ -51,15 +60,19 @@ export function useWebSocket(ticker: string, onMessage?: (msg: any) => void) {
         if (wsRef.current) {
           if (tickerRef.current) {
             wsRef.current.send(
-              JSON.stringify({ type: 'unsubscribe', ticker: tickerRef.current }),
+              JSON.stringify({
+                type: 'unsubscribe',
+                ticker: tickerRef.current,
+              }),
             );
           }
           wsRef.current.close();
         }
-      } catch {}
-      wsRef.current = null;
+      } catch {} finally {
+        wsRef.current = null;
+      }
     };
-  }, [ticker, onMessage]);
+  }, [ticker]);
 
   return wsRef;
 }

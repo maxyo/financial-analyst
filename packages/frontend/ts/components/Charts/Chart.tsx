@@ -17,7 +17,7 @@ export function AnyChartStock({ candles, trades, clearings }: Props) {
   const candleByTs = React.useMemo(() => {
     const map = new Map<number, CandlePoint>();
     for (const c of pts) {
-      const ms = new Date((c as any).t).getTime();
+      const ms = new Date((c).t).getTime();
       if (isFinite(ms)) map.set(ms, c);
     }
     return map;
@@ -27,12 +27,12 @@ export function AnyChartStock({ candles, trades, clearings }: Props) {
   const series = React.useMemo(() => {
     const data = pts
       .map((c) => {
-        const ms = new Date((c as any).t).getTime();
+        const ms = new Date((c).t).getTime();
         if (!isFinite(ms)) return null;
-        const o = Number((c as any).o);
-        const h = Number((c as any).h);
-        const l = Number((c as any).l);
-        const cl = Number((c as any).c);
+        const o = Number((c).o);
+        const h = Number((c).h);
+        const l = Number((c).l);
+        const cl = Number((c).c);
         if ([o, h, l, cl].some((v) => !isFinite(v))) return null;
         return { x: ms, y: [o, h, l, cl] } as const;
       })
@@ -44,17 +44,17 @@ export function AnyChartStock({ candles, trades, clearings }: Props) {
   const annotations = React.useMemo(() => {
     const tradePoints = (Array.isArray(trades) ? trades : [])
       .map((t) => {
-        if (!t || !t.t || (t as any).p == null) return null;
+        if (!t || !t.t || (t).p == null) return null;
         const x = new Date(t.t).getTime();
         if (!isFinite(x)) return null;
-        const price = Number((t as any).p);
+        const price = Number((t).p);
         if (!isFinite(price)) return null;
-        const qty = (t as any).q != null ? Number((t as any).q) : null;
-        const side = ((t as any).side || '').toLowerCase();
+        const qty = (t).q != null ? Number((t).q) : null;
+        const side = ((t).side || '').toLowerCase();
         const isBuy = side === 'buy';
         const isSell = side === 'sell';
         const color = isBuy ? '#22c55e' : isSell ? '#ef4444' : '#94a3b8';
-        const labelText = isBuy ? 'B' : isSell ? 'S' : 'T';
+        const labelText = `${isBuy ? 'B' : 'S'} ${price}/${qty}`;
         return {
           x,
           y: price,
@@ -65,7 +65,7 @@ export function AnyChartStock({ candles, trades, clearings }: Props) {
             style: { background: '#0b1222', color: '#e2e8f0' },
           },
           // Tooltip via label text approximation
-        } as any;
+        };
       })
       .filter(Boolean) as any[];
 
@@ -75,26 +75,25 @@ export function AnyChartStock({ candles, trades, clearings }: Props) {
         const x = new Date(c.t).getTime();
         if (!isFinite(x)) return null;
         const candle = candleByTs.get(x);
-        const y = candle ? Number((candle as any).c) : undefined;
-        const text = `C`;
+        const y = candle ? Number((candle).c) : undefined;
         const color = '#eab308';
-        const funding = (c as any).fundingRateEst;
+        const funding = (c).fundingRateEst;
         return {
           x,
           y,
           marker: { size: 3, fillColor: color, strokeColor: color },
           label: {
-            text,
+            text: `Clearing: ${fmt((c.fundingRateEst ?? 0) * 100,5)}%`,
             borderColor: color,
             style: { background: '#0b1222', color: '#fde68a' },
           },
           // Additional context shown in tooltip formatter
           _meta: { funding },
-        } as any;
+        };
       })
       .filter(Boolean) as any[];
 
-    return { points: [...clearingPoints, ...tradePoints] } as const;
+    return { xaxis: [...clearingPoints, ...tradePoints] } as const;
   }, [trades, clearings, candleByTs]);
 
   const options: any = React.useMemo(() => ({
@@ -126,7 +125,7 @@ export function AnyChartStock({ candles, trades, clearings }: Props) {
   return (
     <Chart
       options={options}
-      series={series as any}
+      series={series}
       type="candlestick"
       height={420}
       width="100%"
