@@ -1,0 +1,38 @@
+# Ignore node modules and build artifacts
+node_modules
+**/node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Git and VCS
+.git
+.gitignore
+
+# Editor/IDE
+.vscode
+.idea
+
+# Build outputs
+/dist
+**/dist
+coverage
+
+# Local environment files
+.env
+.env.*
+
+# Docker
+Dockerfile.old
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Do not bake local SQLite databases and data directories
+/data
+packages/backend/data
+*.db
+*.sqlite
+*.sqlite3
