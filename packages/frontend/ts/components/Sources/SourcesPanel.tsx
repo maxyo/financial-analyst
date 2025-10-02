@@ -16,6 +16,10 @@ import {
   Stack,
   Typography,
   CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 
 interface DataSourceRecord {
@@ -42,6 +46,16 @@ export function SourcesPanel() {
   const [error, setError] = React.useState<string | null>(null);
   const [info, setInfo] = React.useState<string | null>(null);
 
+  // Create dialog state
+  const [createOpen, setCreateOpen] = React.useState(false);
+  const [newName, setNewName] = React.useState('');
+  const [newType, setNewType] = React.useState('');
+  const [newActive, setNewActive] = React.useState(true);
+  const [newStrategy, setNewStrategy] = React.useState(
+    JSON.stringify({ type: 'time_interval', options: { value: 1, unit: 'hour' } }, null, 2),
+  );
+  const [newConfig, setNewConfig] = React.useState('{}');
+
   const load = async () => {
     setLoading(true);
     setError(null);
@@ -65,6 +79,19 @@ export function SourcesPanel() {
   async function putJSON(url: string, body: any) {
     const res = await fetch(`${API_URL}${url}`, {
       method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body ?? {}),
+    });
+    if (!res.ok) {
+      const txt = await res.text().catch(() => '');
+      throw new Error(`HTTP ${res.status}: ${txt}`);
+    }
+    return res.json();
+  }
+
+  async function postJSON(url: string, body: any) {
+    const res = await fetch(`${API_URL}${url}`, {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body ?? {}),
     });
@@ -109,6 +136,38 @@ export function SourcesPanel() {
     }
   };
 
+  const openCreate = () => {
+    setNewName('');
+    setNewType('');
+    setNewActive(true);
+    setNewStrategy(
+      JSON.stringify({ type: 'time_interval', options: { value: 1, unit: 'hour' } }, null, 2),
+    );
+    setNewConfig('{}');
+    setCreateOpen(true);
+  };
+
+  const createSource = async () => {
+    setError(null);
+    setInfo(null);
+    try {
+      const payload: any = {
+        name: newName,
+        source_type: newType,
+        is_active: newActive,
+        update_strategy: tryParseJson(newStrategy),
+        config: tryParseJson(newConfig),
+      };
+      await postJSON('/api/data-sources', payload);
+      setCreateOpen(false);
+      await load();
+      setInfo('Источник создан');
+    } catch (e: any) {
+      console.error(e);
+      setError('Ошибка создания источника');
+    }
+  };
+
   return (
     <Card>
       <CardHeader
@@ -118,6 +177,9 @@ export function SourcesPanel() {
             {loading && <CircularProgress size={18} />}
             <Button variant="outlined" onClick={load} disabled={loading}>
               Обновить
+            </Button>
+            <Button variant="contained" onClick={openCreate}>
+              Создать источник
             </Button>
           </Stack>
         }
@@ -233,6 +295,59 @@ export function SourcesPanel() {
           </Table>
         </TableContainer>
       </CardContent>
+
+      <Dialog open={createOpen} onClose={() => setCreateOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Создать источник</DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <TextField
+              label="Название"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              fullWidth
+              size="small"
+            />
+            <TextField
+              label="Тип"
+              value={newType}
+              onChange={(e) => setNewType(e.target.value)}
+              fullWidth
+              size="small"
+            />
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Checkbox
+                checked={newActive}
+                onChange={(e) => setNewActive(e.target.checked)}
+              />
+              <Typography>Активен</Typography>
+            </Stack>
+            <TextField
+              label="Стратегия обновления (JSON)"
+              value={newStrategy}
+              onChange={(e) => setNewStrategy(e.target.value)}
+              fullWidth
+              multiline
+              minRows={3}
+              size="small"
+            />
+            <TextField
+              label="Конфиг (JSON)"
+              value={newConfig}
+              onChange={(e) => setNewConfig(e.target.value)}
+              fullWidth
+              multiline
+              minRows={3}
+              size="small"
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCreateOpen(false)}>Отмена</Button>
+          <Button variant="contained" onClick={createSource} disabled={!newName || !newType}>
+            Создать
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   );
 }

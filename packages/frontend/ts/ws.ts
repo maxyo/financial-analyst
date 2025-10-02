@@ -13,7 +13,7 @@ export function useWebSocket(ticker: string, onMessage?: (msg: any) => void) {
     function wsUrl() {
       const loc = window.location;
       const proto = loc.protocol === 'https:' ? 'wss:' : 'ws:';
-      return `${proto}//${loc.host}/ws`;
+      return `${proto}//localhost:3000/ws`;
     }
 
     if (
@@ -68,7 +68,8 @@ export function useWebSocket(ticker: string, onMessage?: (msg: any) => void) {
           }
           wsRef.current.close();
         }
-      } catch {} finally {
+      } catch {
+      } finally {
         wsRef.current = null;
       }
     };

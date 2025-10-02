@@ -5,7 +5,8 @@
   "scripts": {
     "build": "esbuild ts/index.tsx --bundle --format=esm --platform=browser --sourcemap --outfile=build/index.js",
     "watch": "esbuild ts/index.tsx --bundle --format=esm --platform=browser --sourcemap --outfile=build/index.js --watch",
-    "typecheck": "tsc -p tsconfig.client.json --noEmit"
+    "typecheck": "tsc -p tsconfig.client.json --noEmit",
+    "api:generate": "openapi --input ../backend/openapi.json --output ts/api/client --client fetch"
   },
   "author": "",
   "license": "ISC",
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "@types/react-dom": "^18.3.7",
-    "esbuild": "^0.21.5"
+    "esbuild": "^0.21.5",
+    "openapi-typescript-codegen": "^0.29.0"
   }
 }

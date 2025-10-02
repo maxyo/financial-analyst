@@ -3,7 +3,7 @@ export const API_URL = 'http://localhost:3000';
 export type Scale = '1m' | '5m' | '15m' | '1h';
 
 export function fmt(n: unknown, digits = 4): string {
-  const num = Number(n as any);
+  const num = Number(n);
   if (n == null || Number.isNaN(num)) return '-';
   try {
     const f = new Intl.NumberFormat('ru-RU', {
@@ -18,7 +18,7 @@ export function fmt(n: unknown, digits = 4): string {
 }
 
 export function fmtInt(n: unknown): string {
-  const num = Number(n as any);
+  const num = Number(n);
   if (n == null || Number.isNaN(num)) return '-';
   try {
     const f = new Intl.NumberFormat('ru-RU', {
@@ -33,13 +33,13 @@ export function fmtInt(n: unknown): string {
 }
 
 export function fmtPct(v: unknown, digits = 4): string {
-  const num = Number(v as any);
+  const num = Number(v);
   if (v == null || !isFinite(num)) return '-';
   return `${fmt(num * 100, digits)}%`;
 }
 
 export function signClass(v: unknown): string {
-  const num = Number(v as any);
+  const num = Number(v);
   if (v == null || !isFinite(num)) return '';
   return num > 0 ? 'pos' : num < 0 ? 'neg' : '';
 }
@@ -59,9 +59,19 @@ export function scaleToMs(scale: Scale): number {
   }
 }
 
-export type CandleLike = { t: string; o: number; h?: number; l?: number; c: number; v?: number };
+export type CandleLike = {
+  t: string;
+  o: number;
+  h?: number;
+  l?: number;
+  c: number;
+  v?: number;
+};
 
-export function aggregateCandles<T extends CandleLike>(candles: T[] | undefined | null, scale: Scale): T[] {
+export function aggregateCandles<T extends CandleLike>(
+  candles: T[] | undefined | null,
+  scale: Scale,
+): T[] {
   if (!Array.isArray(candles) || candles.length === 0) return [] as T[];
   if (scale === '1m') return candles.slice() as T[];
   const step = scaleToMs(scale);
@@ -75,11 +85,11 @@ export function aggregateCandles<T extends CandleLike>(candles: T[] | undefined 
     if (!agg) {
       agg = {
         t: new Date(bucket).toISOString(),
-        o: (p as any).o,
-        h: (p as any).h,
-        l: (p as any).l,
-        c: (p as any).c,
-        v: (p as any).v ?? 0,
+        o: p.o,
+        h: p.h,
+        l: p.l,
+        c: p.c,
+        v: p.v ?? 0,
         _firstTs: ts,
         _lastTs: ts,
       };
@@ -87,15 +97,15 @@ export function aggregateCandles<T extends CandleLike>(candles: T[] | undefined 
     } else {
       if (ts < agg._firstTs) {
         agg._firstTs = ts;
-        agg.o = (p as any).o;
+        agg.o = p.o;
       }
       if (ts > agg._lastTs) {
         agg._lastTs = ts;
-        agg.c = (p as any).c;
+        agg.c = p.c;
       }
-      if ((p as any).h != null) agg.h = Math.max(agg.h ?? (p as any).h, (p as any).h);
-      if ((p as any).l != null) agg.l = Math.min(agg.l ?? (p as any).l, (p as any).l);
-      agg.v = (agg.v || 0) + ((p as any).v || 0);
+      if (p.h != null) agg.h = Math.max(agg.h ?? p.h, p.h);
+      if (p.l != null) agg.l = Math.min(agg.l ?? p.l, p.l);
+      agg.v = (agg.v || 0) + (p.v || 0);
     }
   }
   const result = Array.from(map.entries())
@@ -116,4 +126,10 @@ export async function fetchJSON<T = any>(url: string): Promise<T> {
     throw new Error(`HTTP ${res.status}: ${txt}`);
   }
   return res.json();
+}
+
+export function numColor(val: unknown): string {
+  const n = Number(val);
+  if (!isFinite(n)) return 'text.primary';
+  return n > 0 ? 'success.main' : n < 0 ? 'error.main' : 'text.secondary';
 }

@@ -11,12 +11,18 @@
     "noEmit": false,
     "strict": true,
     "noUnusedLocals": true,
+    "strictNullChecks": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "types": ["node"]
   },
   "include": [
     "packages/backend/src"
+  ],
+  "exclude": [
+    "packages/backend/src/api.ts"
   ]
 }

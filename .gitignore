@@ -22,8 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.env
+packages/backend/.env
 /frontend/build/
 /data/
 /packages/frontend/build/
 /packages/backend/data/
+/packages/backend/openapi.json

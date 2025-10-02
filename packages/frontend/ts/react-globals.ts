@@ -1,2 +1,2 @@
-export const React: any = (window as any).React;
-export const ReactDOM: any = (window as any).ReactDOM;
+export const React: any = window.React;
+export const ReactDOM: any = window.ReactDOM;

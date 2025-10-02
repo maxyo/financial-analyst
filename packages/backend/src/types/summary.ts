@@ -1,0 +1,20 @@
+export type Summary = {
+  name: string;
+  ticker: string;
+  figi: string;
+  lot: number;
+  lastPrice?: number;
+  bestBid?: number;
+  bestAsk?: number;
+  spread?: number;
+  dayHigh?: number;
+  dayLow?: number;
+  dayOpen?: number;
+  changeAbs?: number;
+  changePct?: number;
+  volumeSum?: number;
+  vwap?: number;
+  fundingRateEst?: number;
+  nextFundingTime: string;
+  minutesToFunding: number;
+};

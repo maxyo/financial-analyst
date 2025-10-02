@@ -34,7 +34,6 @@ export interface SummaryLite {
 
 export interface Summary extends SummaryLite {
   underlying?: SummaryLite | null;
-  clearings?: Clearing[];
 }
 
 export interface PositionsResponse {
