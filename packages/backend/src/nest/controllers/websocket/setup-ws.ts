@@ -1,9 +1,12 @@
 import * as http from 'http';
-import { WebSocket, WebSocketServer } from 'ws';
-import type { RawData } from 'ws';
 
-import { computeMoexClearingInstants } from '../../lib/calculations';
-import { errorMessage } from '../../lib/utils/http';
+import { WebSocket, WebSocketServer } from 'ws';
+
+
+import { computeMoexClearingInstants } from '../lib/calculations';
+import { errorMessage } from '../lib/utils/http';
+
+import type { RawData } from 'ws';
 
 interface ClearingPoint {
   t: string;
@@ -51,7 +54,7 @@ export function setupWebSocket(server: http.Server, jobsEvents?: JobsEvents, ser
     jobsEvents.on('job:succeeded', async ({ job, result }) => {
       try {
         if (!job || job.type !== 'candles.import.tinkoff') return;
-        const tickerRaw = (result && (result as any).ticker) || (job.payload && (job.payload.ticker || job.payload.symbol));
+        const tickerRaw = (result && (result).ticker) || (job.payload && (job.payload.ticker || job.payload.symbol));
         if (!tickerRaw || typeof tickerRaw !== 'string') return;
         const ticker = tickerRaw.trim().toUpperCase();
         const clients = tickerSubs.get(ticker);
