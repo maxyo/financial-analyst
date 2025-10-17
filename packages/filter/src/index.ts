@@ -8,7 +8,7 @@ function nextParam(): string {
   return `p${globalParamIdx}`;
 }
 
-function isPlainObject(v: any): v is Record<string, any> {
+function isPlainObject(v: unknown): v is Record<string, unknown> {
   return v != null && typeof v === 'object' && !Array.isArray(v);
 }
 
@@ -20,7 +20,7 @@ function toColumn(alias: string, key: string): string {
   return `${alias}.${key}`;
 }
 
-export type MongoLike = any;
+export type MongoLike = Record<string, unknown>;
 
 // Field type definition for schema builder
 export type FieldType = 'string' | 'number' | 'boolean' | 'date' | { enum: readonly string[] } | z.ZodTypeAny;
@@ -44,6 +44,12 @@ function zodForFieldType(ft: FieldType) {
   }
 }
 
+function toDate(v: unknown): Date {
+  if (v instanceof Date) return v;
+  if (typeof v === 'string' || typeof v === 'number') return new Date(v);
+  return new Date(String(v));
+}
+
 // Allowed operators per primitive type
 function buildOpsSchemaForType(base: z.ZodTypeAny, kind: 'string' | 'number' | 'boolean' | 'date' | 'enum') {
   const eqne = z.object({ $eq: base }).partial().and(z.object({ $ne: base }).partial());
@@ -64,35 +70,60 @@ function buildOpsSchemaForType(base: z.ZodTypeAny, kind: 'string' | 'number' | '
   return eqne.and(cmpOps).and(inOps);
 }
 
-// Create a Zod schema for a Mongo-like filter bound to an entity fields spec
-export function createFilterSchema(fields: EntityFields) {
+// Create a generic Zod schema for a Mongo-like filter NOT bound to any entity.
+// The schema allows any field name and supports a broad set of operators with permissive value types.
+export function createFilterSchema(fields?: EntityFields) {
   // Forward declaration for recursive schema
   type AnyFilter = Record<string, unknown>;
   let FilterSchema: z.ZodType<AnyFilter>;
 
+  // If fields specified, build per-field schemas as before; otherwise allow any keys with generic operator/value types
+  const anyVal = z.union([z.string(), z.number(), z.boolean(), z.date(), z.null(), z.undefined(), z.any()]);
+  const genericOps = z
+    .object({
+      $eq: anyVal,
+      $ne: anyVal,
+      $gt: anyVal,
+      $gte: anyVal,
+      $lt: anyVal,
+      $lte: anyVal,
+      $in: z.array(anyVal).min(1),
+      $nin: z.array(anyVal).min(1),
+      $regex: z.string().or(z.instanceof(RegExp)).optional(),
+      $options: z.string().optional(),
+    })
+    .partial();
+
   const fieldSchemas: Record<string, z.ZodTypeAny> = {};
-  for (const [name, ft] of Object.entries(fields)) {
-    const kind = typeof ft === 'object' && 'enum' in ft ? 'enum' : (ft as any);
-    const base = zodForFieldType(ft);
-    const ops = buildOpsSchemaForType(base, kind as any);
-    // Field value can be direct base value or operators object
-    fieldSchemas[name] = z.union([base, ops]);
+  if (fields && Object.keys(fields).length) {
+    for (const [name, ft] of Object.entries(fields)) {
+      const kind: 'string' | 'number' | 'boolean' | 'date' | 'enum' =
+            typeof ft === 'object' && 'enum' in ft ? 'enum' : (ft as 'string' | 'number' | 'boolean' | 'date');
+      const base = zodForFieldType(ft);
+      const ops = buildOpsSchemaForType(base, kind);
+      fieldSchemas[name] = z.union([base, ops]);
+    }
   }
 
   // This is filled after FilterSchema is set up so we can reference recursively
-  FilterSchema = z.lazy(() =>
-    z
-      .object({
-        // Logical operators
-        $and: z.array(FilterSchema).min(1).optional(),
-        $or: z.array(FilterSchema).min(1).optional(),
-        $not: FilterSchema.optional(),
-        // Fields for the entity
-        ...fieldSchemas,
-      })
-      // Disallow unknown keys outside declared fields and logical keys
-      .strict()
-  );
+  FilterSchema = z.lazy(() => {
+    const baseObject = z.object({
+      $and: z.array(FilterSchema).min(1).optional(),
+      $or: z.array(FilterSchema).min(1).optional(),
+      $not: FilterSchema.optional(),
+      ...(fields && Object.keys(fields).length
+        ? fieldSchemas
+        : ({} as Record<string, z.ZodTypeAny>)),
+    });
+
+    if (fields && Object.keys(fields).length) {
+      return baseObject.strict();
+    }
+
+    // No fields map: allow any keys with genericOps or direct primitive values
+    const dynamic = baseObject.catchall(z.union([anyVal, genericOps]));
+    return dynamic;
+  });
 
   return FilterSchema;
 }
@@ -102,7 +133,7 @@ export type FilterFor<F extends EntityFields> = z.infer<ReturnType<typeof create
 
 // Overload: allow passing a Zod schema for validation. If provided, invalid filters are ignored by default.
 export function applyFilter(
-  qb: SelectQueryBuilder<any>,
+  qb: SelectQueryBuilder<Record<string, unknown>>,
   alias: string,
   filter: MongoLike,
   options?: { schema?: z.ZodTypeAny; onInvalid?: 'ignore' | 'throw' }
@@ -117,17 +148,17 @@ export function applyFilter(
       return; // ignore invalid filter
     }
     // use parsed.data to ensure transformed values like dates are applied
-    filter = parsed.data as any;
+    filter = parsed.data as MongoLike;
   }
   const { clause, params } = buildClause(alias, filter);
   if (clause) qb.andWhere(clause, params);
 }
 
-function buildClause(alias: string, filter: any): { clause: string; params: Record<string, any> } {
+function buildClause(alias: string, filter: Record<string, unknown>): { clause: string; params: Record<string, unknown> } {
   const parts: string[] = [];
-  const params: Record<string, any> = {};
+  const params: Record<string, unknown> = {};
 
-  const push = (cl: string, pr: Record<string, any>) => {
+  const push = (cl: string, pr: Record<string, unknown>) => {
     if (cl) parts.push(`(${cl})`);
     Object.assign(params, pr);
   };
@@ -173,22 +204,22 @@ function buildClause(alias: string, filter: any): { clause: string; params: Reco
           }
           case '$gt': {
             const p = nextParam();
-            push(`${column} > :${p}`, { [p]: column.endsWith('scraped_at') ? new Date(val as any) : (val as any) });
+            push(`${column} > :${p}`, { [p]: column.endsWith('scraped_at') ? toDate(val) : val });
             break;
           }
           case '$gte': {
             const p = nextParam();
-            push(`${column} >= :${p}`, { [p]: column.endsWith('scraped_at') ? new Date(val as any) : (val as any) });
+            push(`${column} >= :${p}`, { [p]: column.endsWith('scraped_at') ? toDate(val) : val });
             break;
           }
           case '$lt': {
             const p = nextParam();
-            push(`${column} < :${p}`, { [p]: column.endsWith('scraped_at') ? new Date(val as any) : (val as any) });
+            push(`${column} < :${p}`, { [p]: column.endsWith('scraped_at') ? toDate(val) : val });
             break;
           }
           case '$lte': {
             const p = nextParam();
-            push(`${column} <= :${p}`, { [p]: column.endsWith('scraped_at') ? new Date(val as any) : (val as any) });
+            push(`${column} <= :${p}`, { [p]: column.endsWith('scraped_at') ? toDate(val) : val });
             break;
           }
           case '$in': {
@@ -223,7 +254,7 @@ function buildClause(alias: string, filter: any): { clause: string; params: Reco
       }
     } else {
       const p = nextParam();
-      push(`${column} = :${p}`, { [p]: column.endsWith('scraped_at') ? new Date(value as any) : (value as any) });
+      push(`${column} = :${p}`, { [p]: column.endsWith('scraped_at') ? toDate(value) : value });
     }
   }
 
