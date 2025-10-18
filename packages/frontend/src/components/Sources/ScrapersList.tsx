@@ -10,11 +10,11 @@ import {
   Typography,
 } from '@mui/material';
 import {
-  ScraperCreateDto,
-  ScraperDto,
-  ScrapersListResponseDto,
+  type ScraperCreateDto,
+  type ScraperUpdateDto,
   ScrapersService,
-  ScraperUpdateDto,
+  type ScraperDto_Output as ScraperDto,
+  type ScrapersListResponseDto_Output as ScrapersListResponseDto,
 } from '../../api/client';
 import { AddCircle, Delete, Edit, PlayArrow } from '@mui/icons-material';
 
@@ -98,9 +98,9 @@ export function ScrapersList() {
     // navigate to scraper creation page (by analogy with profiles)
     window.location.hash = '#/scraper/new';
   }
-  function openEdit(s: ScraperDto) {
+  function openEdit(s: any) {
     // navigate to edit page
-    window.location.hash = `#/scraper/${s.id}`;
+    window.location.hash = `#/scraper/${s.data?.id || ''}`;
   }
   function closeDialog() {
     setDialogOpen(false);
@@ -154,18 +154,23 @@ export function ScrapersList() {
       }
       if (editing) {
         const payload: ScraperUpdateDto = {
-          name: form.name,
-          type: form.type,
-          config,
-        };
-        await ScrapersService.scrapersControllerUpdate(editing.id, payload);
+          data: {
+            name: form.name,
+            type: form.type,
+            config,
+          },
+        } as any;
+        const editingId = (editing as any)?.data?.id || (editing as any)?.id;
+        await ScrapersService.scrapersControllerUpdate(editingId, payload as any);
       } else {
         const payload: ScraperCreateDto = {
-          name: form.name,
-          type: form.type,
-          config: config,
-        };
-        await ScrapersService.scrapersControllerCreate(payload);
+          data: {
+            name: form.name,
+            type: form.type,
+            config: config,
+          },
+        } as any;
+        await ScrapersService.scrapersControllerCreate(payload as any);
       }
       setDialogOpen(false);
       await loadScrapers();
@@ -234,15 +239,15 @@ export function ScrapersList() {
         {scrapers?.items?.length
           ? scrapers.items.map((s) => (
               <ListItem
-                key={s.id}
+                key={s.data?.id || ''}
                 divider
                 secondaryAction={
                   <Box>
                     <IconButton
                       edge="end"
                       aria-label="run"
-                      onClick={() => handleRun(s.id)}
-                      disabled={runningId === s.id}
+                      onClick={() => handleRun((s as any).data?.id)}
+                      disabled={runningId === (s as any).data?.id}
                       title="Запустить"
                     >
                       <PlayArrow />
@@ -258,7 +263,7 @@ export function ScrapersList() {
                     <IconButton
                       edge="end"
                       aria-label="delete"
-                      onClick={() => handleDelete(s.id)}
+                      onClick={() => handleDelete((s as any).data?.id)}
                       title="Удалить"
                     >
                       <Delete />
@@ -266,7 +271,7 @@ export function ScrapersList() {
                   </Box>
                 }
               >
-                <ListItemText primary={s.name} secondary={`Тип: ${s.type}`} />
+                <ListItemText primary={(s as any).data?.name} secondary={`Тип: ${(s as any).data?.type}`} />
               </ListItem>
             ))
           : !loading && (

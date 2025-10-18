@@ -63,16 +63,16 @@ var icons_material_1 = require("@mui/icons-material");
 var client_1 = require("../../api/client");
 // Edit page for Scraper, migrated from modal in ScrapersList
 function ScraperEditPage(_a) {
-    var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r;
+    var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s;
     var id = _a.id, onBack = _a.onBack;
     var useState = react_1.default.useState;
     var useEffect = react_1.default.useEffect;
     var isNew = !id;
-    var _s = useState(false), loading = _s[0], setLoading = _s[1];
-    var _t = useState(false), saving = _t[0], setSaving = _t[1];
-    var _u = useState(null), error = _u[0], setError = _u[1];
-    var _v = useState(null), scraper = _v[0], setScraper = _v[1];
-    var _w = useState({
+    var _t = useState(false), loading = _t[0], setLoading = _t[1];
+    var _u = useState(false), saving = _u[0], setSaving = _u[1];
+    var _v = useState(null), error = _v[0], setError = _v[1];
+    var _w = useState(null), scraper = _w[0], setScraper = _w[1];
+    var _x = useState({
         name: '',
         type: 'API',
         api: { url: '' },
@@ -86,10 +86,10 @@ function ScraperEditPage(_a) {
         },
         postProcessors: [],
         showJson: false,
-    }), form = _w[0], setForm = _w[1];
+    }), form = _x[0], setForm = _x[1];
     function load() {
         return __awaiter(this, void 0, void 0, function () {
-            var s, rawCfg, cfg, api, html, postProcessors, e_1;
+            var s, raw, rawCfg, cfg, api, html, postProcessors, e_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -104,9 +104,10 @@ function ScraperEditPage(_a) {
                     case 2:
                         s = _a.sent();
                         setScraper(s);
-                        rawCfg = s.config || {};
-                        cfg = rawCfg && typeof rawCfg === 'object' && rawCfg[s.type]
-                            ? rawCfg[s.type]
+                        raw = s.data || s || {};
+                        rawCfg = raw.config || {};
+                        cfg = rawCfg && typeof rawCfg === 'object' && rawCfg[raw.type]
+                            ? rawCfg[raw.type]
                             : rawCfg;
                         api = {
                             url: typeof (cfg === null || cfg === void 0 ? void 0 : cfg.url) === 'string' ? cfg.url : '',
@@ -178,8 +179,8 @@ function ScraperEditPage(_a) {
                             })
                             : [];
                         setForm({
-                            name: s.name || '',
-                            type: s.type,
+                            name: raw.name || '',
+                            type: raw.type,
                             api: api,
                             html: html,
                             postProcessors: postProcessors,
@@ -236,10 +237,12 @@ function ScraperEditPage(_a) {
                         }); });
                         if (!isNew) return [3 /*break*/, 3];
                         payload = {
-                            name: form.name,
-                            type: form.type,
-                            config: config,
-                            postProcessors: pp,
+                            data: {
+                                name: form.name,
+                                type: form.type,
+                                config: config,
+                                postProcessors: pp,
+                            },
                         };
                         return [4 /*yield*/, client_1.ScrapersService.scrapersControllerCreate(payload)];
                     case 2:
@@ -247,10 +250,12 @@ function ScraperEditPage(_a) {
                         return [3 /*break*/, 5];
                     case 3:
                         payload = {
-                            name: form.name,
-                            type: form.type,
-                            config: config,
-                            postProcessors: pp,
+                            data: {
+                                name: form.name,
+                                type: form.type,
+                                config: config,
+                                postProcessors: pp,
+                            },
                         };
                         return [4 /*yield*/, client_1.ScrapersService.scrapersControllerUpdate(id, payload)];
                     case 4:
@@ -286,7 +291,7 @@ function ScraperEditPage(_a) {
         <material_1.Typography variant="h6">
           {isNew
             ? 'Создать сборщика'
-            : "\u0420\u0435\u0434\u0430\u043A\u0442\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0441\u0431\u043E\u0440\u0449\u0438\u043A\u0430".concat(scraper ? ": ".concat(scraper.name) : '')}
+            : "\u0420\u0435\u0434\u0430\u043A\u0442\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0441\u0431\u043E\u0440\u0449\u0438\u043A\u0430".concat(scraper ? ": ".concat(((_b = scraper.data) === null || _b === void 0 ? void 0 : _b.name) || '') : '')}
         </material_1.Typography>
       </material_1.Box>
 
@@ -397,22 +402,22 @@ function ScraperEditPage(_a) {
               <material_1.Typography variant="body2" sx={{ mt: 1, mb: 1 }}>
                 Пагинация (опционально)
               </material_1.Typography>
-              <material_1.TextField size="small" label="CSS селектор кнопки 'Далее'" value={((_b = form.html.pagination) === null || _b === void 0 ? void 0 : _b.nextSelector) || ''} onChange={function (e) {
+              <material_1.TextField size="small" label="CSS селектор кнопки 'Далее'" value={((_c = form.html.pagination) === null || _c === void 0 ? void 0 : _c.nextSelector) || ''} onChange={function (e) {
                 return setForm(__assign(__assign({}, form), { html: __assign(__assign({}, form.html), { pagination: __assign(__assign({}, (form.html.pagination || {})), { nextSelector: e.target.value || undefined }) }) }));
             }} fullWidth sx={{ mb: 1 }}/>
-              <material_1.TextField size="small" label="Шаблон следующего URL" value={((_c = form.html.pagination) === null || _c === void 0 ? void 0 : _c.nextUrlTemplate) || ''} onChange={function (e) {
+              <material_1.TextField size="small" label="Шаблон следующего URL" value={((_d = form.html.pagination) === null || _d === void 0 ? void 0 : _d.nextUrlTemplate) || ''} onChange={function (e) {
                 return setForm(__assign(__assign({}, form), { html: __assign(__assign({}, form.html), { pagination: __assign(__assign({}, (form.html.pagination || {})), { nextUrlTemplate: e.target.value || undefined }) }) }));
             }} fullWidth sx={{ mb: 1 }}/>
-              <material_1.TextField size="small" label="Имя параметра страницы" value={((_d = form.html.pagination) === null || _d === void 0 ? void 0 : _d.pageParam) || ''} onChange={function (e) {
+              <material_1.TextField size="small" label="Имя параметра страницы" value={((_e = form.html.pagination) === null || _e === void 0 ? void 0 : _e.pageParam) || ''} onChange={function (e) {
                 return setForm(__assign(__assign({}, form), { html: __assign(__assign({}, form.html), { pagination: __assign(__assign({}, (form.html.pagination || {})), { pageParam: e.target.value || undefined }) }) }));
             }} fullWidth sx={{ mb: 1 }}/>
               <material_1.Box sx={{ display: 'flex', gap: 1 }}>
-                <material_1.TextField size="small" type="number" label="Начальная страница" value={(_f = (_e = form.html.pagination) === null || _e === void 0 ? void 0 : _e.startPage) !== null && _f !== void 0 ? _f : ''} onChange={function (e) {
+                <material_1.TextField size="small" type="number" label="Начальная страница" value={(_g = (_f = form.html.pagination) === null || _f === void 0 ? void 0 : _f.startPage) !== null && _g !== void 0 ? _g : ''} onChange={function (e) {
                 return setForm(__assign(__assign({}, form), { html: __assign(__assign({}, form.html), { pagination: __assign(__assign({}, (form.html.pagination || {})), { startPage: e.target.value
                                 ? Number(e.target.value)
                                 : undefined }) }) }));
             }} sx={{ flex: 1 }}/>
-                <material_1.TextField size="small" type="number" label="Макс. страниц" value={(_h = (_g = form.html.pagination) === null || _g === void 0 ? void 0 : _g.maxPages) !== null && _h !== void 0 ? _h : ''} onChange={function (e) {
+                <material_1.TextField size="small" type="number" label="Макс. страниц" value={(_j = (_h = form.html.pagination) === null || _h === void 0 ? void 0 : _h.maxPages) !== null && _j !== void 0 ? _j : ''} onChange={function (e) {
                 return setForm(__assign(__assign({}, form), { html: __assign(__assign({}, form.html), { pagination: __assign(__assign({}, (form.html.pagination || {})), { maxPages: e.target.value
                                 ? Number(e.target.value)
                                 : undefined }) }) }));
@@ -424,22 +429,22 @@ function ScraperEditPage(_a) {
               <material_1.Typography variant="body2" sx={{ mt: 1, mb: 1 }}>
                 Документы (опционально)
               </material_1.Typography>
-              <material_1.TextField size="small" label="Селектор ссылки на документ" value={((_j = form.html.document) === null || _j === void 0 ? void 0 : _j.linkSelector) || ''} onChange={function (e) {
+              <material_1.TextField size="small" label="Селектор ссылки на документ" value={((_k = form.html.document) === null || _k === void 0 ? void 0 : _k.linkSelector) || ''} onChange={function (e) {
                 return setForm(__assign(__assign({}, form), { html: __assign(__assign({}, form.html), { document: __assign(__assign({}, (form.html.document || {})), { linkSelector: e.target.value }) }) }));
             }} fullWidth sx={{ mb: 1 }}/>
-              <material_1.TextField size="small" label="Атрибут ссылки (по умолчанию href)" value={((_k = form.html.document) === null || _k === void 0 ? void 0 : _k.linkAttr) || ''} onChange={function (e) {
+              <material_1.TextField size="small" label="Атрибут ссылки (по умолчанию href)" value={((_l = form.html.document) === null || _l === void 0 ? void 0 : _l.linkAttr) || ''} onChange={function (e) {
                 return setForm(__assign(__assign({}, form), { html: __assign(__assign({}, form.html), { document: __assign(__assign({}, (form.html.document || {})), { linkAttr: e.target.value || undefined }) }) }));
             }} fullWidth sx={{ mb: 1 }}/>
-              <material_1.TextField size="small" label="Селектор заголовка" value={((_l = form.html.document) === null || _l === void 0 ? void 0 : _l.titleSelector) || ''} onChange={function (e) {
+              <material_1.TextField size="small" label="Селектор заголовка" value={((_m = form.html.document) === null || _m === void 0 ? void 0 : _m.titleSelector) || ''} onChange={function (e) {
                 return setForm(__assign(__assign({}, form), { html: __assign(__assign({}, form.html), { document: __assign(__assign({}, (form.html.document || {})), { titleSelector: e.target.value || undefined }) }) }));
             }} fullWidth sx={{ mb: 1 }}/>
-              <material_1.TextField size="small" label="Селектор контента" value={((_m = form.html.document) === null || _m === void 0 ? void 0 : _m.contentSelector) || ''} onChange={function (e) {
+              <material_1.TextField size="small" label="Селектор контента" value={((_o = form.html.document) === null || _o === void 0 ? void 0 : _o.contentSelector) || ''} onChange={function (e) {
                 return setForm(__assign(__assign({}, form), { html: __assign(__assign({}, form.html), { document: __assign(__assign({}, (form.html.document || {})), { contentSelector: e.target.value || undefined }) }) }));
             }} fullWidth sx={{ mb: 1 }}/>
-              <material_1.TextField size="small" label="Базовый URL" value={((_o = form.html.document) === null || _o === void 0 ? void 0 : _o.baseUrl) || ''} onChange={function (e) {
+              <material_1.TextField size="small" label="Базовый URL" value={((_p = form.html.document) === null || _p === void 0 ? void 0 : _p.baseUrl) || ''} onChange={function (e) {
                 return setForm(__assign(__assign({}, form), { html: __assign(__assign({}, form.html), { document: __assign(__assign({}, (form.html.document || {})), { baseUrl: e.target.value || undefined }) }) }));
             }} fullWidth sx={{ mb: 1 }}/>
-              <material_1.TextField size="small" type="number" label="Макс. документов на страницу" value={(_q = (_p = form.html.document) === null || _p === void 0 ? void 0 : _p.maxDocsPerPage) !== null && _q !== void 0 ? _q : ''} onChange={function (e) {
+              <material_1.TextField size="small" type="number" label="Макс. документов на страницу" value={(_r = (_q = form.html.document) === null || _q === void 0 ? void 0 : _q.maxDocsPerPage) !== null && _r !== void 0 ? _r : ''} onChange={function (e) {
                 return setForm(__assign(__assign({}, form), { html: __assign(__assign({}, form.html), { document: __assign(__assign({}, (form.html.document || {})), { maxDocsPerPage: e.target.value
                                 ? Number(e.target.value)
                                 : undefined }) }) }));
@@ -471,7 +476,7 @@ function ScraperEditPage(_a) {
               Добавить
             </material_1.Button>
           </material_1.Box>
-          {((_r = form.postProcessors) === null || _r === void 0 ? void 0 : _r.length) ? (form.postProcessors.map(function (pp, idx) { return (<material_1.Box key={idx} sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1 }}>
+          {((_s = form.postProcessors) === null || _s === void 0 ? void 0 : _s.length) ? (form.postProcessors.map(function (pp, idx) { return (<material_1.Box key={idx} sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1 }}>
                 <material_1.Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                   <material_1.TextField select size="small" label="Тип" value={pp.type} onChange={function (e) {
                 var list = form.postProcessors.slice();

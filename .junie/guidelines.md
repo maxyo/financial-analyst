@@ -94,7 +94,7 @@ Frontend (React + esbuild)
 - Native module (better-sqlite3): Requires build toolchain on host. Dockerfile already installs required deps; on local machines ensure Python 3 + C/C++ toolchain (build‑essential or XCode CLT) when running npm ci.
 - Logging/diagnostics: Favor Nest’s built‑in logger and structured errors. Keep sensitive configs in .env.
 - Repository hygiene: Commit both server openapi.json and generated client when API changes. Avoid committing local dev artifacts or temporary test files.
-
+- After finishing any feature, commit everything and push to remote.
 
 ## Quick Test Strategy (no permanent test framework)
 

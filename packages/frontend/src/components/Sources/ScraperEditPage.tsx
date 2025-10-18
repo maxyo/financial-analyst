@@ -8,11 +8,7 @@ import {
   Typography,
 } from '@mui/material';
 import { ArrowBack, Save } from '@mui/icons-material';
-import type {
-  ScraperCreateDto,
-  ScraperDto,
-  ScraperUpdateDto,
-} from '../../api/client';
+import type { ScraperCreateDto, ScraperUpdateDto, ScraperDto_Output as ScraperDto } from '../../api/client';
 import { ScrapersService } from '../../api/client';
 
 // Edit page for Scraper, migrated from modal in ScrapersList
@@ -97,10 +93,11 @@ export function ScraperEditPage({
     try {
       const s = await ScrapersService.scrapersControllerGetOne(id);
       setScraper(s);
-      const rawCfg = s.config || {};
+      const raw = (s as any).data || (s as any) || {};
+      const rawCfg = raw.config || {};
       const cfg =
-        rawCfg && typeof rawCfg === 'object' && rawCfg[s.type]
-          ? rawCfg[s.type]
+        rawCfg && typeof rawCfg === 'object' && rawCfg[raw.type]
+          ? rawCfg[raw.type]
           : rawCfg;
       const api: ApiConfigForm = {
         url: typeof cfg?.url === 'string' ? cfg.url : '',
@@ -184,8 +181,8 @@ export function ScraperEditPage({
           }))
         : [];
       setForm({
-        name: s.name || '',
-        type: s.type,
+        name: (raw as any).name || '',
+        type: (raw as any).type,
         api,
         html,
         postProcessors,
@@ -236,20 +233,24 @@ export function ScraperEditPage({
       }));
       if (isNew) {
         const payload: ScraperCreateDto = {
-          name: form.name,
-          type: form.type,
-          config: config,
-          postProcessors: pp,
-        };
-        await ScrapersService.scrapersControllerCreate(payload);
+          data: {
+            name: form.name,
+            type: form.type,
+            config: config,
+            postProcessors: pp,
+          },
+        } as any;
+        await ScrapersService.scrapersControllerCreate(payload as any);
       } else {
         const payload: ScraperUpdateDto = {
-          name: form.name,
-          type: form.type,
-          config,
-          postProcessors: pp,
-        };
-        await ScrapersService.scrapersControllerUpdate(id!, payload);
+          data: {
+            name: form.name,
+            type: form.type,
+            config,
+            postProcessors: pp,
+          },
+        } as any;
+        await ScrapersService.scrapersControllerUpdate(id!, payload as any);
       }
       onBack();
     } catch (e) {
@@ -277,7 +278,7 @@ export function ScraperEditPage({
         <Typography variant="h6">
           {isNew
             ? 'Создать сборщика'
-            : `Редактировать сборщика${scraper ? `: ${scraper.name}` : ''}`}
+            : `Редактировать сборщика${scraper ? `: ${(scraper as any).data?.name || ''}` : ''}`}
         </Typography>
       </Box>
 

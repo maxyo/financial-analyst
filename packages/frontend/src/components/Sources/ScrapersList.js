@@ -85,8 +85,9 @@ function ScrapersList() {
         window.location.hash = '#/scraper/new';
     }
     function openEdit(s) {
+        var _a;
         // navigate to edit page
-        window.location.hash = "#/scraper/".concat(s.id);
+        window.location.hash = "#/scraper/".concat(((_a = s.data) === null || _a === void 0 ? void 0 : _a.id) || '');
     }
     function closeDialog() {
         setDialogOpen(false);
@@ -122,15 +123,16 @@ function ScrapersList() {
     }
     function handleSave() {
         return __awaiter(this, void 0, void 0, function () {
-            var config, payload, payload, e_2;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var config, payload, editingId, payload, e_2;
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         setSaving(true);
                         setError(null);
-                        _a.label = 1;
+                        _b.label = 1;
                     case 1:
-                        _a.trys.push([1, 7, 8, 9]);
+                        _b.trys.push([1, 7, 8, 9]);
                         config = {};
                         {
                             // Build config from form fields; JSON view is read-only and not used for submission
@@ -155,32 +157,37 @@ function ScrapersList() {
                         }
                         if (!editing) return [3 /*break*/, 3];
                         payload = {
-                            name: form.name,
-                            type: form.type,
-                            config: config,
+                            data: {
+                                name: form.name,
+                                type: form.type,
+                                config: config,
+                            },
                         };
-                        return [4 /*yield*/, client_1.ScrapersService.scrapersControllerUpdate(editing.id, payload)];
+                        editingId = ((_a = editing === null || editing === void 0 ? void 0 : editing.data) === null || _a === void 0 ? void 0 : _a.id) || (editing === null || editing === void 0 ? void 0 : editing.id);
+                        return [4 /*yield*/, client_1.ScrapersService.scrapersControllerUpdate(editingId, payload)];
                     case 2:
-                        _a.sent();
+                        _b.sent();
                         return [3 /*break*/, 5];
                     case 3:
                         payload = {
-                            name: form.name,
-                            type: form.type,
-                            config: config,
+                            data: {
+                                name: form.name,
+                                type: form.type,
+                                config: config,
+                            },
                         };
                         return [4 /*yield*/, client_1.ScrapersService.scrapersControllerCreate(payload)];
                     case 4:
-                        _a.sent();
-                        _a.label = 5;
+                        _b.sent();
+                        _b.label = 5;
                     case 5:
                         setDialogOpen(false);
                         return [4 /*yield*/, loadScrapers()];
                     case 6:
-                        _a.sent();
+                        _b.sent();
                         return [3 /*break*/, 9];
                     case 7:
-                        e_2 = _a.sent();
+                        e_2 = _b.sent();
                         console.error(e_2);
                         setError('Не удалось сохранить сборщик');
                         return [3 /*break*/, 9];
@@ -268,19 +275,22 @@ function ScrapersList() {
 
       <material_1.List dense>
         {((_a = scrapers === null || scrapers === void 0 ? void 0 : scrapers.items) === null || _a === void 0 ? void 0 : _a.length)
-            ? scrapers.items.map(function (s) { return (<material_1.ListItem key={s.id} divider secondaryAction={<material_1.Box>
-                    <material_1.IconButton edge="end" aria-label="run" onClick={function () { return handleRun(s.id); }} disabled={runningId === s.id} title="Запустить">
+            ? scrapers.items.map(function (s) {
+                var _a, _b, _c, _d;
+                return (<material_1.ListItem key={((_a = s.data) === null || _a === void 0 ? void 0 : _a.id) || ''} divider secondaryAction={<material_1.Box>
+                    <material_1.IconButton edge="end" aria-label="run" onClick={function () { var _a; return handleRun((_a = s.data) === null || _a === void 0 ? void 0 : _a.id); }} disabled={runningId === ((_b = s.data) === null || _b === void 0 ? void 0 : _b.id)} title="Запустить">
                       <icons_material_1.PlayArrow />
                     </material_1.IconButton>
                     <material_1.IconButton edge="end" aria-label="edit" onClick={function () { return openEdit(s); }} title="Редактировать">
                       <icons_material_1.Edit />
                     </material_1.IconButton>
-                    <material_1.IconButton edge="end" aria-label="delete" onClick={function () { return handleDelete(s.id); }} title="Удалить">
+                    <material_1.IconButton edge="end" aria-label="delete" onClick={function () { var _a; return handleDelete((_a = s.data) === null || _a === void 0 ? void 0 : _a.id); }} title="Удалить">
                       <icons_material_1.Delete />
                     </material_1.IconButton>
                   </material_1.Box>}>
-                <material_1.ListItemText primary={s.name} secondary={"\u0422\u0438\u043F: ".concat(s.type)}/>
-              </material_1.ListItem>); })
+                <material_1.ListItemText primary={(_c = s.data) === null || _c === void 0 ? void 0 : _c.name} secondary={"\u0422\u0438\u043F: ".concat((_d = s.data) === null || _d === void 0 ? void 0 : _d.type)}/>
+              </material_1.ListItem>);
+            })
             : !loading && (<material_1.Typography variant="body2">Сборщики отсутствуют</material_1.Typography>)}
       </material_1.List>
       <material_1.Snackbar open={!!(snack === null || snack === void 0 ? void 0 : snack.open)} autoHideDuration={3000} onClose={function () { return setSnack(null); }} message={(snack === null || snack === void 0 ? void 0 : snack.message) || ''}/>
