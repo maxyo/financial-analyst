@@ -14,6 +14,7 @@ async function generate() {
     .setTitle('Trade API')
     .setDescription('Auto-generated OpenAPI documentation for Trade backend')
     .setVersion('1.0.0')
+    .addServer('http://localhost:3000')
     .build();
 
   const doc = SwaggerModule.createDocument(app, config);

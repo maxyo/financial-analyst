@@ -1,85 +1,70 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { scrapperTypes, ScraperConfiguration, ScraperType } from '../types';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
-export class ListQueryDto {
-  @ApiPropertyOptional({ description: 'Limit', example: 50 })
-  limit?: number;
+import {
+  apiScraperConfigurationSchema,
+  htmlScraperConfigurationSchema,
+  PostProcessorType,
+  ScraperType,
+  trimWhitespaceConfigSchema,
+} from '../types';
 
-  @ApiPropertyOptional({ description: 'Offset', example: 0 })
-  offset?: number;
-}
+export const ListQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(200).default(50),
+  offset: z.coerce.number().int().min(0).default(0),
+});
 
-export class ScraperCreateDto<T extends ScraperType = ScraperType> {
-  @ApiProperty({ description: 'Scraper name' })
-  name!: string;
+const TrimWhiteSpaceProcessorSchema = z.object({
+  type: z.literal(PostProcessorType.TRIM_WHITESPACE),
+  config: trimWhitespaceConfigSchema,
+});
 
-  @ApiProperty({ description: 'Scraper type', enum: scrapperTypes })
-  type!: T;
+const PostProcessorSchema = z.discriminatedUnion('type', [TrimWhiteSpaceProcessorSchema]);
 
-  @ApiProperty({ description: 'Scraper config', type: Object })
-  // loose typing for swagger
-  config!: ScraperConfiguration[T] | Record<string, any>;
-}
+export const ScraperCreateHtmlSchema = z.object({
+  name: z.string().min(1),
+  type: z.literal(ScraperType.HTML),
+  config: htmlScraperConfigurationSchema,
+  postProcessors: z.array(PostProcessorSchema).optional(),
+});
+export const ScraperCreateApiSchema = z.object({
+  name: z.string().min(1),
+  type: z.literal(ScraperType.API),
+  config: apiScraperConfigurationSchema,
+  postProcessors: z.array(PostProcessorSchema).optional(),
+});
 
-export class ScraperUpdateDto<T extends ScraperType = ScraperType> {
-  @ApiPropertyOptional({ description: 'Scraper name' })
-  name?: string;
+export const ScraperCreateSchema = z.object({
+  data: z.discriminatedUnion('type', [
+    ScraperCreateApiSchema,
+    ScraperCreateHtmlSchema,
+  ]),
+});
 
-  @ApiPropertyOptional({ description: 'Scraper type', enum: scrapperTypes })
-  type?: T;
+export const ScraperUpdateSchema = ScraperCreateSchema;
 
-  @ApiPropertyOptional({ description: 'Scraper config', type: Object })
-  config?: ScraperConfiguration[T] | Record<string, any>;
-}
+export const ScraperSchema = ScraperCreateSchema;
 
-export class IdParamDto {
-  @ApiProperty({ format: 'uuid' })
-  id!: string;
-}
 
-export class OkResponseDto {
-  @ApiProperty({ example: true })
-  ok!: boolean;
-}
+export const ScrapersListResponseSchema = z.object({
+  items: z.array(ScraperSchema),
+  total: z.number().int().nonnegative(),
+  limit: z.number().int().min(1),
+  offset: z.number().int().min(0),
+});
 
-export class PaginationResponseDto<T> {
-  @ApiProperty({ isArray: true, type: Object })
-  items!: T[];
+export const ScraperRunResponseSchema = z.object({
+  ok: z.boolean(),
+  jobId: z.union([z.string(), z.number()]).optional(),
+});
 
-  @ApiProperty()
-  total!: number;
-
-  @ApiProperty()
-  limit!: number;
-
-  @ApiProperty()
-  offset!: number;
-}
-
-export class ScraperDto {
-  @ApiProperty({ format: 'uuid' })
-  id!: string;
-
-  @ApiProperty()
-  name!: string;
-
-  @ApiProperty({ enum: scrapperTypes })
-  type!: ScraperType;
-
-  @ApiProperty({ type: Object })
-  config!: Record<string, any>;
-}
-
-export class ScrapersListResponseDto {
-  @ApiProperty({ type: [ScraperDto] })
-  items!: ScraperDto[];
-
-  @ApiProperty()
-  total!: number;
-
-  @ApiProperty()
-  limit!: number;
-
-  @ApiProperty()
-  offset!: number;
-}
+export class ListQueryDto extends createZodDto(ListQuerySchema) {}
+export class ScraperCreateDto extends createZodDto(ScraperCreateSchema) {}
+export class ScraperUpdateDto extends createZodDto(ScraperUpdateSchema) {}
+export class ScraperDto extends createZodDto(ScraperSchema) {}
+export class ScrapersListResponseDto extends createZodDto(
+  ScrapersListResponseSchema,
+) {}
+export class ScraperRunResponseDto extends createZodDto(
+  ScraperRunResponseSchema,
+) {}

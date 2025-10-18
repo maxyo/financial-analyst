@@ -1,6 +1,14 @@
-import { Entity, Column, PrimaryGeneratedColumn, Index, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
-import { ProfileEntity } from './profile.entity';
+import { ProfileEntity } from '../profile.entity';
+import { reportStructures } from './report-structure';
 
 @Entity({ name: 'reports' })
 @Index(['profile_id', 'created_at'])
@@ -15,12 +23,8 @@ export class ReportEntity {
   @JoinColumn({ name: 'profile_id', referencedColumnName: 'id' })
   profile!: ProfileEntity;
 
-  @Column({ type: 'text', name: 'job_id', nullable: true })
-  job_id!: string | null;
-
-  // Type of report content structure, e.g., 'md' | 'json' | custom identifiers
-  @Column({ type: 'varchar', name: 'type', nullable: true })
-  type!: string | null;
+  @Column({ type: 'varchar', enum: reportStructures, name: 'type', nullable: true })
+  type!: keyof typeof reportStructures | null;
 
   @Column({ type: 'text', name: 'content', nullable: true })
   content!: string | null;

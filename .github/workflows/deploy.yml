@@ -1,0 +1,88 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment (e.g., production, staging)'
+        required: true
+        default: 'production'
+  push:
+    branches: [ main ]
+    paths:
+      - 'packages/**'
+      - 'Dockerfile'
+      - '.github/workflows/deploy.yml'
+      - 'deploy/**'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'production' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build artifacts
+        run: |
+          npm run build
+          npm run build --workspace packages/frontend
+
+      - name: Setup Python and Ansible
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install Ansible
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible=='9.*' paramiko
+          ansible-galaxy collection install community.docker
+
+      - name: Prepare SSH key
+        id: ssh
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          printf "Host *\n  StrictHostKeyChecking no\n" > ~/.ssh/config
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.YC_SSH_KEY }}
+
+      - name: Create dynamic inventory from secrets
+        run: |
+          mkdir -p deploy/inventory
+          echo "[trade]" > deploy/inventory/hosts
+          echo "${{ secrets.YC_HOST }} ansible_user=${{ secrets.YC_SSH_USER }} ansible_ssh_private_key_file=~/.ssh/id_rsa" >> deploy/inventory/hosts
+
+      - name: Render Ansible extra vars
+        run: |
+          cat > deploy/extra_vars.yml << 'YML'
+          app_name: trade
+          backend_container_name: trade-backend
+          backend_image: node:20-slim
+          backend_workdir: /opt/trade
+          backend_port: 3000
+          frontend_root: /var/www/trade
+          env:
+            PORT: 3000
+            REDIS_URL: ${{ secrets.REDIS_URL || '' }}
+            DATABASE_PATH: ./data/app.sqlite
+            # For Postgres (optional): DATABASE_URL: ${{ secrets.DATABASE_URL || '' }}
+          YML
+
+      - name: Run Ansible playbook
+        run: |
+          ansible-playbook -i deploy/inventory/hosts deploy/site.yml \
+            --extra-vars @deploy/extra_vars.yml

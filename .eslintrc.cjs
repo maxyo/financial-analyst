@@ -16,7 +16,7 @@ module.exports = {
   settings: {
     'import/resolver': {
       node: {
-        extensions: ['.js', '.ts']
+        extensions: ['.js', '.src', '.ts']
       },
       // If you later add path aliases in tsconfig, consider enabling typescript resolver
       // typescript: { project: './tsconfig.json' },
@@ -31,6 +31,7 @@ module.exports = {
   ],
   rules: {
     // General best practices
+    "@typescript-eslint/no-explicit-any": ["error"],
     eqeqeq: ['error', 'smart'],
     curly: ['error', 'multi-line'],
     'no-console': 'warn', // allow during server dev, but warn to keep output intentional
@@ -62,7 +63,7 @@ module.exports = {
   overrides: [
     // Enable type-aware rules for TS files only
     {
-      files: ['**/*.ts', '**/*.tsx'],
+      files: ['**/*.src', '**/*.tsx'],
       parser: '@typescript-eslint/parser',
       parserOptions: {
         project: ['./tsconfig.json'],

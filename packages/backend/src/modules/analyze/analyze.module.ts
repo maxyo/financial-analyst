@@ -1,12 +1,18 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 
-import { AnalyzeController } from './controllers/analyze.controller';
+import { ProfileController } from './controllers/profile.controller';
+import { ReportController } from './controllers/report.controller';
+import { TasksController } from './controllers/tasks.controller';
 import { AiAggregateAnalysisWorker } from './jobs/ai.aggregate-analysis.worker';
-import { AiSummarizeDocumentsWorker } from './jobs/ai.summarize-documents.worker';
+import { LlmModule } from './modules/llm/llm.module';
+import { DocumentsRepository } from './modules/scraper/repositories/documents.repository';
 import { ScrapperModule } from './modules/scraper/scrapper.module';
 import { AnalysisProfilesRepository } from './repositories/analysis-profiles.repository';
+import { DocumentSourcesRepository } from './repositories/document-sources.repository';
+import { ProfileExecutionsRepository } from './repositories/profile-executions.repository';
 import { ReportsRepository } from './repositories/reports.repository';
+import { TasksRepository } from './repositories/tasks.repository';
 
 @Module({
   exports: [],
@@ -14,14 +20,17 @@ import { ReportsRepository } from './repositories/reports.repository';
     BullModule.registerQueue({ name: 'ai.aggregate-analysis' }),
     BullModule.registerQueue({ name: 'ai.summarize-documents' }),
     ScrapperModule,
+    LlmModule,
   ],
   providers: [
     AnalysisProfilesRepository,
     ReportsRepository,
+    DocumentSourcesRepository,
+    DocumentsRepository,
     AiAggregateAnalysisWorker,
-    AiSummarizeDocumentsWorker,
-
+    ProfileExecutionsRepository,
+    TasksRepository,
   ],
-  controllers: [AnalyzeController],
+  controllers: [ProfileController, ReportController, TasksController],
 })
 export class AnalyzeModule {}

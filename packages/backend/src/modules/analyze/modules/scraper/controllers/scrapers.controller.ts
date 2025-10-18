@@ -1,97 +1,89 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Res } from '@nestjs/common';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { ZodResponse } from 'nestjs-zod';
 
-
-import { errorMessage, getN, getQ } from '../../../../../lib/utils/http';
-import { ListQueryDto, ScraperCreateDto, ScraperUpdateDto, ScraperDto, ScrapersListResponseDto } from '../dto/scrapers.dto';
+import { OkResponseDto } from '../../../../../dto/response';
+import {
+  ListQueryDto,
+  ScraperCreateDto,
+  ScraperUpdateDto,
+  ScraperDto,
+  ScrapersListResponseDto,
+  ScraperRunResponseDto,
+  ScrapersListResponseSchema,
+  ScraperSchema,
+} from '../dto/scrapers.dto';
 import { ScrapersRepository } from '../repositories/scrapers.repository';
-import { scrapperTypes } from '../types';
 
-import type { Response } from 'express';
+import type { Queue } from 'bullmq';
 
 @ApiTags('Scrapers')
 @Controller('api/scrapers')
 export class ScrapersController {
-  constructor(private readonly scrapers: ScrapersRepository) {}
+  constructor(
+    private readonly scrapers: ScrapersRepository,
+    @InjectQueue('scrap.run') private readonly scrapQueue: Queue,
+  ) {}
 
   @Get()
-  @ApiOkResponse({ type: ScrapersListResponseDto, description: 'List of scrapers with pagination' })
-  async list(@Query() _q: ListQueryDto, @Res() res: Response) {
-    try {
-      const take = getN(getQ({ query: _q } as any, 'limit')) || 50;
-      const skip = getN(getQ({ query: _q } as any, 'offset')) || 0;
-      const [items, total] = await this.scrapers.findAndCount({
-        order: { name: 'ASC' as const },
-        take,
-        skip,
-      });
-      res.json({ items, total, limit: take, offset: skip });
-    } catch (e) {
-      res.status(500).json({ error: errorMessage(e) });
-    }
+  @ZodResponse({ type: ScrapersListResponseDto })
+  async list(@Query() q: ListQueryDto) {
+    const take = q.limit;
+    const skip = q.offset;
+    const [items, total] = await this.scrapers.findAndCount({
+      order: { name: 'ASC' as const },
+      take,
+      skip,
+    });
+    return ScrapersListResponseSchema.parse({ items: items.map(i => ({data: i})), total, limit: take, offset: skip });
   }
 
   @Get(':id')
-  @ApiOkResponse({ type: ScraperDto, description: 'Scraper by id' })
-  async getOne(@Param('id') id: string, @Res() res: Response) {
-    try {
-      const item = await this.scrapers.findOne({ where: { id } as any });
-      if (!item) return res.status(404).json({ error: 'Not found' });
-      res.json(item);
-    } catch (e) {
-      res.status(500).json({ error: errorMessage(e) });
-    }
+  @ZodResponse({ type: ScraperDto })
+  async getOne(@Param('id') id: string) {
+    const item = await this.scrapers.findOne({ where: { id } });
+    if (!item) throw new NotFoundException('Not found');
+    return ScraperSchema.parse(item);
   }
 
   @Post()
-  @ApiOkResponse({ type: ScraperDto, description: 'Created scraper' })
-  async create(@Body() body: ScraperCreateDto, @Res() res: Response) {
-    try {
-      const name = typeof body?.name === 'string' ? body.name.trim() : '';
-      const type = body?.type;
-      const config = body?.config as any;
-      if (!name) return res.status(400).json({ error: 'name is required (string)' });
-      if (!type || !scrapperTypes.includes(type)) {
-        return res.status(400).json({ error: `type is required one of: ${scrapperTypes.join(', ')}` });
-      }
-      if (config == null || typeof config !== 'object') {
-        return res.status(400).json({ error: 'config is required (object)' });
-      }
-      const created = await this.scrapers.save(this.scrapers.create({ name, type, config } as any));
-      res.status(201).json(created);
-    } catch (e) {
-      res.status(500).json({ error: errorMessage(e) });
-    }
+  @ZodResponse({ type: ScraperDto })
+  async create(@Body() body: ScraperCreateDto) {
+    const name = body.data.name.trim();
+    const type = body.data.type;
+    const config = body.data.config;
+    const postProcessors = (body).data.postProcessors;
+    const entity = this.scrapers.create({ name, type, config, postProcessors });
+    const created = await this.scrapers.save(entity);
+    return ScraperSchema.parse(created);
   }
 
   @Patch(':id')
-  @ApiOkResponse({ type: ScraperDto, description: 'Updated scraper' })
-  async update(@Param('id') id: string, @Body() body: ScraperUpdateDto, @Res() res: Response) {
-    try {
-      const item = await this.scrapers.findOne({ where: { id } as any });
-      if (!item) return res.status(404).json({ error: 'Not found' });
-      const updated: any = {};
-      if (typeof body.name === 'string') updated.name = body.name.trim();
-      if (body.type && scrapperTypes.includes(body.type as any)) updated.type = body.type;
-      if (body.config != null) updated.config = body.config;
-      await this.scrapers.update({ id } as any, updated);
-      const fresh = await this.scrapers.findOne({ where: { id } as any });
-      res.json(fresh);
-    } catch (e) {
-      res.status(500).json({ error: errorMessage(e) });
-    }
+  @ZodResponse({ type: ScraperDto })
+  async update(@Param('id') id: string, @Body() body: ScraperUpdateDto) {
+    const item = await this.scrapers.findOne({ where: { id } });
+    if (!item) throw new NotFoundException('Not found');
+    await this.scrapers.update({ id }, body.data);
+    const fresh = await this.scrapers.findOne({ where: { id } });
+    return ScraperSchema.parse(fresh);
   }
 
   @Delete(':id')
-  @ApiOkResponse({ schema: { properties: { ok: { type: 'boolean', example: true } } }, description: 'Delete result' })
-  async remove(@Param('id') id: string, @Res() res: Response) {
-    try {
-      const item = await this.scrapers.findOne({ where: { id } as any });
-      if (!item) return res.status(404).json({ error: 'Not found' });
-      await this.scrapers.delete({ id } as any);
-      res.json({ ok: true });
-    } catch (e) {
-      res.status(500).json({ error: errorMessage(e) });
-    }
+  @ZodResponse({ type: OkResponseDto })
+  async remove(@Param('id') id: string) {
+    const item = await this.scrapers.findOne({ where: { id } });
+    if (!item) throw new NotFoundException('Not found');
+    await this.scrapers.delete({ id });
+    return { ok: true };
+  }
+
+  @Post(':id/run')
+  @ZodResponse({ type: ScraperRunResponseDto })
+  async run(@Param('id') id: string) {
+    const item = await this.scrapers.findOne({ where: { id } });
+    if (!item) throw new NotFoundException('Not found');
+    const job = await this.scrapQueue.add('run', { scraperId: id }, { removeOnComplete: true, removeOnFail: 10 });
+    return { ok: true, jobId: job.id };
   }
 }

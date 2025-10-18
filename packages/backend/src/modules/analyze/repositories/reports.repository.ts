@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 
-import { ReportEntity } from '../entities/report.entity';
+import { ReportEntity } from '../entities/report/report.entity';
 
 @Injectable()
 export class ReportsRepository extends Repository<ReportEntity> {

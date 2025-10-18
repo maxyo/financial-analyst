@@ -20,7 +20,7 @@ function toColumn(alias: string, key: string): string {
   return `${alias}.${key}`;
 }
 
-export type MongoLike = Record<string, unknown>;
+export type Filter = Record<string, unknown>;
 
 // Field type definition for schema builder
 export type FieldType = 'string' | 'number' | 'boolean' | 'date' | { enum: readonly string[] } | z.ZodTypeAny;
@@ -132,10 +132,10 @@ export function createFilterSchema(fields?: EntityFields) {
 export type FilterFor<F extends EntityFields> = z.infer<ReturnType<typeof createFilterSchema>>;
 
 // Overload: allow passing a Zod schema for validation. If provided, invalid filters are ignored by default.
-export function applyFilter(
-  qb: SelectQueryBuilder<Record<string, unknown>>,
+export function applyFilter<T extends object>(
+  qb: SelectQueryBuilder<T>,
   alias: string,
-  filter: MongoLike,
+  filter: Filter,
   options?: { schema?: z.ZodTypeAny; onInvalid?: 'ignore' | 'throw' }
 ): void {
   if (!filter || !isPlainObject(filter)) return;
@@ -148,7 +148,7 @@ export function applyFilter(
       return; // ignore invalid filter
     }
     // use parsed.data to ensure transformed values like dates are applied
-    filter = parsed.data as MongoLike;
+    filter = parsed.data as Filter;
   }
   const { clause, params } = buildClause(alias, filter);
   if (clause) qb.andWhere(clause, params);

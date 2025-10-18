@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-import { ScraperConfiguration, ScraperType } from '../types';
+import { PostProcessorConfiguration, PostProcessorType, ScraperConfiguration, ScraperType } from '../types';
 
 @Entity({ name: 'scrapers' })
 export class Scraper<T extends ScraperType = ScraperType> {
@@ -15,4 +15,8 @@ export class Scraper<T extends ScraperType = ScraperType> {
 
   @Column({ type: 'simple-json' })
   config!: ScraperConfiguration[T];
+
+  // Hardcoded (code-defined) post-processors configuration per scraper, not stored as a separate entity
+  @Column({ type: 'simple-json', nullable: true })
+  postProcessors?: { type: PostProcessorType; config: PostProcessorConfiguration[PostProcessorType] }[];
 }

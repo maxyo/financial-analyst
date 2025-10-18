@@ -1,0 +1,25 @@
+{
+  "name": "MOEX News (all)",
+  "type": "HTML",
+  "config": {
+    "url": "https://www.moex.com/ru/news/",
+    "selectors": [],
+    "headers": {
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
+    },
+    "timeoutMs": 20000,
+    "pagination": {
+      "nextUrlTemplate": "https://www.moex.com/ru/news/?pge={page}",
+      "startPage": 1,
+      "maxPages": 500
+    },
+    "document": {
+      "linkSelector": ".new-moex-news-list__record .new-moex-news-list__body a.new-moex-news-list__link",
+      "linkAttr": "href",
+      "titleSelector": "h1, .text-block h1, .article h1, .page-title",
+      "contentSelector": ".text-block, .news-content, .article, .content, .content-block, .content-body, .news-item, .new-moex-news-content, .news-detail, .page-content",
+      "baseUrl": "https://www.moex.com",
+      "maxDocsPerPage": 200
+    }
+  }
+}

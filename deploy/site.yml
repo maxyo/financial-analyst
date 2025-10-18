@@ -1,0 +1,137 @@
+---
+- name: Deploy trade app
+  hosts: trade
+  become: true
+  vars:
+    app_name: "{{ app_name | default('trade') }}"
+    backend_container_name: "{{ backend_container_name | default('trade-backend') }}"
+    backend_image: "{{ backend_image | default('node:20-slim') }}"
+    backend_workdir: "{{ backend_workdir | default('/opt/trade') }}"
+    backend_port: "{{ backend_port | default(3000) }}"
+    frontend_root: "{{ frontend_root | default('/var/www/trade') }}"
+    env: "{{ env | default({}) }}"
+  tasks:
+    - name: Ensure required packages are present
+      apt:
+        name:
+          - docker.io
+          - curl
+        state: present
+        update_cache: yes
+
+    - name: Ensure docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Create backend workdir
+      file:
+        path: "{{ backend_workdir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Sync repository to backend workdir
+      synchronize:
+        src: ./
+        dest: "{{ backend_workdir }}/"
+        delete: yes
+        recursive: yes
+        rsync_opts:
+          - "--exclude=.git"
+          - "--exclude=node_modules"
+          - "--exclude=dist"
+          - "--exclude=packages/frontend/build"
+
+    - name: Copy backend .env file
+      copy:
+        dest: "{{ backend_workdir }}/.env"
+        mode: '0600'
+        content: |
+          PORT={{ env.PORT | default(3000) }}
+          REDIS_URL={{ env.REDIS_URL | default('') }}
+          DATABASE_PATH={{ env.DATABASE_PATH | default('./data/app.sqlite') }}
+          {% if env.DATABASE_URL is defined and env.DATABASE_URL|length > 0 %}
+          DATABASE_URL={{ env.DATABASE_URL }}
+          {% endif %}
+
+    - name: Run backend container
+      community.docker.docker_container:
+        name: "{{ backend_container_name }}"
+        image: "{{ backend_image }}"
+        restart_policy: unless-stopped
+        state: started
+        recreate: true
+        env_file: "{{ backend_workdir }}/.env"
+        command: bash -lc "npm ci && npm run start --workspace packages/backend"
+        ports:
+          - "{{ backend_port }}:3000"
+        volumes:
+          - "{{ backend_workdir }}:/app"
+        working_dir: /app
+
+    - name: Ensure frontend root dir exists
+      file:
+        path: "{{ frontend_root }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Ensure rsync is installed
+      apt:
+        name: rsync
+        state: present
+        update_cache: yes
+
+    - name: Sync frontend build to server
+      synchronize:
+        src: packages/frontend/build/
+        dest: "{{ frontend_root }}/"
+        delete: yes
+        recursive: yes
+
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Configure nginx for trade frontend
+      copy:
+        dest: /etc/nginx/sites-available/trade.conf
+        content: |
+          server {
+            listen 80;
+            server_name _;
+            root {{ frontend_root }};
+            index index.html;
+
+            location / {
+              try_files $uri $uri/ /index.html;
+            }
+
+            location /api/ {
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_pass http://127.0.0.1:{{ backend_port }}/;
+            }
+          }
+      notify: Reload nginx
+
+    - name: Enable nginx site
+      file:
+        src: /etc/nginx/sites-available/trade.conf
+        dest: /etc/nginx/sites-enabled/trade.conf
+        state: link
+        force: true
+      notify: Reload nginx
+
+  handlers:
+    - name: Reload nginx
+      service:
+        name: nginx
+        state: restarted

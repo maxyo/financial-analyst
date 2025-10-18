@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "esbuild ts/index.tsx --bundle --format=esm --platform=browser --sourcemap --outfile=build/index.js",
-    "watch": "esbuild ts/index.tsx --bundle --format=esm --platform=browser --sourcemap --outfile=build/index.js --watch",
+    "build": "esbuild src/index.tsx --bundle --format=esm --platform=browser --sourcemap --outfile=build/index.js",
+    "watch": "esbuild src/index.tsx --bundle --format=esm --platform=browser --sourcemap --outfile=build/index.js --watch",
     "typecheck": "tsc -p tsconfig.client.json --noEmit",
-    "api:generate": "openapi --input ../backend/openapi.json --output ts/api/client --client fetch"
+    "api:generate": "openapi --input ../../openapi.json --output src/api/client --client fetch"
   },
   "author": "",
   "license": "ISC",
@@ -14,7 +14,8 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@mui/material": "^7.3.2",
+    "@mui/icons-material": "^7.3.4",
+    "@mui/material": "^7.3.4",
     "apexcharts": "^5.3.5",
     "prettier-eslint": "^16.4.2",
     "react": "^18.3.1",

@@ -1,6 +1,7 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 
 import { DocumentSourceEntity } from './source.entity';
+import { TaskEntity } from './task.entity';
 
 @Entity({ name: 'profile' })
 export class ProfileEntity {
@@ -19,7 +20,11 @@ export class ProfileEntity {
   @Column({ type: 'text', name: 'updated_at' })
   updated_at!: string;
 
-  // A profile has many document sources
   @OneToMany(() => DocumentSourceEntity, (source) => source.profile)
   documentSources!: DocumentSourceEntity[];
+
+  // Each profile must have at most one task. Many profiles can reference the same task.
+  @ManyToOne(() => TaskEntity, { nullable: true })
+  @JoinColumn({ name: 'task_id', referencedColumnName: 'id' })
+  task!: TaskEntity | null;
 }

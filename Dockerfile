@@ -16,7 +16,7 @@ COPY package.json package-lock.json ./
 COPY packages/backend/package.json packages/backend/package.json
 COPY packages/frontend/package.json packages/frontend/package.json
 
-# Install workspace dependencies (including devDeps, required for ts-node at runtime)
+# Install workspace dependencies (including devDeps, required for src-node at runtime)
 RUN npm ci
 
 # Copy the rest of the repository
@@ -38,5 +38,5 @@ EXPOSE 3000
 # Persist database by default; you can bind mount a host dir to this path
 VOLUME ["/app/packages/backend/data"]
 
-# Start the backend (uses ts-node --transpile-only src/nest/main.ts)
+# Start the backend (uses src-node --transpile-only src/nest/main.src)
 CMD ["npm", "run", "start"]

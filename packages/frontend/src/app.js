@@ -39,17 +39,88 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.App = App;
 var react_1 = require("react");
 var helpers_1 = require("./helpers");
-var ws_1 = require("./ws");
+// import { useWebSocket } from './ws';
 var material_1 = require("@mui/material");
 var styles_1 = require("@mui/material/styles");
 var Header_1 = require("./components/Header");
 var AnalyticsPanel_1 = require("./components/Analytics/AnalyticsPanel");
-var InstrumentSummary_1 = require("./components/Summary/InstrumentSummary");
-var UnderlyingSummary_1 = require("./components/Summary/UnderlyingSummary");
-var PositionsPanel_1 = require("./components/Positions/PositionsPanel");
-var CandlesPanel_1 = require("./components/Charts/CandlesPanel");
+var ReportsPage_1 = require("./components/Analytics/ReportsPage");
+var ProfileEditPage_1 = require("./components/Analytics/ProfileEditPage");
+var ScraperEditPage_1 = require("./components/Sources/ScraperEditPage");
 var JobsList_1 = require("./components/Jobs/JobsList");
 var SourcesPanel_1 = require("./components/Sources/SourcesPanel");
+function ReportsRouterView() {
+    var _a = react_1.default.useState(null), profileId = _a[0], setProfileId = _a[1];
+    var _b = react_1.default.useState(undefined), profileName = _b[0], setProfileName = _b[1];
+    react_1.default.useEffect(function () {
+        var h = (typeof window !== 'undefined' && window.location ? window.location.hash : '') || '';
+        // Accept formats: #/reports?profileId=123 or #/reports/123
+        var id = null;
+        if (h.startsWith('#/reports/')) {
+            var tail = h.substring('#/reports/'.length);
+            var n = Number(tail.split(/[?#]/)[0]);
+            if (Number.isFinite(n))
+                id = n;
+        }
+        else if (h.startsWith('#/reports')) {
+            var m = h.match(/profileId=(\d+)/);
+            if (m && m[1]) {
+                var n = Number(m[1]);
+                if (Number.isFinite(n))
+                    id = n;
+            }
+        }
+        setProfileId(id);
+        // Optionally, can parse profileName from hash too, e.g., &name=...
+        var mName = h.match(/name=([^&#]+)/);
+        if (mName && mName[1])
+            try {
+                setProfileName(decodeURIComponent(mName[1]));
+            }
+            catch (_a) { }
+    }, []);
+    var onBack = react_1.default.useCallback(function () {
+        window.history.back();
+    }, []);
+    if (!profileId) {
+        return <material_1.Typography variant="body2" color="error">Не указан profileId</material_1.Typography>;
+    }
+    return <ReportsPage_1.ReportsPage profileId={profileId} profileName={profileName} onBack={onBack}/>;
+}
+function ProfileRouterView() {
+    var _a = react_1.default.useState(undefined), id = _a[0], setId = _a[1];
+    react_1.default.useEffect(function () {
+        var h = (typeof window !== 'undefined' && window.location ? window.location.hash : '') || '';
+        if (h === '#/profile/new') {
+            setId(undefined);
+        }
+        else if (h.startsWith('#/profile/')) {
+            var tail = h.substring('#/profile/'.length);
+            var n = Number(tail.split(/[?#]/)[0]);
+            if (Number.isFinite(n))
+                setId(n);
+        }
+    }, []);
+    var onBack = react_1.default.useCallback(function () { window.history.back(); }, []);
+    return <ProfileEditPage_1.ProfileEditPage id={id} onBack={onBack}/>;
+}
+function ScraperRouterView() {
+    var _a = react_1.default.useState(undefined), id = _a[0], setId = _a[1];
+    react_1.default.useEffect(function () {
+        var h = (typeof window !== 'undefined' && window.location ? window.location.hash : '') || '';
+        if (h === '#/scraper/new') {
+            setId(undefined);
+        }
+        else if (h.startsWith('#/scraper/')) {
+            var tail = h.substring('#/scraper/'.length);
+            var idStr = tail.split(/[?#]/)[0];
+            if (idStr)
+                setId(idStr);
+        }
+    }, []);
+    var onBack = react_1.default.useCallback(function () { window.history.back(); }, []);
+    return <ScraperEditPage_1.ScraperEditPage id={id} onBack={onBack}/>;
+}
 var theme = (0, styles_1.createTheme)({
     palette: {
         mode: 'dark',
@@ -59,18 +130,16 @@ var theme = (0, styles_1.createTheme)({
 function App() {
     var useState = react_1.default.useState;
     var useEffect = react_1.default.useEffect;
-    var useMemo = react_1.default.useMemo;
     var _a = useState('CNYRUBF'), ticker = _a[0], setTicker = _a[1];
     var _b = useState(''), status = _b[0], setStatus = _b[1];
-    var _c = useState('1m'), scale = _c[0], setScale = _c[1];
-    var _d = useState(null), summary = _d[0], setSummary = _d[1];
-    var _f = useState(null), underlying = _f[0], setUnderlying = _f[1];
-    var _g = useState([]), positions = _g[0], setPositions = _g[1];
-    var _h = useState([]), candles = _h[0], setCandles = _h[1];
-    var _j = useState([]), trades = _j[0], setTrades = _j[1];
-    var _k = useState([]), clearings = _k[0], setClearings = _k[1];
-    var _l = useState('overview'), activeTab = _l[0], setActiveTab = _l[1];
-    var _m = useState(function () {
+    var _c = useState(null), summary = _c[0], setSummary = _c[1];
+    var _d = useState(null), underlying = _d[0], setUnderlying = _d[1];
+    var _e = useState([]), positions = _e[0], setPositions = _e[1];
+    var _f = useState([]), candles = _f[0], setCandles = _f[1];
+    var _g = useState([]), trades = _g[0], setTrades = _g[1];
+    var _h = useState([]), clearings = _h[0], setClearings = _h[1];
+    var _j = useState('overview'), activeTab = _j[0], setActiveTab = _j[1];
+    var _k = useState(function () {
         if (typeof window !== 'undefined' && window.location) {
             var h = window.location.hash;
             if (h === '#/jobs')
@@ -79,9 +148,15 @@ function App() {
                 return 'analytics';
             if (h === '#/sources')
                 return 'sources';
+            if (h.startsWith('#/reports'))
+                return 'reports';
+            if (h.startsWith('#/profile'))
+                return 'profile';
+            if (h.startsWith('#/scraper'))
+                return 'scraper';
         }
-        return 'instrument';
-    }), route = _m[0], setRoute = _m[1];
+        return 'analytics';
+    }), route = _k[0], setRoute = _k[1];
     useEffect(function () {
         var onHash = function () {
             var h = window.location.hash;
@@ -91,40 +166,18 @@ function App() {
                 setRoute('analytics');
             else if (h === '#/sources')
                 setRoute('sources');
+            else if (h.startsWith('#/reports'))
+                setRoute('reports');
+            else if (h.startsWith('#/profile'))
+                setRoute('profile');
+            else if (h.startsWith('#/scraper'))
+                setRoute('scraper');
             else
-                setRoute('instrument');
+                setRoute('analytics');
         };
         window.addEventListener('hashchange', onHash);
         return function () { return window.removeEventListener('hashchange', onHash); };
     }, []);
-    var aggCandles = useMemo(function () { return (0, helpers_1.aggregateCandles)(candles, scale); }, [candles, scale]);
-    // WS to update candles and live quotes
-    (0, ws_1.useWebSocket)(ticker, function (msg) {
-        if (!msg || typeof msg !== 'object')
-            return;
-        if (msg.type === 'candles' && msg.mode === 'snapshot') {
-            var pts = Array.isArray(msg.points) ? msg.points : [];
-            setCandles(pts);
-            if (Array.isArray(msg.clearings))
-                setClearings(msg.clearings);
-        }
-        else if (msg.type === 'quote') {
-            if (msg.summary)
-                setSummary(msg.summary);
-            if (msg.underlying)
-                setUnderlying(msg.underlying);
-        }
-        else if (msg.type === 'trades') {
-            if (Array.isArray(msg.trades))
-                setTrades(msg.trades);
-        }
-        else if (msg.type === 'error') {
-            console.warn('WS error:', msg.message || msg);
-        }
-        else if (msg.type === 'pong') {
-            // ignore
-        }
-    });
     function loadAll(targetTicker) {
         return __awaiter(this, void 0, void 0, function () {
             var t, _a, sum, candlesResp, tradesResp, posResp, e_1;
@@ -182,38 +235,26 @@ function App() {
             else if (r === 'sources')
                 window.location.hash = '#/sources';
             else
-                window.location.hash = '#/instrument';
+                window.location.hash = '#/analytics';
         }} onTickerChange={setTicker} onLoad={function () { return loadAll(ticker); }}/>
 
       <material_1.Container maxWidth="lg" sx={{ mt: 2, mb: 4 }}>
-        {route === 'jobs' ? (<JobsList_1.JobsList />) : route === 'analytics' ? (<AnalyticsPanel_1.AnalyticsPanel />) : route === 'sources' ? (<SourcesPanel_1.SourcesPanel />) : (<>
-            <material_1.Tabs value={activeTab} onChange={function (_e, v) { return setActiveTab(v); }} sx={{ mb: 2 }}>
-              <material_1.Tab label="Обзор" value="overview"/>
-              <material_1.Tab label="Аналитика" value="analytics"/>
-            </material_1.Tabs>
-              <material_1.Grid container spacing={2}>
-                <material_1.Grid item xs={12} md={6}>
-                  <InstrumentSummary_1.InstrumentSummary summary={summary}/>
-                </material_1.Grid>
-
-                {underlying && (<material_1.Grid item xs={12} md={6}>
-                    <UnderlyingSummary_1.UnderlyingSummary underlying={underlying}/>
-                  </material_1.Grid>)}
-
-                <material_1.Grid item xs={12}>
-                  <material_1.Card>
-                    <material_1.CardHeader title="Позиции"/>
-                    <material_1.CardContent>
-                      <PositionsPanel_1.PositionsPanel positions={positions} summary={summary}/>
-                    </material_1.CardContent>
-                  </material_1.Card>
-                </material_1.Grid>
-
-                <material_1.Grid item xs={12}>
-                  <CandlesPanel_1.CandlesPanel scale={scale} onScaleChange={function (s) { return setScale(s); }} candles={aggCandles} trades={trades} clearings={clearings}/>
-                </material_1.Grid>
-              </material_1.Grid>
-          </>)}
+        {route === 'jobs' ? (<JobsList_1.JobsList />) : route === 'analytics' ? (<AnalyticsPanel_1.AnalyticsPanel />) : route === 'sources' ? (<SourcesPanel_1.SourcesPanel />) : route === 'reports' ? (<material_1.Card>
+            <material_1.CardHeader title="Аналитика"/>
+            <material_1.CardContent>
+              <ReportsRouterView />
+            </material_1.CardContent>
+          </material_1.Card>) : route === 'profile' ? (<material_1.Card>
+            <material_1.CardHeader title="Аналитика"/>
+            <material_1.CardContent>
+              <ProfileRouterView />
+            </material_1.CardContent>
+          </material_1.Card>) : route === 'scraper' ? (<material_1.Card>
+            <material_1.CardHeader title="Источники"/>
+            <material_1.CardContent>
+              <ScraperRouterView />
+            </material_1.CardContent>
+          </material_1.Card>) : (<AnalyticsPanel_1.AnalyticsPanel />)}
       </material_1.Container>
     </styles_1.ThemeProvider>);
 }

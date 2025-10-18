@@ -1,0 +1,2785 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/health": {
+      "get": {
+        "operationId": "HealthController_getHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/jobs/queues": {
+      "get": {
+        "operationId": "JobsController_listQueues",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of queues with job counts by status"
+          }
+        },
+        "tags": [
+          "Jobs"
+        ]
+      }
+    },
+    "/api/jobs/{queue}": {
+      "get": {
+        "operationId": "JobsController_listJobs",
+        "parameters": [
+          {
+            "name": "queue",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List jobs for a specific queue with pagination and status filter"
+          }
+        },
+        "tags": [
+          "Jobs"
+        ]
+      }
+    },
+    "/api/jobs/{queue}/{id}": {
+      "get": {
+        "operationId": "JobsController_getJob",
+        "parameters": [
+          {
+            "name": "queue",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get a specific job details by id"
+          }
+        },
+        "tags": [
+          "Jobs"
+        ]
+      }
+    },
+    "/api/summary": {
+      "get": {
+        "operationId": "SummaryController_getSummary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/underlying-summary": {
+      "get": {
+        "operationId": "UnderlyingController_getUnderlying",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/candles": {
+      "get": {
+        "operationId": "CandlesController_getCandles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/positions": {
+      "get": {
+        "operationId": "PositionsController_getPositions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/trades": {
+      "get": {
+        "operationId": "TradesController_getTrades",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/search": {
+      "get": {
+        "operationId": "SearchController_search",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/profiles": {
+      "get": {
+        "operationId": "ProfileController_list",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Limit",
+            "schema": {
+              "example": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Offset",
+            "schema": {
+              "example": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List profiles with pagination",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfilesListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profiles"
+        ]
+      },
+      "post": {
+        "operationId": "ProfileController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profiles"
+        ]
+      }
+    },
+    "/api/profiles/{id}": {
+      "get": {
+        "operationId": "ProfileController_getOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profile by id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profiles"
+        ]
+      },
+      "patch": {
+        "operationId": "ProfileController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profiles"
+        ]
+      },
+      "delete": {
+        "operationId": "ProfileController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profiles"
+        ]
+      }
+    },
+    "/api/profiles/{id}/document-sources": {
+      "get": {
+        "operationId": "ProfileController_listSources",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Limit",
+            "schema": {
+              "example": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Offset",
+            "schema": {
+              "example": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List document sources assigned to profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSourcesListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profiles"
+        ]
+      },
+      "post": {
+        "operationId": "ProfileController_assignSource",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignDocumentSourceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Assigned document source",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSourceDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profiles"
+        ]
+      }
+    },
+    "/api/profiles/{id}/document-sources/{documentId}": {
+      "delete": {
+        "operationId": "ProfileController_unassignSource",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unassign result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profiles"
+        ]
+      }
+    },
+    "/api/profiles/{id}/task": {
+      "post": {
+        "operationId": "ProfileController_assignTask",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignTaskDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Assigned task result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileTaskDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profiles"
+        ]
+      },
+      "get": {
+        "operationId": "ProfileController_getTask",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get assigned task for profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileTaskDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profiles"
+        ]
+      },
+      "delete": {
+        "operationId": "ProfileController_unassignTask",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unassign task from profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profiles"
+        ]
+      }
+    },
+    "/api/profiles/{id}/run": {
+      "post": {
+        "operationId": "ProfileController_runAggregate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Enqueue aggregate analysis job for profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "jobId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profiles"
+        ]
+      }
+    },
+    "/api/reports": {
+      "get": {
+        "operationId": "ReportController_list",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Limit",
+            "schema": {
+              "example": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Offset",
+            "schema": {
+              "example": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "profile_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter by profile id",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "kind",
+            "required": false,
+            "in": "query",
+            "description": "Filter by kind",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List reports with pagination",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportsListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Reports"
+        ]
+      },
+      "post": {
+        "operationId": "ReportController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created report",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Reports"
+        ]
+      }
+    },
+    "/api/reports/{id}": {
+      "get": {
+        "operationId": "ReportController_getOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Report by id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Reports"
+        ]
+      },
+      "patch": {
+        "operationId": "ReportController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated report",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Reports"
+        ]
+      },
+      "delete": {
+        "operationId": "ReportController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Reports"
+        ]
+      }
+    },
+    "/api/tasks": {
+      "get": {
+        "operationId": "TasksController_list",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Limit",
+            "schema": {
+              "default": 50,
+              "example": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Offset",
+            "schema": {
+              "default": 0,
+              "example": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List tasks with pagination",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TasksListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Tasks"
+        ]
+      },
+      "post": {
+        "operationId": "TasksController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Tasks"
+        ]
+      }
+    },
+    "/api/tasks/{id}": {
+      "get": {
+        "operationId": "TasksController_getOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task by id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Tasks"
+        ]
+      },
+      "patch": {
+        "operationId": "TasksController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Tasks"
+        ]
+      },
+      "delete": {
+        "operationId": "TasksController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Tasks"
+        ]
+      }
+    },
+    "/api/collections": {
+      "get": {
+        "operationId": "CollectionController_list",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Limit",
+            "schema": {
+              "example": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Offset",
+            "schema": {
+              "example": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Search by name substring",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionsListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Collections"
+        ]
+      },
+      "post": {
+        "operationId": "CollectionController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CollectionCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Collections"
+        ]
+      }
+    },
+    "/api/collections/{id}": {
+      "get": {
+        "operationId": "CollectionController_getOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Collections"
+        ]
+      },
+      "patch": {
+        "operationId": "CollectionController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CollectionUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Collections"
+        ]
+      },
+      "delete": {
+        "operationId": "CollectionController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Collections"
+        ]
+      }
+    },
+    "/api/collections/{id}/documents": {
+      "get": {
+        "operationId": "CollectionController_documents",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Limit",
+            "schema": {
+              "example": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Offset",
+            "schema": {
+              "example": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DocumentDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Collections"
+        ]
+      }
+    },
+    "/api/documents": {
+      "get": {
+        "operationId": "DocumentsController_list",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Limit",
+            "schema": {
+              "example": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Offset",
+            "schema": {
+              "example": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "title",
+            "required": false,
+            "in": "query",
+            "description": "Filter by title (substring match)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Full-text query applied to title OR content (substring match)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scraperId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by scraper id (UUID)",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "description": "Date from (inclusive)",
+            "schema": {
+              "format": "date-time",
+              "example": "2024-01-01T00:00:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "description": "Date to (inclusive)",
+            "schema": {
+              "format": "date-time",
+              "example": "2024-12-31T23:59:59.999Z",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List documents with pagination",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentsListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      },
+      "post": {
+        "operationId": "DocumentsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created document",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/api/documents/{id}": {
+      "get": {
+        "operationId": "DocumentsController_getOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document by id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      },
+      "patch": {
+        "operationId": "DocumentsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated document",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      },
+      "delete": {
+        "operationId": "DocumentsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/api/scrapers": {
+      "get": {
+        "operationId": "ScrapersController_list",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Limit",
+            "schema": {
+              "example": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Offset",
+            "schema": {
+              "example": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of scrapers with pagination",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScrapersListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Scrapers"
+        ]
+      },
+      "post": {
+        "operationId": "ScrapersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScraperCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created scraper",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScraperDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Scrapers"
+        ]
+      }
+    },
+    "/api/scrapers/{id}": {
+      "get": {
+        "operationId": "ScrapersController_getOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Scraper by id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScraperDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Scrapers"
+        ]
+      },
+      "patch": {
+        "operationId": "ScrapersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScraperUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated scraper",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScraperDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Scrapers"
+        ]
+      },
+      "delete": {
+        "operationId": "ScrapersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Scrapers"
+        ]
+      }
+    },
+    "/api/scrapers/{id}/run": {
+      "post": {
+        "operationId": "ScrapersController_run",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Enqueue scraping job for the scraper by id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "jobId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Scrapers"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Trade API",
+    "description": "Auto-generated OpenAPI documentation for Trade backend",
+    "version": "1.0.0",
+    "contact": {
+      "name": "API",
+      "url": "",
+      "email": ""
+    }
+  },
+  "tags": [],
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "ProfileDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Profile numeric identifier",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Profile name",
+            "example": "Default profile"
+          },
+          "description": {
+            "type": "object",
+            "nullable": true,
+            "description": "Optional profile description",
+            "example": "My primary research profile"
+          },
+          "created_at": {
+            "type": "string",
+            "description": "Creation timestamp (ISO 8601)",
+            "example": "2025-01-01T12:00:00.000Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Last update timestamp (ISO 8601)",
+            "example": "2025-01-02T08:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "ProfilesListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "Returned profiles",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProfileDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "description": "Total number of profiles matching the query",
+            "example": 123
+          },
+          "limit": {
+            "type": "number",
+            "description": "Page size (limit) applied to the query",
+            "example": 50
+          },
+          "offset": {
+            "type": "number",
+            "description": "Offset applied to the query",
+            "example": 0
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ]
+      },
+      "ProfileCreateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Profile name"
+          },
+          "description": {
+            "type": "object",
+            "description": "Profile description"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "ProfileUpdateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Profile name"
+          },
+          "description": {
+            "type": "object",
+            "description": "Profile description"
+          }
+        }
+      },
+      "DocumentSourceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Link identifier within the profile",
+            "example": 10
+          },
+          "documentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Source document UUID"
+          }
+        },
+        "required": [
+          "id",
+          "documentId"
+        ]
+      },
+      "DocumentSourcesListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "Assigned document sources",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentSourceDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "description": "Total number of assigned sources",
+            "example": 12
+          },
+          "limit": {
+            "type": "number",
+            "description": "Page size (limit) applied to the query",
+            "example": 50
+          },
+          "offset": {
+            "type": "number",
+            "description": "Offset applied to the query",
+            "example": 0
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ]
+      },
+      "AssignDocumentSourceDto": {
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "description": "UUID of document to assign",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "documentId"
+        ]
+      },
+      "AssignTaskDto": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "number",
+            "description": "Numeric id of task to assign",
+            "example": 1
+          }
+        },
+        "required": [
+          "taskId"
+        ]
+      },
+      "ProfileTaskDto": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "object",
+            "description": "Currently assigned task id",
+            "example": 1,
+            "nullable": true
+          }
+        },
+        "required": [
+          "taskId"
+        ]
+      },
+      "ReportDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Report UUID"
+          },
+          "profile_id": {
+            "type": "number",
+            "description": "Profile id this report belongs to",
+            "example": 1
+          },
+          "job_id": {
+            "type": "object",
+            "nullable": true,
+            "description": "Job id that produced this report"
+          },
+          "content": {
+            "type": "object",
+            "nullable": true,
+            "description": "Main LLM text (narrative/outlook)"
+          },
+          "confidence": {
+            "type": "object",
+            "nullable": true,
+            "description": "Confidence score"
+          },
+          "llmModel": {
+            "type": "object",
+            "nullable": true,
+            "description": "LLM model used"
+          },
+          "created_at": {
+            "type": "string",
+            "description": "Creation timestamp (ISO 8601)",
+            "example": "2025-01-01T12:00:00.000Z"
+          },
+          "kind": {
+            "type": "string",
+            "description": "Kind/category of report",
+            "example": "default"
+          },
+          "relevance": {
+            "type": "object",
+            "nullable": true,
+            "description": "Relevance to the profile/topic (0..1)"
+          },
+          "tokens_in": {
+            "type": "object",
+            "nullable": true,
+            "description": "Input tokens used by the LLM"
+          },
+          "tokens_out": {
+            "type": "object",
+            "nullable": true,
+            "description": "Output tokens generated by the LLM"
+          },
+          "cost": {
+            "type": "object",
+            "nullable": true,
+            "description": "Approximate processing cost (USD)"
+          },
+          "summary_bullets": {
+            "nullable": true,
+            "description": "Short bullet-point summary",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "signals": {
+            "nullable": true,
+            "description": "Key signals or insights",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "risks": {
+            "nullable": true,
+            "description": "Risks or caveats",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sentiment_label": {
+            "type": "string",
+            "enum": [
+              "bearish",
+              "neutral",
+              "bullish"
+            ],
+            "nullable": true,
+            "description": "Overall sentiment label"
+          },
+          "sentiment_score": {
+            "type": "number",
+            "nullable": true,
+            "description": "Numeric sentiment score"
+          },
+          "outlook": {
+            "type": "string",
+            "nullable": true,
+            "description": "Forward-looking outlook text"
+          },
+          "support": {
+            "description": "Citations with documentId and quote",
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "profile_id",
+          "job_id",
+          "content",
+          "confidence",
+          "llmModel",
+          "created_at",
+          "kind",
+          "relevance",
+          "tokens_in",
+          "tokens_out",
+          "cost",
+          "summary_bullets",
+          "signals",
+          "risks",
+          "sentiment_label",
+          "sentiment_score",
+          "outlook",
+          "support"
+        ]
+      },
+      "ReportsListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "Returned reports",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "description": "Total number of reports matching the query",
+            "example": 123
+          },
+          "limit": {
+            "type": "number",
+            "description": "Page size (limit) applied to the query",
+            "example": 50
+          },
+          "offset": {
+            "type": "number",
+            "description": "Offset applied to the query",
+            "example": 0
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ]
+      },
+      "ReportCreateDto": {
+        "type": "object",
+        "properties": {
+          "profile_id": {
+            "type": "number",
+            "description": "Profile id to attach report to"
+          },
+          "content": {
+            "type": "object",
+            "description": "Main LLM text (narrative/outlook)"
+          },
+          "llmModel": {
+            "type": "object",
+            "description": "LLM model used"
+          },
+          "job_id": {
+            "type": "object",
+            "description": "Job id that produced this report"
+          },
+          "confidence": {
+            "type": "object",
+            "description": "Confidence score"
+          },
+          "kind": {
+            "type": "string",
+            "description": "Kind/category of report",
+            "default": "default"
+          },
+          "relevance": {
+            "type": "object",
+            "description": "How relevant this report is to the profile/topic (0..1)",
+            "example": 0.87
+          },
+          "tokens_in": {
+            "type": "object",
+            "description": "Number of input tokens used by the LLM",
+            "example": 1234
+          },
+          "tokens_out": {
+            "type": "object",
+            "description": "Number of output tokens generated by the LLM",
+            "example": 512
+          },
+          "cost": {
+            "type": "object",
+            "description": "Approximate processing cost (USD)",
+            "example": 0.023
+          },
+          "summary_bullets": {
+            "description": "Short bullet-point summary generated by the model",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "signals": {
+            "description": "Key signals or insights identified",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "risks": {
+            "description": "Risks or caveats mentioned in the report",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sentiment_label": {
+            "type": "string",
+            "enum": [
+              "bearish",
+              "neutral",
+              "bullish"
+            ],
+            "description": "Overall sentiment label"
+          },
+          "sentiment_score": {
+            "type": "number",
+            "description": "Numeric sentiment score (e.g., -1..1 or 0..1 depending on model)"
+          },
+          "outlook": {
+            "type": "string",
+            "description": "Forward-looking outlook text"
+          },
+          "support": {
+            "description": "Citations with documentId and quote",
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": [
+          "profile_id"
+        ]
+      },
+      "ReportUpdateDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "object",
+            "description": "Main LLM text (narrative/outlook)"
+          },
+          "llmModel": {
+            "type": "object",
+            "description": "LLM model used"
+          },
+          "job_id": {
+            "type": "object",
+            "description": "Job id that produced this report"
+          },
+          "confidence": {
+            "type": "object",
+            "description": "Confidence score"
+          },
+          "kind": {
+            "type": "string",
+            "description": "Kind/category of report"
+          },
+          "relevance": {
+            "type": "object",
+            "description": "How relevant this report is to the profile/topic (0..1)"
+          },
+          "tokens_in": {
+            "type": "object",
+            "description": "Number of input tokens used by the LLM"
+          },
+          "tokens_out": {
+            "type": "object",
+            "description": "Number of output tokens generated by the LLM"
+          },
+          "cost": {
+            "type": "object",
+            "description": "Approximate processing cost (USD)"
+          },
+          "summary_bullets": {
+            "description": "Short bullet-point summary generated by the model",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "signals": {
+            "description": "Key signals or insights identified",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "risks": {
+            "description": "Risks or caveats mentioned in the report",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sentiment_label": {
+            "type": "string",
+            "enum": [
+              "bearish",
+              "neutral",
+              "bullish"
+            ],
+            "description": "Overall sentiment label"
+          },
+          "sentiment_score": {
+            "type": "number",
+            "description": "Numeric sentiment score (e.g., -1..1 or 0..1 depending on model)"
+          },
+          "outlook": {
+            "type": "string",
+            "description": "Forward-looking outlook text"
+          },
+          "support": {
+            "description": "Citations with documentId and quote",
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "TaskDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Task numeric identifier",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Task name",
+            "example": "Summarize article"
+          },
+          "description": {
+            "type": "object",
+            "description": "Optional task description",
+            "example": "Generate concise summary bullets"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "Prompt/template used for the task"
+          },
+          "created_at": {
+            "type": "string",
+            "description": "Creation timestamp (ISO 8601)",
+            "example": "2025-01-01T12:00:00.000Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Last update timestamp (ISO 8601)",
+            "example": "2025-01-02T08:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "prompt",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "TasksListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "Returned tasks",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "description": "Total number of tasks matching the query",
+            "example": 123
+          },
+          "limit": {
+            "type": "number",
+            "description": "Page size (limit) applied to the query",
+            "example": 50
+          },
+          "offset": {
+            "type": "number",
+            "description": "Offset applied to the query",
+            "example": 0
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ]
+      },
+      "TaskCreateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Task name",
+            "example": "Summarize article"
+          },
+          "description": {
+            "type": "object",
+            "description": "Optional task description"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "Prompt/template used for the task"
+          }
+        },
+        "required": [
+          "name",
+          "prompt"
+        ]
+      },
+      "TaskUpdateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Task name"
+          },
+          "description": {
+            "type": "object",
+            "description": "Optional task description"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "Prompt/template used for the task"
+          }
+        }
+      },
+      "CollectionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Collection UUID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Collection name"
+          },
+          "description": {
+            "type": "object",
+            "nullable": true
+          },
+          "filters": {
+            "type": "object",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "description": "Created at (ISO 8601)"
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Updated at (ISO 8601)"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "filters",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CollectionsListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CollectionDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "offset": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ]
+      },
+      "CollectionCreateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Collection name"
+          },
+          "description": {
+            "type": "object",
+            "description": "Description"
+          },
+          "filters": {
+            "type": "object",
+            "description": "Filter criteria"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CollectionUpdateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Collection name"
+          },
+          "description": {
+            "type": "object",
+            "description": "Description"
+          },
+          "filters": {
+            "type": "object",
+            "description": "Filter criteria"
+          }
+        }
+      },
+      "DocumentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "scraper": {
+            "$ref": "#/components/schemas/ScraperShortDto"
+          },
+          "scrapedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contentHash": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "content",
+          "scraper",
+          "scrapedAt",
+          "contentHash"
+        ]
+      },
+      "DocumentsListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "offset": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ]
+      },
+      "ScraperShortDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "DocumentCreateDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "scraperId": {
+            "type": "string",
+            "description": "UUID of scraper",
+            "format": "uuid"
+          },
+          "content": {
+            "type": "object",
+            "description": "Content of the document. If non-string is provided will be stringified."
+          },
+          "scrapedAt": {
+            "type": "string",
+            "description": "Scraped at date",
+            "format": "date-time"
+          },
+          "contentHash": {
+            "type": "string",
+            "description": "Content hash. If omitted, server computes sha256(content)."
+          }
+        },
+        "required": [
+          "title",
+          "scraperId",
+          "content"
+        ]
+      },
+      "DocumentUpdateDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object",
+            "description": "Content of the document. If non-string is provided will be stringified."
+          },
+          "scraperId": {
+            "type": "string",
+            "description": "UUID of scraper",
+            "format": "uuid"
+          },
+          "scrapedAt": {
+            "type": "string",
+            "description": "Scraped at date",
+            "format": "date-time"
+          }
+        }
+      },
+      "AugmentedZodDto": {
+        "type": "object",
+        "properties": {
+          "API": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "selfRequired": true
+          },
+          "HTML": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "selectors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "selector": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "selector"
+                  ]
+                }
+              },
+              "headers": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "timeoutMs": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "nextSelector": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "nextUrlTemplate": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "pageParam": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "startPage": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "maxPages": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                }
+              },
+              "document": {
+                "type": "object",
+                "properties": {
+                  "linkSelector": {
+                    "type": "string"
+                  },
+                  "linkAttr": {
+                    "type": "string"
+                  },
+                  "titleSelector": {
+                    "type": "string"
+                  },
+                  "contentSelector": {
+                    "type": "string"
+                  },
+                  "baseUrl": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "maxDocsPerPage": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "linkSelector"
+                ]
+              }
+            },
+            "selfRequired": true
+          }
+        },
+        "required": [
+          "API",
+          "HTML"
+        ]
+      },
+      "ScraperDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "API",
+              "HTML"
+            ]
+          },
+          "config": {
+            "$ref": "#/components/schemas/AugmentedZodDto"
+          },
+          "postProcessors": {
+            "description": "Post-processors list",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "config"
+        ]
+      },
+      "ScrapersListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScraperDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "offset": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ]
+      },
+      "ScraperCreateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Scraper name"
+          },
+          "type": {
+            "type": "string",
+            "description": "Scraper type",
+            "enum": [
+              "API",
+              "HTML"
+            ]
+          },
+          "config": {
+            "description": "Scraper config",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AugmentedZodDto"
+              }
+            ]
+          },
+          "postProcessors": {
+            "description": "Post-processors list",
+            "example": [
+              {
+                "type": "TRIM_WHITESPACE",
+                "config": {
+                  "trimEachLine": true
+                }
+              }
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "config"
+        ]
+      },
+      "ScraperUpdateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Scraper name"
+          },
+          "type": {
+            "type": "string",
+            "description": "Scraper type",
+            "enum": [
+              "API",
+              "HTML"
+            ]
+          },
+          "config": {
+            "description": "Scraper config",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AugmentedZodDto"
+              }
+            ]
+          },
+          "postProcessors": {
+            "description": "Post-processors list",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 # Infrastructure-only docker-compose for the project
-# Currently includes only Redis. Extend this file as new infra services are added.
+# Includes Redis and PostgreSQL for local development.
 
 services:
   redis:
@@ -19,9 +19,30 @@ services:
     networks:
       - trade-net
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: trade-postgres
+    environment:
+      POSTGRES_DB: trade
+      POSTGRES_USER: trade
+      POSTGRES_PASSWORD: trade
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - trade-net
+
 # Named volumes for data persistence
 volumes:
   redis-data:
+  postgres-data:
 
 # Dedicated network to isolate project services
 networks:
@@ -31,7 +52,8 @@ networks:
 # Usage:
 #  - Start infra:    docker compose up -d
 #  - Stop infra:     docker compose down
-#  - Purge data:     docker volume rm $(docker volume ls -q | grep redis-data)  # or: docker volume rm trade_redis-data if project name is default
+#  - Purge data:     docker volume rm $(docker volume ls -q | grep -E "redis-data|postgres-data")
 # Backend config (optional):
-#  - Set CACHE_BACKEND=redis and REDIS_URL=redis://redis:6379 for containers on the same network.
-#  - From host, REDIS_URL=redis://localhost:6379
+#  - Redis (in-network): REDIS_URL=redis://redis:6379; from host: REDIS_URL=redis://localhost:6379
+#  - Postgres (in-network): DATABASE_URL=postgres://trade:trade@postgres:5432/trade; from host: DATABASE_URL=postgres://trade:trade@localhost:5432/trade
+#  - Current backend defaults to SQLite via better-sqlite3. Switch to Postgres only if/when backend supports it or for external tools.

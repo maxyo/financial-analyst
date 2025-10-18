@@ -4,13 +4,17 @@ import { AppBar, Toolbar, Typography, TextField, Button, Tabs, Tab } from '@mui/
 interface Props {
   ticker: string;
   status?: string;
-  activeRoute: 'instrument' | 'jobs' | 'analytics' | 'sources';
-  onNavigate: (route: 'instrument' | 'jobs' | 'analytics' | 'sources') => void;
+  activeRoute: 'instrument' | 'jobs' | 'analytics' | 'sources' | 'reports' | 'profile';
+  onNavigate: (route: 'instrument' | 'jobs' | 'analytics' | 'sources' | 'reports' | 'profile') => void;
   onTickerChange: (value: string) => void;
   onLoad: () => void;
 }
 
 export function Header({ ticker, status, activeRoute, onNavigate, onTickerChange, onLoad }: Props) {
+  // Map nested routes to their parent tab to avoid MUI Tabs value mismatch
+  const tabsValue: 'jobs' | 'analytics' | 'sources' =
+    activeRoute === 'profile' || activeRoute === 'reports' ? 'analytics' : activeRoute;
+
   return (
     <AppBar position="static" color="default" enableColorOnDark>
       <Toolbar sx={{ gap: 2, flexWrap: 'wrap' }}>
@@ -18,11 +22,10 @@ export function Header({ ticker, status, activeRoute, onNavigate, onTickerChange
           Панель инструментов
         </Typography>
         <Tabs
-          value={activeRoute}
+          value={tabsValue}
           onChange={(_e, v) => onNavigate(v)}
           sx={{ mr: 2 }}
         >
-          <Tab label="инструмент" value="instrument" />
           <Tab label="задачи" value="jobs" />
           <Tab label="Аналитика" value="analytics" />
           <Tab label="данные" value="sources" />

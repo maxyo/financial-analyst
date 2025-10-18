@@ -7,7 +7,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": false,
-    "outDir": "dist",
+    "outDir": "../../dist",
     "noEmit": false,
     "strict": true,
     "noUnusedLocals": true,
@@ -17,10 +17,11 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "alwaysStrict": true,
     "types": ["node"]
   },
   "include": [
-    "packages/backend/src"
+    "src"
   ],
   "exclude": [
     "packages/backend/src/api.ts"

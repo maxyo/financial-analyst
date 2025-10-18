@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 
+import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { Job } from "bullmq";
 
@@ -9,10 +10,8 @@ import { ScrapersRepository } from '../repositories/scrapers.repository';
 import { ScrapedItem, ScraperType } from '../types';
 import { apiScraper } from './strategies/api.scraper';
 import { htmlScraper } from './strategies/html.scrapper';
+import { applyPostProcessors } from '../utils/processing';
 
-import AsyncIterator = NodeJS.AsyncIterator;
-
-import { Processor, WorkerHost } from '@nestjs/bullmq';
 
 export interface ScrapingResult {
   items: number;
@@ -22,13 +21,9 @@ export interface ScrapingResult {
   meta?: Record<string, unknown>;
 }
 
-const SCRAPERS = {
-  [ScraperType.API]: apiScraper,
-  [ScraperType.HTML]: htmlScraper,
-} as const;
 
 @Injectable()
-@Processor('scrap.*')
+@Processor('scrap.run')
 export class ScraperNestService extends WorkerHost {
   logger = new Logger(ScraperNestService.name);
   constructor(
@@ -38,27 +33,25 @@ export class ScraperNestService extends WorkerHost {
     super();
   }
 
-  async process(job: Job): Promise<any> {
-    const data: any = job.data || {};
+  async process(job: Job) {
+    const data = job.data || {};
     const scraperId: string | undefined = String(
       data.scraperId || data.scraper_id || data.id || ''
     ).trim() || undefined;
     if (!scraperId) {
       throw new Error('scraperId is required');
     }
-    const scr = await this.scrapers.findOne({ where: { id: scraperId } as any });
+    const scr = await this.scrapers.findOne({ where: { id: scraperId }});
     if (!scr) {
       throw new Error(`Scraper not found: ${scraperId}`);
     }
-    return this.runScraper(scr as any);
+    return this.runScraper(scr);
   }
 
 
   async runScraper<T extends ScraperType>(
     scrapper: Scraper<T>,
   ): Promise<ScrapingResult> {
-    const func = SCRAPERS[scrapper.type];
-
     const result: ScrapingResult = {
       items: 0,
       meta: {},
@@ -66,21 +59,35 @@ export class ScraperNestService extends WorkerHost {
       inserted: 0,
       failed: 0,
     };
-    // @ts-ignore
-    const iterator = func(scrapper) as AsyncIterator<ScrapedItem<T>>;
+
+    let iterator: AsyncIterator<ScrapedItem<T>>;
+    if (scrapper.type === ScraperType.HTML) {
+      iterator = htmlScraper(scrapper as Scraper<ScraperType.HTML>) as AsyncIterator<ScrapedItem<T>>;
+    } else if (scrapper.type === ScraperType.API) {
+      iterator = apiScraper(scrapper as Scraper<ScraperType.API>) as AsyncIterator<ScrapedItem<T>>;
+    } else {
+      throw new Error(`Unsupported scraper type: ${String((scrapper).type)}`);
+    }
+
     let item = await iterator.next();
     while (item.value) {
       result.items++;
       try {
-        const scrapedItem: ScrapedItem<T> = item.value;
+        const scrapedItem = item.value as ScrapedItem<T>;
         const contentStr =
           typeof scrapedItem.content === 'string'
             ? scrapedItem.content
             : JSON.stringify(scrapedItem.content);
-        const resultDocument = {
-          content: contentStr,
+
+        const processed = applyPostProcessors(scrapper, {
           title: scrapedItem.title,
-          contentHash: this.generateHash(contentStr),
+          content: contentStr,
+        });
+
+        const resultDocument = {
+          content: processed.content,
+          title: processed.title,
+          contentHash: this.generateHash(processed.content),
           scrapedAt: new Date(),
           scraperId: scrapper.id,
           id: randomUUID(),
@@ -88,10 +95,11 @@ export class ScraperNestService extends WorkerHost {
         await this.documents.insert(resultDocument);
         result.inserted++;
 
-        item = await iterator.next();
       } catch (e) {
         result.failed++;
         this.logger.error(`Scraping failed`, e);
+      } finally {
+        item = await iterator.next();
       }
     }
 
@@ -105,8 +113,8 @@ export class ScraperNestService extends WorkerHost {
   }
 
   async runById(scraperId: string) {
-    const scr = await this.scrapers.findOne({ where: { id: scraperId } as any });
+    const scr = await this.scrapers.findOne({ where: { id: scraperId } });
     if (!scr) throw new Error(`Scraper not found: ${scraperId}`);
-    return this.runScraper(scr as any);
+    return this.runScraper(scr);
   }
 }

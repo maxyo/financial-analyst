@@ -11,24 +11,24 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import {applyFilter} from '@trade/filter';
+import { applyFilter } from '@trade/filter';
 import { createZodDto, ZodResponse } from 'nestjs-zod';
 import { z } from 'zod';
 
-import { OkResponseDto } from '../../../common/zod-response';
+import { OkResponseDto } from '../../../../../dto/response';
+import { CollectionsRepository } from '../../../repositories/collections.repository';
 import {
   type CollectionCreateDto,
   type CollectionDocumentsQueryDto,
   CollectionDto,
-  type CollectionFilters,
   CollectionSchema,
   type CollectionsListQueryDto,
-  CollectionsListResponseDto, CollectionsListResponseSchema,
+  CollectionsListResponseDto,
+  CollectionsListResponseSchema,
   type CollectionUpdateDto,
   DocumentSchema,
 } from '../dto/collection.dto';
-import { DocumentsRepository } from '../modules/scraper/repositories/documents.repository';
-import { CollectionsRepository } from '../repositories/collections.repository';
+import { DocumentsRepository } from '../repositories/documents.repository';
 
 @ApiTags('Collections')
 @Controller('api/collections')
@@ -62,7 +62,7 @@ export class CollectionController {
   @Get(':id')
   @ZodResponse({ type: CollectionDto })
   async getOne(@Param('id') id: string) {
-    const item = await this.collections.findOne({ where: { id }});
+    const item = await this.collections.findOne({ where: { id } });
     if (!item) throw new NotFoundException('Collection not found');
     return CollectionSchema.parse(item);
   }
@@ -70,14 +70,7 @@ export class CollectionController {
   @Post()
   @ZodResponse({ type: CollectionDto })
   async create(@Body() body: CollectionCreateDto) {
-    const now = new Date();
-    const entity = this.collections.create({
-      name: body.name.trim(),
-      description: body.description ?? null,
-      filters: body.filters == null ? null : JSON.stringify(body.filters),
-      created_at: now,
-      updated_at: now,
-    });
+    const entity = this.collections.create(body);
 
     return CollectionSchema.parse(await this.collections.save(entity));
   }
@@ -85,11 +78,11 @@ export class CollectionController {
   @Patch(':id')
   @ZodResponse({ type: CollectionDto })
   async update(@Param('id') id: string, @Body() body: CollectionUpdateDto) {
-    const item = await this.collections.findOne({ where: { id }});
+    const item = await this.collections.findOne({ where: { id } });
     if (!item) throw new NotFoundException('Collection not found');
     await this.collections.update({ id }, body);
 
-    const result = await this.collections.findOne({ where: { id }});
+    const result = await this.collections.findOne({ where: { id } });
     if (!result) {
       throw new InternalServerErrorException('Failed to update collection');
     }
@@ -100,9 +93,9 @@ export class CollectionController {
   @Delete(':id')
   @ZodResponse({ type: OkResponseDto })
   async remove(@Param('id') id: string) {
-    const item = await this.collections.findOne({ where: { id }});
+    const item = await this.collections.findOne({ where: { id } });
     if (!item) throw new NotFoundException('Collection not found');
-    await this.collections.delete({ id } as any);
+    await this.collections.delete({ id });
     return { ok: true };
   }
 
@@ -113,23 +106,17 @@ export class CollectionController {
     @Query() q: CollectionDocumentsQueryDto,
   ) {
     const collection = await this.collections.findOne({
-      where: { id } as any,
+      where: { id },
     });
     if (!collection) {
       throw new NotFoundException(`Collection with id ${id} not found`);
     }
 
-    let filters: CollectionFilters | null = collection.filters
-      ? JSON.parse(collection.filters)
-      : null;
-
     const take = q.limit;
     const skip = q.offset;
 
     const qb = this.docsRepo.createQueryBuilder('d');
-    if (filters && typeof filters === 'object') {
-      applyFilter(qb, 'd', filters as any);
-    }
+    applyFilter(qb, 'd', collection.filters);
 
     qb.orderBy('d.scraped_at', 'DESC').take(take).skip(skip);
     const items = await qb.getMany();

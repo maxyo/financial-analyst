@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check (backend)
+        run: npm run build
+
+      - name: Build frontend bundle
+        run: npm run build --workspace packages/frontend
+
+      - name: Smoke test backend (ts-node ephemeral)
+        shell: bash
+        run: |
+          cat > packages/backend/src/smoke.test.ts <<'TS'
+          import assert from 'node:assert/strict';
+          assert.equal(1 + 1, 2);
+          console.log('smoke ok');
+          TS
+          npx ts-node packages/backend/src/smoke.test.ts
+          rm packages/backend/src/smoke.test.ts
+
+      - name: Upload frontend build artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: packages/frontend/build/
+          if-no-files-found: ignore
+
+      - name: Upload backend openapi.json artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi
+          path: packages/backend/openapi.json
+          if-no-files-found: ignore

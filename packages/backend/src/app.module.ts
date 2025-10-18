@@ -2,27 +2,28 @@ import * as path from 'path';
 
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ZodValidationPipe } from 'nestjs-zod';
 
 import { HealthController } from './controllers/health.controller';
-import { JobsController } from './controllers/jobs.controller';
-import { WsBridgeService } from './controllers/websocket/ws-bridge.service';
 import { AnalyzeModule } from './modules/analyze/analyze.module';
+import { ProfileExecutionEntity } from './modules/analyze/entities/profile-execution.entity';
 import { ProfileEntity } from './modules/analyze/entities/profile.entity';
-import { ReportEntity } from './modules/analyze/entities/report.entity';
+import { ReportEntity } from './modules/analyze/entities/report/report.entity';
 import { DocumentSourceEntity } from './modules/analyze/entities/source.entity';
+import { TaskEntity } from './modules/analyze/entities/task.entity';
+import { CollectionEntity } from './modules/analyze/modules/scraper/entities/collection.entity';
 import { DocumentEntity } from './modules/analyze/modules/scraper/entities/document.entity';
-import { CandleEntity } from './modules/market/entities/candle.entity';
-import { FundingRateEntity } from './modules/market/entities/funding-rate.entity';
-import { InstrumentEntity } from './modules/market/entities/instrument.entity';
-import { TradePublicEntity } from './modules/market/entities/trade-public.entity';
-import { TradeUserEntity } from './modules/market/entities/trade-user.entity';
-import { MarketModule } from './modules/market/market.module';
+import { Scraper } from './modules/analyze/modules/scraper/entities/scrapper.entity';
 
 @Module({
   imports: [
-    MarketModule,
     AnalyzeModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRootAsync({
       useFactory: () => {
         const dbPath =
@@ -38,15 +39,14 @@ import { MarketModule } from './modules/market/market.module';
       },
     }),
     TypeOrmModule.forFeature([
-      InstrumentEntity,
-      CandleEntity,
       DocumentEntity,
-      TradePublicEntity,
-      TradeUserEntity,
-      FundingRateEntity,
       ProfileEntity,
       DocumentSourceEntity,
       ReportEntity,
+      Scraper,
+      TaskEntity,
+      CollectionEntity,
+      ProfileExecutionEntity,
     ]),
     BullModule.forRootAsync({
       useFactory: () => {
@@ -59,8 +59,13 @@ import { MarketModule } from './modules/market/market.module';
       },
     }),
   ],
-  controllers: [HealthController, JobsController],
-  providers: [WsBridgeService],
+  controllers: [HealthController],
+  providers: [
+    {
+      provide: APP_PIPE,
+      useClass: ZodValidationPipe,
+    },
+  ],
   exports: [],
 })
 export class AppModule {}

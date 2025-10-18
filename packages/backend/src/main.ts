@@ -1,6 +1,8 @@
 /* eslint-disable import/no-unresolved */
 import 'reflect-metadata';
+import { writeFileSync } from 'fs';
 import * as path from 'path';
+import { join, resolve } from 'path';
 
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -25,10 +27,13 @@ async function bootstrap() {
     .setTitle('Trade API')
     .setDescription('Auto-generated OpenAPI documentation for Trade backend')
     .setVersion('1.0.0')
+    .addServer('http://localhost:3000')
     .setContact('API', '', '')
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/docs', app, document);
+  const outPath = join(resolve(__dirname, '..'), 'openapi.json');
+  writeFileSync(outPath, JSON.stringify(document, null, 2), 'utf-8');
 
   const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 
