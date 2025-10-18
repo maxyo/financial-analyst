@@ -2,24 +2,25 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { TaskCreateDto } from '../models/TaskCreateDto';
-import type { TaskDto } from '../models/TaskDto';
-import type { TasksListResponseDto } from '../models/TasksListResponseDto';
-import type { TaskUpdateDto } from '../models/TaskUpdateDto';
+import type { OkResponseDto_Output } from '../models/OkResponseDto_Output';
+import type { TaskCreateDtoClass } from '../models/TaskCreateDtoClass';
+import type { TaskDtoClass_Output } from '../models/TaskDtoClass_Output';
+import type { TasksListResponseDtoClass_Output } from '../models/TasksListResponseDtoClass_Output';
+import type { TaskUpdateDtoClass } from '../models/TaskUpdateDtoClass';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class TasksService {
     /**
-     * @param limit Limit
-     * @param offset Offset
-     * @returns TasksListResponseDto List tasks with pagination
+     * @param limit
+     * @param offset
+     * @returns TasksListResponseDtoClass_Output
      * @throws ApiError
      */
     public static tasksControllerList(
         limit: number = 50,
         offset?: number,
-    ): CancelablePromise<TasksListResponseDto> {
+    ): CancelablePromise<TasksListResponseDtoClass_Output> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/tasks',
@@ -31,12 +32,12 @@ export class TasksService {
     }
     /**
      * @param requestBody
-     * @returns TaskDto Created task
+     * @returns TaskDtoClass_Output
      * @throws ApiError
      */
     public static tasksControllerCreate(
-        requestBody: TaskCreateDto,
-    ): CancelablePromise<TaskDto> {
+        requestBody: TaskCreateDtoClass,
+    ): CancelablePromise<TaskDtoClass_Output> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/tasks',
@@ -46,12 +47,12 @@ export class TasksService {
     }
     /**
      * @param id
-     * @returns TaskDto Task by id
+     * @returns TaskDtoClass_Output
      * @throws ApiError
      */
     public static tasksControllerGetOne(
         id: string,
-    ): CancelablePromise<TaskDto> {
+    ): CancelablePromise<TaskDtoClass_Output> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/tasks/{id}',
@@ -63,13 +64,13 @@ export class TasksService {
     /**
      * @param id
      * @param requestBody
-     * @returns TaskDto Updated task
+     * @returns TaskDtoClass_Output
      * @throws ApiError
      */
     public static tasksControllerUpdate(
         id: string,
-        requestBody: TaskUpdateDto,
-    ): CancelablePromise<TaskDto> {
+        requestBody: TaskUpdateDtoClass,
+    ): CancelablePromise<TaskDtoClass_Output> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/tasks/{id}',
@@ -82,12 +83,12 @@ export class TasksService {
     }
     /**
      * @param id
-     * @returns any Delete result
+     * @returns OkResponseDto_Output
      * @throws ApiError
      */
     public static tasksControllerRemove(
         id: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<OkResponseDto_Output> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/tasks/{id}',

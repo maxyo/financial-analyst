@@ -2,14 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type DocumentSourceDto = {
-    /**
-     * Link identifier within the profile
-     */
+export type DocumentSourceDto_Output = {
     id: number;
-    /**
-     * Source document UUID
-     */
     documentId: string;
 };
 

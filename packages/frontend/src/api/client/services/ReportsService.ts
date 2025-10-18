@@ -2,28 +2,27 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { OkResponseDto_Output } from '../models/OkResponseDto_Output';
 import type { ReportCreateDto } from '../models/ReportCreateDto';
-import type { ReportDto } from '../models/ReportDto';
-import type { ReportsListResponseDto } from '../models/ReportsListResponseDto';
+import type { ReportDto_Output } from '../models/ReportDto_Output';
+import type { ReportsListResponseDto_Output } from '../models/ReportsListResponseDto_Output';
 import type { ReportUpdateDto } from '../models/ReportUpdateDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class ReportsService {
     /**
-     * @param limit Limit
-     * @param offset Offset
-     * @param profileId Filter by profile id
-     * @param kind Filter by kind
-     * @returns ReportsListResponseDto List reports with pagination
+     * @param limit
+     * @param offset
+     * @param profileId
+     * @returns ReportsListResponseDto_Output
      * @throws ApiError
      */
     public static reportControllerList(
-        limit?: number,
+        limit: number = 50,
         offset?: number,
         profileId?: number,
-        kind?: string,
-    ): CancelablePromise<ReportsListResponseDto> {
+    ): CancelablePromise<ReportsListResponseDto_Output> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/reports',
@@ -31,18 +30,17 @@ export class ReportsService {
                 'limit': limit,
                 'offset': offset,
                 'profile_id': profileId,
-                'kind': kind,
             },
         });
     }
     /**
      * @param requestBody
-     * @returns ReportDto Created report
+     * @returns ReportDto_Output
      * @throws ApiError
      */
     public static reportControllerCreate(
         requestBody: ReportCreateDto,
-    ): CancelablePromise<ReportDto> {
+    ): CancelablePromise<ReportDto_Output> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/reports',
@@ -52,12 +50,12 @@ export class ReportsService {
     }
     /**
      * @param id
-     * @returns ReportDto Report by id
+     * @returns ReportDto_Output
      * @throws ApiError
      */
     public static reportControllerGetOne(
         id: string,
-    ): CancelablePromise<ReportDto> {
+    ): CancelablePromise<ReportDto_Output> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/reports/{id}',
@@ -69,13 +67,13 @@ export class ReportsService {
     /**
      * @param id
      * @param requestBody
-     * @returns ReportDto Updated report
+     * @returns ReportDto_Output
      * @throws ApiError
      */
     public static reportControllerUpdate(
         id: string,
         requestBody: ReportUpdateDto,
-    ): CancelablePromise<ReportDto> {
+    ): CancelablePromise<ReportDto_Output> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/reports/{id}',
@@ -88,12 +86,12 @@ export class ReportsService {
     }
     /**
      * @param id
-     * @returns any Delete result
+     * @returns OkResponseDto_Output
      * @throws ApiError
      */
     public static reportControllerRemove(
         id: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<OkResponseDto_Output> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/reports/{id}',

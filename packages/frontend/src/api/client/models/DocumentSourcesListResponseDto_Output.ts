@@ -2,9 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ScraperDto } from './ScraperDto';
-export type ScrapersListResponseDto = {
-    items: Array<ScraperDto>;
+export type DocumentSourcesListResponseDto_Output = {
+    items: Array<{
+        id: number;
+        documentId: string;
+    }>;
     total: number;
     limit: number;
     offset: number;

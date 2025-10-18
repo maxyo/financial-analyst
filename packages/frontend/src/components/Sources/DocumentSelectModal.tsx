@@ -2,7 +2,7 @@ import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, List, ListItemButton, ListItemText, CircularProgress, Box, Typography, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
-import { DocumentsService, DocumentsListResponseDto, DocumentDto } from '../../api/client';
+import { DocumentsService, type DocumentsListResponseDto_Output as DocumentsListResponseDto, type DocumentDto_Output as DocumentDto } from '../../api/client';
 
 export type DocumentSelectModalProps = {
   open: boolean;

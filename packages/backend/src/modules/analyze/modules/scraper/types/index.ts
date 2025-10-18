@@ -28,6 +28,8 @@ export type ScraperConfiguration = {
       linkAttr?: string; // default: 'href'
       titleSelector?: string; // selector to extract title on the document page
       contentSelector?: string; // selector to extract content on the document page
+      dateSelector?: string; // selector to extract date on the document page
+      dateAttr?: string; // attribute to read date from (e.g., datetime, content); if omitted, use text()
       baseUrl?: string; // base URL for resolving relative links
       maxDocsPerPage?: number; // safety limit per page
     };
@@ -64,6 +66,8 @@ export const htmlScraperConfigurationSchema = z
         linkAttr: z.string().optional(),
         titleSelector: z.string().optional(),
         contentSelector: z.string().optional(),
+        dateSelector: z.string().optional(),
+        dateAttr: z.string().optional(),
         baseUrl: z.string().url().optional(),
         maxDocsPerPage: z.number().int().positive().optional(),
       })
@@ -78,6 +82,7 @@ export const scraperConfigurationSchema = z.object({
 export type ScrapedItem<T> = {
   title: string;
   content: T;
+  date?: string; // ISO string or raw if parsing failed
 };
 export enum PostProcessorType {
   TRIM_WHITESPACE = 'TRIM_WHITESPACE',

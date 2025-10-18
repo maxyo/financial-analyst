@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type ScraperCreateDto = {
+export type ScraperDto_Output = {
     data: ({
         name: string;
         type: string;
@@ -12,9 +12,9 @@ export type ScraperCreateDto = {
         postProcessors?: Array<{
             type: string;
             config: {
-                collapseMultipleSpaces?: boolean;
-                collapseNewlines?: boolean;
-                trimEachLine?: boolean;
+                collapseMultipleSpaces: boolean;
+                collapseNewlines: boolean;
+                trimEachLine: boolean;
             };
         }>;
     } | {
@@ -47,9 +47,9 @@ export type ScraperCreateDto = {
         postProcessors?: Array<{
             type: string;
             config: {
-                collapseMultipleSpaces?: boolean;
-                collapseNewlines?: boolean;
-                trimEachLine?: boolean;
+                collapseMultipleSpaces: boolean;
+                collapseNewlines: boolean;
+                trimEachLine: boolean;
             };
         }>;
     });

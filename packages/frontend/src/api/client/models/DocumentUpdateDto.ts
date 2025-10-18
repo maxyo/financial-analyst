@@ -4,17 +4,16 @@
 /* eslint-disable */
 export type DocumentUpdateDto = {
     title?: string;
-    /**
-     * Content of the document. If non-string is provided will be stringified.
-     */
-    content?: Record<string, any>;
-    /**
-     * UUID of scraper
-     */
+    content?: any;
     scraperId?: string;
-    /**
-     * Scraped at date
-     */
     scrapedAt?: string;
+    type: DocumentUpdateDto.type;
 };
+export namespace DocumentUpdateDto {
+    export enum type {
+        MD = 'MD',
+        XML = 'XML',
+        JSON = 'JSON',
+    }
+}
 

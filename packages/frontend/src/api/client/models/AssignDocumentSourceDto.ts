@@ -3,9 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export type AssignDocumentSourceDto = {
-    /**
-     * UUID of document to assign
-     */
     documentId: string;
 };
 

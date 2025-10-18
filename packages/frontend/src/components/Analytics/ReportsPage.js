@@ -63,7 +63,7 @@ function ReportsPage(_a) {
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, 4, 5]);
-                        return [4 /*yield*/, client_1.ReportsService.reportControllerList(undefined, undefined, profileId, undefined)];
+                        return [4 /*yield*/, client_1.ReportsService.reportControllerList(undefined, undefined, profileId)];
                     case 2:
                         resp = _a.sent();
                         setData(resp);
@@ -127,24 +127,35 @@ function ReportsPage(_a) {
     }
     return (<material_1.Box>
       <material_1.Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        <material_1.Button startIcon={<icons_material_1.ArrowBack />} onClick={onBack}>Назад</material_1.Button>
-        <material_1.Typography variant="h6">Репорты профиля{profileName ? ": ".concat(profileName) : ''}</material_1.Typography>
+        <material_1.Button startIcon={<icons_material_1.ArrowBack />} onClick={onBack}>
+          Назад
+        </material_1.Button>
+        <material_1.Typography variant="h6">
+          Репорты профиля{profileName ? ": ".concat(profileName) : ''}
+        </material_1.Typography>
       </material_1.Box>
 
       {loading && <material_1.Typography variant="body2">Загрузка...</material_1.Typography>}
-      {error && <material_1.Typography variant="body2" color="error">{error}</material_1.Typography>}
+      {error && (<material_1.Typography variant="body2" color="error">
+          {error}
+        </material_1.Typography>)}
 
       <material_1.List dense>
-        {((_b = data === null || data === void 0 ? void 0 : data.items) === null || _b === void 0 ? void 0 : _b.length) ? data.items.map(function (r) { return (<material_1.ListItem key={r.id} divider secondaryAction={<material_1.Box>
-              <material_1.IconButton edge="end" aria-label="open" title="Открыть" onClick={function () { return openReport(r); }}>
-                <icons_material_1.OpenInNew />
-              </material_1.IconButton>
-              <material_1.IconButton edge="end" aria-label="delete" title="Удалить" onClick={function () { return removeReport(r.id); }} disabled={removingId === r.id}>
-                <icons_material_1.Delete />
-              </material_1.IconButton>
-            </material_1.Box>}>
-            <material_1.ListItemText primary={"".concat(r.kind || 'default', " \u2022 ").concat(new Date(r.created_at).toLocaleString())} secondary={r.content ? JSON.stringify(r.content).slice(0, 160) + (JSON.stringify(r.content).length > 160 ? '…' : '') : 'Нет содержимого'}/>
-          </material_1.ListItem>); }) : (!loading && <material_1.Typography variant="body2">Репорты отсутствуют</material_1.Typography>)}
+        {((_b = data === null || data === void 0 ? void 0 : data.items) === null || _b === void 0 ? void 0 : _b.length)
+            ? data.items.map(function (r) { return (<material_1.ListItem key={r.id} divider secondaryAction={<material_1.Box>
+                    <material_1.IconButton edge="end" aria-label="open" title="Открыть" onClick={function () { return openReport(r); }}>
+                      <icons_material_1.OpenInNew />
+                    </material_1.IconButton>
+                    <material_1.IconButton edge="end" aria-label="delete" title="Удалить" onClick={function () { return removeReport(r.id); }} disabled={removingId === r.id}>
+                      <icons_material_1.Delete />
+                    </material_1.IconButton>
+                  </material_1.Box>}>
+                <material_1.ListItemText primary={"".concat(r.type || 'default', " \u2022 ").concat(new Date(r.created_at).toLocaleString())} secondary={r.content
+                    ? JSON.stringify(r.content).slice(0, 160) +
+                        (JSON.stringify(r.content).length > 160 ? '…' : '')
+                    : 'Нет содержимого'}/>
+              </material_1.ListItem>); })
+            : !loading && (<material_1.Typography variant="body2">Репорты отсутствуют</material_1.Typography>)}
       </material_1.List>
 
       <material_1.Dialog open={modalOpen} onClose={closeReport} fullWidth maxWidth="md">
@@ -152,7 +163,7 @@ function ReportsPage(_a) {
         <material_1.DialogContent>
           {selected ? (<material_1.Box>
               <material_1.Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }}>
-                <material_1.Chip label={selected.kind || 'default'} size="small"/>
+                <material_1.Chip label={selected.type || 'default'} size="small"/>
                 <material_1.Chip label={new Date(selected.created_at).toLocaleString()} size="small"/>
                 <material_1.Chip label={"ID: ".concat(selected.id)} size="small" variant="outlined"/>
                 <material_1.Chip label={"Profile: ".concat(selected.profile_id)} size="small" variant="outlined"/>
@@ -160,43 +171,236 @@ function ReportsPage(_a) {
 
               <material_1.Divider sx={{ my: 1 }}/>
 
-              <material_1.Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+              <material_1.Box sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                gap: 2,
+            }}>
                 <material_1.Box>
-                  <material_1.Typography variant="subtitle2" gutterBottom>Содержимое</material_1.Typography>
-                  <material_1.Box component="pre" sx={{ m: 0, p: 1, bgcolor: function (theme) { return theme.palette.mode === 'dark' ? '#0b1220' : 'grey.100'; }, color: function (theme) { return theme.palette.mode === 'dark' ? theme.palette.grey[100] : 'inherit'; }, border: function (theme) { return "1px solid ".concat(theme.palette.divider); }, borderRadius: 1, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'monospace', fontSize: 12 }}>
-                    {selected.content ? JSON.stringify(selected.content, null, 2) : 'Нет содержимого'}
+                  <material_1.Typography variant="subtitle2" gutterBottom>
+                    Содержимое
+                  </material_1.Typography>
+                  <material_1.Box component="pre" sx={{
+                m: 0,
+                p: 1,
+                bgcolor: function (theme) {
+                    return theme.palette.mode === 'dark' ? '#0b1220' : 'grey.100';
+                },
+                color: function (theme) {
+                    return theme.palette.mode === 'dark'
+                        ? theme.palette.grey[100]
+                        : 'inherit';
+                },
+                border: function (theme) { return "1px solid ".concat(theme.palette.divider); },
+                borderRadius: 1,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                fontFamily: 'monospace',
+                fontSize: 12,
+            }}>
+                    {selected.content
+                ? JSON.stringify(selected.content, null, 2)
+                : 'Нет содержимого'}
                   </material_1.Box>
                 </material_1.Box>
                 <material_1.Box>
-                  <material_1.Typography variant="subtitle2" gutterBottom>Метаданные</material_1.Typography>
-                  <material_1.Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', rowGap: 0.5, columnGap: 1, alignItems: 'start' }}>
-                    <material_1.Typography variant="caption" color="text.secondary">Job</material_1.Typography>
-                    <material_1.Box component="pre" sx={{ m: 0, p: 1, bgcolor: function (theme) { return theme.palette.mode === 'dark' ? '#0b1220' : 'grey.100'; }, color: function (theme) { return theme.palette.mode === 'dark' ? theme.palette.grey[100] : 'inherit'; }, border: function (theme) { return "1px solid ".concat(theme.palette.divider); }, borderRadius: 1, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'monospace', fontSize: 12 }}>
-                      {selected.job_id ? JSON.stringify(selected.job_id, null, 2) : '—'}
+                  <material_1.Typography variant="subtitle2" gutterBottom>
+                    Метаданные
+                  </material_1.Typography>
+                  <material_1.Box sx={{
+                display: 'grid',
+                gridTemplateColumns: 'auto 1fr',
+                rowGap: 0.5,
+                columnGap: 1,
+                alignItems: 'start',
+            }}>
+                    <material_1.Typography variant="caption" color="text.secondary">
+                      Job
+                    </material_1.Typography>
+                    <material_1.Box component="pre" sx={{
+                m: 0,
+                p: 1,
+                bgcolor: function (theme) {
+                    return theme.palette.mode === 'dark'
+                        ? '#0b1220'
+                        : 'grey.100';
+                },
+                color: function (theme) {
+                    return theme.palette.mode === 'dark'
+                        ? theme.palette.grey[100]
+                        : 'inherit';
+                },
+                border: function (theme) { return "1px solid ".concat(theme.palette.divider); },
+                borderRadius: 1,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                fontFamily: 'monospace',
+                fontSize: 12,
+            }}>
+                      {selected.job_id
+                ? JSON.stringify(selected.job_id, null, 2)
+                : '—'}
                     </material_1.Box>
-                    <material_1.Typography variant="caption" color="text.secondary">LLM</material_1.Typography>
-                    <material_1.Box component="pre" sx={{ m: 0, p: 1, bgcolor: function (theme) { return theme.palette.mode === 'dark' ? '#0b1220' : 'grey.100'; }, color: function (theme) { return theme.palette.mode === 'dark' ? theme.palette.grey[100] : 'inherit'; }, border: function (theme) { return "1px solid ".concat(theme.palette.divider); }, borderRadius: 1, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'monospace', fontSize: 12 }}>
-                      {selected.llmModel ? JSON.stringify(selected.llmModel, null, 2) : '—'}
+                    <material_1.Typography variant="caption" color="text.secondary">
+                      LLM
+                    </material_1.Typography>
+                    <material_1.Box component="pre" sx={{
+                m: 0,
+                p: 1,
+                bgcolor: function (theme) {
+                    return theme.palette.mode === 'dark'
+                        ? '#0b1220'
+                        : 'grey.100';
+                },
+                color: function (theme) {
+                    return theme.palette.mode === 'dark'
+                        ? theme.palette.grey[100]
+                        : 'inherit';
+                },
+                border: function (theme) { return "1px solid ".concat(theme.palette.divider); },
+                borderRadius: 1,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                fontFamily: 'monospace',
+                fontSize: 12,
+            }}>
+                      {selected.llmModel
+                ? JSON.stringify(selected.llmModel, null, 2)
+                : '—'}
                     </material_1.Box>
-                    <material_1.Typography variant="caption" color="text.secondary">Confidence</material_1.Typography>
-                    <material_1.Box component="pre" sx={{ m: 0, p: 1, bgcolor: function (theme) { return theme.palette.mode === 'dark' ? '#0b1220' : 'grey.100'; }, color: function (theme) { return theme.palette.mode === 'dark' ? theme.palette.grey[100] : 'inherit'; }, border: function (theme) { return "1px solid ".concat(theme.palette.divider); }, borderRadius: 1, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'monospace', fontSize: 12 }}>
-                      {selected.confidence ? JSON.stringify(selected.confidence, null, 2) : '—'}
+                    <material_1.Typography variant="caption" color="text.secondary">
+                      Confidence
+                    </material_1.Typography>
+                    <material_1.Box component="pre" sx={{
+                m: 0,
+                p: 1,
+                bgcolor: function (theme) {
+                    return theme.palette.mode === 'dark'
+                        ? '#0b1220'
+                        : 'grey.100';
+                },
+                color: function (theme) {
+                    return theme.palette.mode === 'dark'
+                        ? theme.palette.grey[100]
+                        : 'inherit';
+                },
+                border: function (theme) { return "1px solid ".concat(theme.palette.divider); },
+                borderRadius: 1,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                fontFamily: 'monospace',
+                fontSize: 12,
+            }}>
+                      {selected.confidence
+                ? JSON.stringify(selected.confidence, null, 2)
+                : '—'}
                     </material_1.Box>
-                    <material_1.Typography variant="caption" color="text.secondary">Relevance</material_1.Typography>
-                    <material_1.Box component="pre" sx={{ m: 0, p: 1, bgcolor: function (theme) { return theme.palette.mode === 'dark' ? '#0b1220' : 'grey.100'; }, color: function (theme) { return theme.palette.mode === 'dark' ? theme.palette.grey[100] : 'inherit'; }, border: function (theme) { return "1px solid ".concat(theme.palette.divider); }, borderRadius: 1, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'monospace', fontSize: 12 }}>
-                      {selected.relevance ? JSON.stringify(selected.relevance, null, 2) : '—'}
+                    <material_1.Typography variant="caption" color="text.secondary">
+                      Relevance
+                    </material_1.Typography>
+                    <material_1.Box component="pre" sx={{
+                m: 0,
+                p: 1,
+                bgcolor: function (theme) {
+                    return theme.palette.mode === 'dark'
+                        ? '#0b1220'
+                        : 'grey.100';
+                },
+                color: function (theme) {
+                    return theme.palette.mode === 'dark'
+                        ? theme.palette.grey[100]
+                        : 'inherit';
+                },
+                border: function (theme) { return "1px solid ".concat(theme.palette.divider); },
+                borderRadius: 1,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                fontFamily: 'monospace',
+                fontSize: 12,
+            }}>
+                      {selected.relevance
+                ? JSON.stringify(selected.relevance, null, 2)
+                : '—'}
                     </material_1.Box>
-                    <material_1.Typography variant="caption" color="text.secondary">Tokens in</material_1.Typography>
-                    <material_1.Box component="pre" sx={{ m: 0, p: 1, bgcolor: function (theme) { return theme.palette.mode === 'dark' ? '#0b1220' : 'grey.100'; }, color: function (theme) { return theme.palette.mode === 'dark' ? theme.palette.grey[100] : 'inherit'; }, border: function (theme) { return "1px solid ".concat(theme.palette.divider); }, borderRadius: 1, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'monospace', fontSize: 12 }}>
-                      {selected.tokens_in ? JSON.stringify(selected.tokens_in, null, 2) : '—'}
+                    <material_1.Typography variant="caption" color="text.secondary">
+                      Tokens in
+                    </material_1.Typography>
+                    <material_1.Box component="pre" sx={{
+                m: 0,
+                p: 1,
+                bgcolor: function (theme) {
+                    return theme.palette.mode === 'dark'
+                        ? '#0b1220'
+                        : 'grey.100';
+                },
+                color: function (theme) {
+                    return theme.palette.mode === 'dark'
+                        ? theme.palette.grey[100]
+                        : 'inherit';
+                },
+                border: function (theme) { return "1px solid ".concat(theme.palette.divider); },
+                borderRadius: 1,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                fontFamily: 'monospace',
+                fontSize: 12,
+            }}>
+                      {selected.tokens_in
+                ? JSON.stringify(selected.tokens_in, null, 2)
+                : '—'}
                     </material_1.Box>
-                    <material_1.Typography variant="caption" color="text.secondary">Tokens out</material_1.Typography>
-                    <material_1.Box component="pre" sx={{ m: 0, p: 1, bgcolor: function (theme) { return theme.palette.mode === 'dark' ? '#0b1220' : 'grey.100'; }, color: function (theme) { return theme.palette.mode === 'dark' ? theme.palette.grey[100] : 'inherit'; }, border: function (theme) { return "1px solid ".concat(theme.palette.divider); }, borderRadius: 1, whiteSpace: 'break-word', fontFamily: 'monospace', fontSize: 12 }}>
-                      {selected.tokens_out ? JSON.stringify(selected.tokens_out, null, 2) : '—'}
+                    <material_1.Typography variant="caption" color="text.secondary">
+                      Tokens out
+                    </material_1.Typography>
+                    <material_1.Box component="pre" sx={{
+                m: 0,
+                p: 1,
+                bgcolor: function (theme) {
+                    return theme.palette.mode === 'dark'
+                        ? '#0b1220'
+                        : 'grey.100';
+                },
+                color: function (theme) {
+                    return theme.palette.mode === 'dark'
+                        ? theme.palette.grey[100]
+                        : 'inherit';
+                },
+                border: function (theme) { return "1px solid ".concat(theme.palette.divider); },
+                borderRadius: 1,
+                whiteSpace: 'break-word',
+                fontFamily: 'monospace',
+                fontSize: 12,
+            }}>
+                      {selected.tokens_out
+                ? JSON.stringify(selected.tokens_out, null, 2)
+                : '—'}
                     </material_1.Box>
-                    <material_1.Typography variant="caption" color="text.secondary">Стоимость</material_1.Typography>
-                    <material_1.Box component="pre" sx={{ m: 0, p: 1, bgcolor: function (theme) { return theme.palette.mode === 'dark' ? '#0b1220' : 'grey.100'; }, color: function (theme) { return theme.palette.mode === 'dark' ? theme.palette.grey[100] : 'inherit'; }, border: function (theme) { return "1px solid ".concat(theme.palette.divider); }, borderRadius: 1, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'monospace', fontSize: 12 }}>
-                      {selected.cost ? JSON.stringify(selected.cost, null, 2) : '—'}
+                    <material_1.Typography variant="caption" color="text.secondary">
+                      Стоимость
+                    </material_1.Typography>
+                    <material_1.Box component="pre" sx={{
+                m: 0,
+                p: 1,
+                bgcolor: function (theme) {
+                    return theme.palette.mode === 'dark'
+                        ? '#0b1220'
+                        : 'grey.100';
+                },
+                color: function (theme) {
+                    return theme.palette.mode === 'dark'
+                        ? theme.palette.grey[100]
+                        : 'inherit';
+                },
+                border: function (theme) { return "1px solid ".concat(theme.palette.divider); },
+                borderRadius: 1,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                fontFamily: 'monospace',
+                fontSize: 12,
+            }}>
+                      {selected.cost
+                ? JSON.stringify(selected.cost, null, 2)
+                : '—'}
                     </material_1.Box>
                   </material_1.Box>
                 </material_1.Box>

@@ -4,21 +4,9 @@
 /* eslint-disable */
 export type DocumentCreateDto = {
     title: string;
-    /**
-     * UUID of scraper
-     */
     scraperId: string;
-    /**
-     * Content of the document. If non-string is provided will be stringified.
-     */
-    content: Record<string, any>;
-    /**
-     * Scraped at date
-     */
+    content: any;
     scrapedAt?: string;
-    /**
-     * Content hash. If omitted, server computes sha256(content).
-     */
     contentHash?: string;
 };
 

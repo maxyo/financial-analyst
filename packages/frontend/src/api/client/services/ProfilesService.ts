@@ -4,27 +4,29 @@
 /* eslint-disable */
 import type { AssignDocumentSourceDto } from '../models/AssignDocumentSourceDto';
 import type { AssignTaskDto } from '../models/AssignTaskDto';
-import type { DocumentSourceDto } from '../models/DocumentSourceDto';
-import type { DocumentSourcesListResponseDto } from '../models/DocumentSourcesListResponseDto';
+import type { DocumentSourceDto_Output } from '../models/DocumentSourceDto_Output';
+import type { DocumentSourcesListResponseDto_Output } from '../models/DocumentSourcesListResponseDto_Output';
+import type { OkResponseDto_Output } from '../models/OkResponseDto_Output';
 import type { ProfileCreateDto } from '../models/ProfileCreateDto';
-import type { ProfileDto } from '../models/ProfileDto';
-import type { ProfilesListResponseDto } from '../models/ProfilesListResponseDto';
-import type { ProfileTaskDto } from '../models/ProfileTaskDto';
+import type { ProfileDto_Output } from '../models/ProfileDto_Output';
+import type { ProfileRunResponseDto_Output } from '../models/ProfileRunResponseDto_Output';
+import type { ProfilesListResponseDto_Output } from '../models/ProfilesListResponseDto_Output';
+import type { ProfileTaskDto_Output } from '../models/ProfileTaskDto_Output';
 import type { ProfileUpdateDto } from '../models/ProfileUpdateDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class ProfilesService {
     /**
-     * @param limit Limit
-     * @param offset Offset
-     * @returns ProfilesListResponseDto List profiles with pagination
+     * @param limit
+     * @param offset
+     * @returns ProfilesListResponseDto_Output
      * @throws ApiError
      */
     public static profileControllerList(
-        limit?: number,
+        limit: number = 50,
         offset?: number,
-    ): CancelablePromise<ProfilesListResponseDto> {
+    ): CancelablePromise<ProfilesListResponseDto_Output> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/profiles',
@@ -36,12 +38,12 @@ export class ProfilesService {
     }
     /**
      * @param requestBody
-     * @returns ProfileDto Created profile
+     * @returns ProfileDto_Output Created profile
      * @throws ApiError
      */
     public static profileControllerCreate(
         requestBody: ProfileCreateDto,
-    ): CancelablePromise<ProfileDto> {
+    ): CancelablePromise<ProfileDto_Output> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/profiles',
@@ -51,12 +53,12 @@ export class ProfilesService {
     }
     /**
      * @param id
-     * @returns ProfileDto Profile by id
+     * @returns ProfileDto_Output Profile by id
      * @throws ApiError
      */
     public static profileControllerGetOne(
         id: string,
-    ): CancelablePromise<ProfileDto> {
+    ): CancelablePromise<ProfileDto_Output> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/profiles/{id}',
@@ -68,13 +70,13 @@ export class ProfilesService {
     /**
      * @param id
      * @param requestBody
-     * @returns ProfileDto Updated profile
+     * @returns ProfileDto_Output Updated profile
      * @throws ApiError
      */
     public static profileControllerUpdate(
         id: string,
         requestBody: ProfileUpdateDto,
-    ): CancelablePromise<ProfileDto> {
+    ): CancelablePromise<ProfileDto_Output> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/profiles/{id}',
@@ -87,12 +89,12 @@ export class ProfilesService {
     }
     /**
      * @param id
-     * @returns any Delete result
+     * @returns OkResponseDto_Output Delete result
      * @throws ApiError
      */
     public static profileControllerRemove(
         id: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<OkResponseDto_Output> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/profiles/{id}',
@@ -103,16 +105,16 @@ export class ProfilesService {
     }
     /**
      * @param id
-     * @param limit Limit
-     * @param offset Offset
-     * @returns DocumentSourcesListResponseDto List document sources assigned to profile
+     * @param limit
+     * @param offset
+     * @returns DocumentSourcesListResponseDto_Output List document sources assigned to profile
      * @throws ApiError
      */
     public static profileControllerListSources(
         id: string,
-        limit?: number,
+        limit: number = 50,
         offset?: number,
-    ): CancelablePromise<DocumentSourcesListResponseDto> {
+    ): CancelablePromise<DocumentSourcesListResponseDto_Output> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/profiles/{id}/document-sources',
@@ -128,13 +130,13 @@ export class ProfilesService {
     /**
      * @param id
      * @param requestBody
-     * @returns DocumentSourceDto Assigned document source
+     * @returns DocumentSourceDto_Output Assigned document source
      * @throws ApiError
      */
     public static profileControllerAssignSource(
         id: string,
         requestBody: AssignDocumentSourceDto,
-    ): CancelablePromise<DocumentSourceDto> {
+    ): CancelablePromise<DocumentSourceDto_Output> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/profiles/{id}/document-sources',
@@ -148,13 +150,13 @@ export class ProfilesService {
     /**
      * @param id
      * @param documentId
-     * @returns any Unassign result
+     * @returns OkResponseDto_Output Unassign result
      * @throws ApiError
      */
     public static profileControllerUnassignSource(
         id: string,
         documentId: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<OkResponseDto_Output> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/profiles/{id}/document-sources/{documentId}',
@@ -167,13 +169,13 @@ export class ProfilesService {
     /**
      * @param id
      * @param requestBody
-     * @returns ProfileTaskDto Assigned task result
+     * @returns ProfileTaskDto_Output Assigned task result
      * @throws ApiError
      */
     public static profileControllerAssignTask(
         id: string,
         requestBody: AssignTaskDto,
-    ): CancelablePromise<ProfileTaskDto> {
+    ): CancelablePromise<ProfileTaskDto_Output> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/profiles/{id}/task',
@@ -186,12 +188,12 @@ export class ProfilesService {
     }
     /**
      * @param id
-     * @returns ProfileTaskDto Get assigned task for profile
+     * @returns ProfileTaskDto_Output Get assigned task for profile
      * @throws ApiError
      */
     public static profileControllerGetTask(
         id: string,
-    ): CancelablePromise<ProfileTaskDto> {
+    ): CancelablePromise<ProfileTaskDto_Output> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/profiles/{id}/task',
@@ -202,12 +204,12 @@ export class ProfilesService {
     }
     /**
      * @param id
-     * @returns any Unassign task from profile
+     * @returns OkResponseDto_Output Unassign task from profile
      * @throws ApiError
      */
     public static profileControllerUnassignTask(
         id: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<OkResponseDto_Output> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/profiles/{id}/task',
@@ -218,12 +220,12 @@ export class ProfilesService {
     }
     /**
      * @param id
-     * @returns any Enqueue aggregate analysis job for profile
+     * @returns ProfileRunResponseDto_Output Enqueue aggregate analysis job for profile
      * @throws ApiError
      */
     public static profileControllerRunAggregate(
         id: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<ProfileRunResponseDto_Output> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/profiles/{id}/run',

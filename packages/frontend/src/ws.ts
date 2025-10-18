@@ -4,7 +4,7 @@ export function useWebSocket(ticker: string, onMessage?: (msg: any) => void) {
   const useRef = React.useRef;
   const useEffect = React.useEffect;
 
-  const wsRef = useRef<WebSocket>(null);
+  const wsRef = useRef<WebSocket | null>(null) as React.MutableRefObject<WebSocket | null>;
   const tickerRef = useRef(ticker);
   tickerRef.current = ticker;
 

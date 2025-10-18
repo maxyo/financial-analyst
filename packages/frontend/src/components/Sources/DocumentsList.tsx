@@ -1,6 +1,6 @@
 import React from 'react';
 import { List, ListItem, ListItemText, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Box, TextField, MenuItem, Select, InputLabel, FormControl, Stack } from '@mui/material';
-import { DocumentsService, DocumentsListResponseDto, DocumentDto, ScrapersService, ScrapersListResponseDto } from '../../api/client';
+import { DocumentsService, type DocumentsListResponseDto_Output as DocumentsListResponseDto, type DocumentDto_Output as DocumentDto, ScrapersService, type ScrapersListResponseDto_Output as ScrapersListResponseDto } from '../../api/client';
 
 export function DocumentsList() {
   const useState = React.useState;

@@ -2,8 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type ProfileCreateDto = {
+export type CollectionDto_Output = {
+    id: string;
     name: string;
-    description?: (string | null);
+    description: (string | null);
+    filters: null;
+    created_at: string;
+    updated_at: string;
 };
 

@@ -105,6 +105,23 @@ export async function* htmlScraper(
         const titleSel = docCfg.titleSelector ?? 'title';
         const contentSel = docCfg.contentSelector ?? 'body';
         const title = (doc(titleSel).first().text() || 'Untitled').trim();
+        // Optional date extraction
+        let dateStr: string | undefined;
+        if (docCfg.dateSelector) {
+          const dateEl = doc(docCfg.dateSelector).first();
+          if (dateEl && dateEl.length > 0) {
+            const raw = docCfg.dateAttr ? dateEl.attr(docCfg.dateAttr) : dateEl.text();
+            if (raw) {
+              const trimmed = raw.trim();
+              const ts = Date.parse(trimmed);
+              if (!Number.isNaN(ts)) {
+                dateStr = new Date(ts).toISOString();
+              } else {
+                dateStr = trimmed; // keep as-is if cannot parse
+              }
+            }
+          }
+        }
 
         // Remove script/style/noscript elements before extracting text to avoid JS/CSS noise
         doc('script, style, noscript').remove();
@@ -141,7 +158,9 @@ export async function* htmlScraper(
         }
 
         if (content) {
-          yield { title, content } as ScrapedItem<string>;
+          const item: ScrapedItem<string> = { title, content };
+          if (dateStr) item.date = dateStr;
+          yield item;
         }
       }
     }

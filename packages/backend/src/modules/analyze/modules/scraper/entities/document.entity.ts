@@ -16,7 +16,7 @@ export class DocumentEntity {
   @Column({ type: 'varchar', enum: DocumentType, default: DocumentType.MD })
   type!: DocumentType;
 
-  @Column({ type: 'datetime', default: Date.now })
+  @Column({ type: 'datetime' })
   date!: Date;
 
   @Column({ type: 'simple-json', default: '{}' })

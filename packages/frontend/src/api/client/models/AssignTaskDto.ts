@@ -3,9 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export type AssignTaskDto = {
-    /**
-     * Numeric id of task to assign
-     */
     taskId: number;
 };
 

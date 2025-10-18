@@ -120,10 +120,10 @@ function ProfilesEditor() {
       </material_1.Box>
 
       <material_1.List dense>
-        {((_a = list === null || list === void 0 ? void 0 : list.items) === null || _a === void 0 ? void 0 : _a.length) ? (list.items.filter(function (p) { return !filter.trim() || (p.name || '').toLowerCase().includes(filter.toLowerCase()); }).map(function (p) { return (<material_1.ListItem key={p.id} divider button onClick={function () { window.location.hash = "#/profile/".concat(p.id); }} secondaryAction={<material_1.Box>
+        {((_a = list === null || list === void 0 ? void 0 : list.items) === null || _a === void 0 ? void 0 : _a.length) ? (list.items.filter(function (p) { return !filter.trim() || (p.name || '').toLowerCase().includes(filter.toLowerCase()); }).map(function (p) { return (<material_1.ListItem key={p.id} divider secondaryAction={<material_1.Box>
                 <material_1.IconButton edge="end" aria-label="delete" onClick={function (e) { e.stopPropagation(); remove(p.id); }} title="Удалить"><icons_material_1.Delete /></material_1.IconButton>
               </material_1.Box>}>
-              <material_1.ListItemText primary={p.name} secondary={"".concat(p.description ? (typeof p.description === 'string' ? p.description : JSON.stringify(p.description)) + ' • ' : '', "ID: ").concat(p.id, " \u2022 \u041E\u0431\u043D\u043E\u0432\u043B\u0435\u043D: ").concat(new Date(p.updated_at).toLocaleString())}/>
+              <material_1.ListItemText onClick={function () { window.location.hash = "#/profile/".concat(p.id); }} primary={p.name} secondary={"".concat(p.description ? (typeof p.description === 'string' ? p.description : JSON.stringify(p.description)) + ' • ' : '', "ID: ").concat(p.id, " \u2022 \u041E\u0431\u043D\u043E\u0432\u043B\u0435\u043D: ").concat(new Date(p.updated_at).toLocaleString())}/>
             </material_1.ListItem>); })) : (!loading && (<material_1.Box sx={{ p: 2, textAlign: 'center' }}>
               <material_1.Typography variant="body2" sx={{ mb: 1 }}>Профили отсутствуют</material_1.Typography>
               <material_1.Button variant="outlined" startIcon={<icons_material_1.Add />} onClick={function () { window.location.hash = '#/profile/new'; }}>Создать первый профиль</material_1.Button>

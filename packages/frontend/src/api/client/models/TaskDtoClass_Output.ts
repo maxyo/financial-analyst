@@ -2,8 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type ProfileCreateDto = {
+export type TaskDtoClass_Output = {
+    id: number;
     name: string;
-    description?: (string | null);
+    description: (string | null);
+    prompt: string;
+    created_at: string;
+    updated_at: string;
 };
 

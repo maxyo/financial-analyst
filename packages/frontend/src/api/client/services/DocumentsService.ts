@@ -3,33 +3,34 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { DocumentCreateDto } from '../models/DocumentCreateDto';
-import type { DocumentDto } from '../models/DocumentDto';
-import type { DocumentsListResponseDto } from '../models/DocumentsListResponseDto';
+import type { DocumentDto_Output } from '../models/DocumentDto_Output';
+import type { DocumentsListResponseDto_Output } from '../models/DocumentsListResponseDto_Output';
 import type { DocumentUpdateDto } from '../models/DocumentUpdateDto';
+import type { OkResponseDto_Output } from '../models/OkResponseDto_Output';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class DocumentsService {
     /**
-     * @param limit Limit
-     * @param offset Offset
-     * @param title Filter by title (substring match)
-     * @param q Full-text query applied to title OR content (substring match)
-     * @param scraperId Filter by scraper id (UUID)
-     * @param dateFrom Date from (inclusive)
-     * @param dateTo Date to (inclusive)
-     * @returns DocumentsListResponseDto List documents with pagination
+     * @param limit
+     * @param offset
+     * @param title
+     * @param q
+     * @param scraperId
+     * @param dateFrom
+     * @param dateTo
+     * @returns DocumentsListResponseDto_Output
      * @throws ApiError
      */
     public static documentsControllerList(
-        limit?: number,
+        limit: number = 50,
         offset?: number,
         title?: string,
         q?: string,
         scraperId?: string,
         dateFrom?: string,
         dateTo?: string,
-    ): CancelablePromise<DocumentsListResponseDto> {
+    ): CancelablePromise<DocumentsListResponseDto_Output> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/documents',
@@ -46,12 +47,12 @@ export class DocumentsService {
     }
     /**
      * @param requestBody
-     * @returns DocumentDto Created document
+     * @returns DocumentDto_Output
      * @throws ApiError
      */
     public static documentsControllerCreate(
         requestBody: DocumentCreateDto,
-    ): CancelablePromise<DocumentDto> {
+    ): CancelablePromise<DocumentDto_Output> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/documents',
@@ -61,12 +62,12 @@ export class DocumentsService {
     }
     /**
      * @param id
-     * @returns DocumentDto Document by id
+     * @returns DocumentDto_Output
      * @throws ApiError
      */
     public static documentsControllerGetOne(
         id: string,
-    ): CancelablePromise<DocumentDto> {
+    ): CancelablePromise<DocumentDto_Output> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/documents/{id}',
@@ -78,13 +79,13 @@ export class DocumentsService {
     /**
      * @param id
      * @param requestBody
-     * @returns DocumentDto Updated document
+     * @returns DocumentDto_Output
      * @throws ApiError
      */
     public static documentsControllerUpdate(
         id: string,
         requestBody: DocumentUpdateDto,
-    ): CancelablePromise<DocumentDto> {
+    ): CancelablePromise<DocumentDto_Output> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/documents/{id}',
@@ -97,12 +98,12 @@ export class DocumentsService {
     }
     /**
      * @param id
-     * @returns any Delete result
+     * @returns OkResponseDto_Output
      * @throws ApiError
      */
     public static documentsControllerRemove(
         id: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<OkResponseDto_Output> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/documents/{id}',

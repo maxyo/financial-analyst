@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Button, IconButton, List, ListItem, ListItemText, TextField, Typography } from '@mui/material';
 import { Delete, Add } from '@mui/icons-material';
-import { ProfilesService, ProfilesListResponseDto, ProfileDto } from '../../api/client';
+import { ProfilesService, type ProfilesListResponseDto_Output as ProfilesListResponseDto, type ProfileDto_Output as ProfileDto } from '../../api/client';
 
 export function ProfilesEditor() {
   const useState = React.useState;
@@ -57,12 +57,12 @@ export function ProfilesEditor() {
       <List dense>
         {list?.items?.length ? (
           list.items.filter((p) => !filter.trim() || (p.name || '').toLowerCase().includes(filter.toLowerCase())).map((p) => (
-            <ListItem key={p.id} divider button onClick={() => { window.location.hash = `#/profile/${p.id}`; }} secondaryAction={
+            <ListItem key={p.id} divider secondaryAction={
               <Box>
                 <IconButton edge="end" aria-label="delete" onClick={(e) => { e.stopPropagation(); remove(p.id); }} title="Удалить"><Delete /></IconButton>
               </Box>
             }>
-              <ListItemText primary={p.name} secondary={`${p.description ? (typeof p.description === 'string' ? p.description : JSON.stringify(p.description)) + ' • ' : ''}ID: ${p.id} • Обновлен: ${new Date(p.updated_at).toLocaleString()}`} />
+              <ListItemText onClick={() => { window.location.hash = `#/profile/${p.id}`; }} primary={p.name} secondary={`${p.description ? (typeof p.description === 'string' ? p.description : JSON.stringify(p.description)) + ' • ' : ''}ID: ${p.id} • Обновлен: ${new Date(p.updated_at).toLocaleString()}`} />
             </ListItem>
           ))
         ) : (

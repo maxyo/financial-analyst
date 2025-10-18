@@ -2,24 +2,26 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { OkResponseDto_Output } from '../models/OkResponseDto_Output';
 import type { ScraperCreateDto } from '../models/ScraperCreateDto';
-import type { ScraperDto } from '../models/ScraperDto';
-import type { ScrapersListResponseDto } from '../models/ScrapersListResponseDto';
+import type { ScraperDto_Output } from '../models/ScraperDto_Output';
+import type { ScraperRunResponseDto_Output } from '../models/ScraperRunResponseDto_Output';
+import type { ScrapersListResponseDto_Output } from '../models/ScrapersListResponseDto_Output';
 import type { ScraperUpdateDto } from '../models/ScraperUpdateDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class ScrapersService {
     /**
-     * @param limit Limit
-     * @param offset Offset
-     * @returns ScrapersListResponseDto List of scrapers with pagination
+     * @param limit
+     * @param offset
+     * @returns ScrapersListResponseDto_Output
      * @throws ApiError
      */
     public static scrapersControllerList(
-        limit?: number,
+        limit: number = 50,
         offset?: number,
-    ): CancelablePromise<ScrapersListResponseDto> {
+    ): CancelablePromise<ScrapersListResponseDto_Output> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/scrapers',
@@ -31,12 +33,12 @@ export class ScrapersService {
     }
     /**
      * @param requestBody
-     * @returns ScraperDto Created scraper
+     * @returns ScraperDto_Output
      * @throws ApiError
      */
     public static scrapersControllerCreate(
         requestBody: ScraperCreateDto,
-    ): CancelablePromise<ScraperDto> {
+    ): CancelablePromise<ScraperDto_Output> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/scrapers',
@@ -46,12 +48,12 @@ export class ScrapersService {
     }
     /**
      * @param id
-     * @returns ScraperDto Scraper by id
+     * @returns ScraperDto_Output
      * @throws ApiError
      */
     public static scrapersControllerGetOne(
         id: string,
-    ): CancelablePromise<ScraperDto> {
+    ): CancelablePromise<ScraperDto_Output> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/scrapers/{id}',
@@ -63,13 +65,13 @@ export class ScrapersService {
     /**
      * @param id
      * @param requestBody
-     * @returns ScraperDto Updated scraper
+     * @returns ScraperDto_Output
      * @throws ApiError
      */
     public static scrapersControllerUpdate(
         id: string,
         requestBody: ScraperUpdateDto,
-    ): CancelablePromise<ScraperDto> {
+    ): CancelablePromise<ScraperDto_Output> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/scrapers/{id}',
@@ -82,12 +84,12 @@ export class ScrapersService {
     }
     /**
      * @param id
-     * @returns any Delete result
+     * @returns OkResponseDto_Output
      * @throws ApiError
      */
     public static scrapersControllerRemove(
         id: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<OkResponseDto_Output> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/scrapers/{id}',
@@ -98,12 +100,12 @@ export class ScrapersService {
     }
     /**
      * @param id
-     * @returns any Enqueue scraping job for the scraper by id
+     * @returns ScraperRunResponseDto_Output
      * @throws ApiError
      */
     public static scrapersControllerRun(
         id: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<ScraperRunResponseDto_Output> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/scrapers/{id}/run',

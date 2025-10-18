@@ -2,8 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type ScraperShortDto = {
-    id: string;
+export type TaskCreateDtoClass = {
     name: string;
+    description?: (string | null);
+    prompt: string;
 };
 

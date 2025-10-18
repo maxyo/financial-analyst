@@ -2,8 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type ProfileUpdateDto = {
-    name?: string;
-    description?: (string | null);
+export type ProfileTaskDto_Output = {
+    taskId: (number | null);
 };
 

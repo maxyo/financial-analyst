@@ -65,7 +65,14 @@ function ScrapersList() {
         name: '',
         type: 'API',
         api: { url: '' },
-        html: { url: '', selectors: [], headers: {}, timeoutMs: 10000, pagination: undefined, document: undefined },
+        html: {
+            url: '',
+            selectors: [],
+            headers: {},
+            timeoutMs: 10000,
+            pagination: undefined,
+            document: undefined,
+        },
         postProcessors: [],
         showJson: false,
         jsonSnapshot: null,
@@ -141,17 +148,27 @@ function ScrapersList() {
                                     setSaving(false);
                                     return [2 /*return*/];
                                 }
-                                config = __assign(__assign({ url: form.html.url, selectors: form.html.selectors, headers: form.html.headers, timeoutMs: form.html.timeoutMs }, (form.html.pagination ? { pagination: form.html.pagination } : {})), (form.html.document ? { document: form.html.document } : {}));
+                                config = __assign(__assign({ url: form.html.url, selectors: form.html.selectors, headers: form.html.headers, timeoutMs: form.html.timeoutMs }, (form.html.pagination
+                                    ? { pagination: form.html.pagination }
+                                    : {})), (form.html.document ? { document: form.html.document } : {}));
                             }
                         }
                         if (!editing) return [3 /*break*/, 3];
-                        payload = { name: form.name, type: form.type, config: config };
+                        payload = {
+                            name: form.name,
+                            type: form.type,
+                            config: config,
+                        };
                         return [4 /*yield*/, client_1.ScrapersService.scrapersControllerUpdate(editing.id, payload)];
                     case 2:
                         _a.sent();
                         return [3 /*break*/, 5];
                     case 3:
-                        payload = { name: form.name, type: form.type, config: config };
+                        payload = {
+                            name: form.name,
+                            type: form.type,
+                            config: config,
+                        };
                         return [4 /*yield*/, client_1.ScrapersService.scrapersControllerCreate(payload)];
                     case 4:
                         _a.sent();
@@ -186,7 +203,12 @@ function ScrapersList() {
                         return [4 /*yield*/, client_1.ScrapersService.scrapersControllerRun(id)];
                     case 1:
                         resp = _a.sent();
-                        setSnack({ open: true, message: resp && resp.jobId ? "\u0417\u0430\u043F\u0443\u0449\u0435\u043D\u043E, jobId: ".concat(resp.jobId) : 'Задача поставлена в очередь' });
+                        setSnack({
+                            open: true,
+                            message: resp && resp.jobId
+                                ? "\u0417\u0430\u043F\u0443\u0449\u0435\u043D\u043E, jobId: ".concat(resp.jobId)
+                                : 'Задача поставлена в очередь',
+                        });
                         return [3 /*break*/, 4];
                     case 2:
                         e_3 = _a.sent();
@@ -235,21 +257,31 @@ function ScrapersList() {
     }, []);
     return (<material_1.Box>
       <material_1.Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
-        <material_1.Button variant="contained" startIcon={<icons_material_1.AddCircle />} onClick={openCreate}>Добавить сборщика</material_1.Button>
+        <material_1.Button variant="contained" startIcon={<icons_material_1.AddCircle />} onClick={openCreate}>
+          Добавить сборщика
+        </material_1.Button>
         {loading && <material_1.Typography variant="body2">Загрузка...</material_1.Typography>}
-        {error && <material_1.Typography variant="body2" color="error">{error}</material_1.Typography>}
+        {error && (<material_1.Typography variant="body2" color="error">
+            {error}
+          </material_1.Typography>)}
       </material_1.Box>
 
       <material_1.List dense>
-        {((_a = scrapers === null || scrapers === void 0 ? void 0 : scrapers.items) === null || _a === void 0 ? void 0 : _a.length) ? (scrapers.items.map(function (s) { return (<material_1.ListItem key={s.id} divider secondaryAction={<material_1.Box>
-                <material_1.IconButton edge="end" aria-label="run" onClick={function () { return handleRun(s.id); }} disabled={runningId === s.id} title="Запустить">
-                  <icons_material_1.PlayArrow />
-                </material_1.IconButton>
-                <material_1.IconButton edge="end" aria-label="edit" onClick={function () { return openEdit(s); }} title="Редактировать"><icons_material_1.Edit /></material_1.IconButton>
-                <material_1.IconButton edge="end" aria-label="delete" onClick={function () { return handleDelete(s.id); }} title="Удалить"><icons_material_1.Delete /></material_1.IconButton>
-              </material_1.Box>}>
-              <material_1.ListItemText primary={s.name} secondary={"\u0422\u0438\u043F: ".concat(s.type)}/>
-            </material_1.ListItem>); })) : (!loading && <material_1.Typography variant="body2">Сборщики отсутствуют</material_1.Typography>)}
+        {((_a = scrapers === null || scrapers === void 0 ? void 0 : scrapers.items) === null || _a === void 0 ? void 0 : _a.length)
+            ? scrapers.items.map(function (s) { return (<material_1.ListItem key={s.id} divider secondaryAction={<material_1.Box>
+                    <material_1.IconButton edge="end" aria-label="run" onClick={function () { return handleRun(s.id); }} disabled={runningId === s.id} title="Запустить">
+                      <icons_material_1.PlayArrow />
+                    </material_1.IconButton>
+                    <material_1.IconButton edge="end" aria-label="edit" onClick={function () { return openEdit(s); }} title="Редактировать">
+                      <icons_material_1.Edit />
+                    </material_1.IconButton>
+                    <material_1.IconButton edge="end" aria-label="delete" onClick={function () { return handleDelete(s.id); }} title="Удалить">
+                      <icons_material_1.Delete />
+                    </material_1.IconButton>
+                  </material_1.Box>}>
+                <material_1.ListItemText primary={s.name} secondary={"\u0422\u0438\u043F: ".concat(s.type)}/>
+              </material_1.ListItem>); })
+            : !loading && (<material_1.Typography variant="body2">Сборщики отсутствуют</material_1.Typography>)}
       </material_1.List>
       <material_1.Snackbar open={!!(snack === null || snack === void 0 ? void 0 : snack.open)} autoHideDuration={3000} onClose={function () { return setSnack(null); }} message={(snack === null || snack === void 0 ? void 0 : snack.message) || ''}/>
     </material_1.Box>);

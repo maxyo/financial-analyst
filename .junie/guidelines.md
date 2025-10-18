@@ -1,103 +1,115 @@
-Project: trade
+# Trade Project – Developer Guidelines
 
-Scope
-- Monorepo with two packages:
-  - packages/backend (NestJS/Express, TypeScript, BullMQ, SQLite via better-sqlite3)
-  - packages/frontend (React + esbuild, TypeScript; API client generated via openapi-typescript-codegen)
-- Node 20 runtime assumed (Dockerfile uses node:20-slim). Workspaces are enabled in root package.json.
+Audience: advanced contributors familiar with Node.js, NestJS, React, TypeScript, TypeORM, and build tooling. Focused on project‑specific practices only.
 
-Build and configuration
-Backend
-- Local (host):
-  - Install deps at repo root: npm ci
-  - Env: create packages/backend/.env if needed (dotenv is used). Typical variables used by runtime features:
-    - PORT=3000 (default if omitted)
-    - DB_PATH=./data/trade.db (better-sqlite3 file path; default resolves to <repo>/packages/backend/data/trade.db)
-    - REDIS_URL=redis://localhost:6379 (if BullMQ/queues enabled); alternatively specify REDIS_HOST and REDIS_PORT
-    - OPENAI_API_KEY=<your key> (required for LLM features; LLM base URL is hardcoded to https://api.proxyapi.ru/openrouter/v1; model mistralai/mistral-medium-3.1)
-    - TINKOFF_TOKEN=<your token> (required for Tinkoff data integration)
-    - QUOTE_POLL_MS=2000 and TRADES_POLL_MS=10000 (optional WS polling intervals)
-  - Dev run: npm run dev (from repo root) or npm run dev --workspace packages/backend
-  - Start (transpile-only): npm run start (root) or npm run start --workspace packages/backend
-  - Type check: npm run build (root/backend). Note: tsconfig.json includes only backend/src and compiles with decorators enabled.
-  - DB migrations (custom script): npm run migrate --workspace packages/backend; related: migrate:status, migrate:reset
-  - Swagger JSON generation: npm run swagger:generate --workspace packages/backend (writes packages/backend/openapi.json)
-- Docker:
-  - Build and run backend container:
-    - docker build -t trade-backend .
-    - docker run -p 3000:3000 -v $(pwd)/packages/backend/data:/app/packages/backend/data --name trade-backend trade-backend
-  - The image installs build tools for better-sqlite3 and runs npm run start in packages/backend as node user.
-- Redis infra (optional):
-  - docker compose up -d (spins up a redis:7-alpine with persistence and healthcheck)
-  - In-container REDIS_URL should be redis://redis:6379; from host: redis://localhost:6379.
+---
+
+## Build and Configuration (project‑specific)
+
+Monorepo layout
+- packages/backend – NestJS/Express + TypeORM (better-sqlite3), BullMQ (optional)
+- packages/frontend – React + esbuild; OpenAPI client generated via openapi-typescript-codegen
+- Node 20 runtime assumed; workspaces enabled
+
+Install deps
+- At repo root: npm ci
+
+Backend (local host)
+- Env via packages/backend/.env (dotenv). Typical variables:
+  - PORT=3000 (default)
+  - DB_PATH=./data/trade.db (better-sqlite3 file; resolves relative to packages/backend)
+  - REDIS_URL=redis://localhost:6379 (optional features); alternatively REDIS_HOST/REDIS_PORT
+  - OPENAI_API_KEY=<key> (required for LlmService features; baseURL https://api.proxyapi.ru/openrouter/v1; model mistralai/mistral-medium-3.1)
+  - TINKOFF_TOKEN=<token> (required for Tinkoff integration)
+  - QUOTE_POLL_MS=2000, TRADES_POLL_MS=10000 (optional WS polling)
+- Data dir: packages/backend/data must exist and be writable (Dockerfile ensures this inside container). Create locally if missing.
+- Dev run: npm run dev (root) or npm run dev --workspace packages/backend
+- Start (transpile‑only): npm run start (root) or npm run start --workspace packages/backend
+- Type check: npm run build (root/backend). Backend tsconfig includes only backend/src and enables decorators + emitDecoratorMetadata.
+- DB migrations (custom script):
+  - npm run migrate --workspace packages/backend
+  - Related: migrate:status, migrate:reset
+- Swagger JSON:
+  - npm run swagger:generate --workspace packages/backend (outputs packages/backend/openapi.json)
+
+Backend (Docker)
+- Build: docker build -t trade-backend .
+- Run: docker run -p 3000:3000 -v $(pwd)/packages/backend/data:/app/packages/backend/data --name trade-backend trade-backend
+- In container, the app runs as node user and executes npm run start in packages/backend.
+
+Redis infra (optional)
+- docker compose up -d (spawns redis:7-alpine with persistence and healthcheck)
+- Container REDIS_URL: redis://redis:6379; host: redis://localhost:6379
 
 Frontend
-- Build once: npm run build --workspace packages/frontend
-  - Bundles ts/index.tsx with esbuild into packages/frontend/build/index.js (ESM, browser platform). Source maps enabled.
-- Watch mode (dev bundling): npm run watch --workspace packages/frontend
+- One‑off build: npm run build --workspace packages/frontend (bundles to packages/frontend/build/index.js, ESM + sourcemaps)
+- Watch: npm run watch --workspace packages/frontend
 - Type check only: npm run typecheck --workspace packages/frontend
-- API client generation:
-  - npm run api:generate --workspace packages/frontend
-  - Input: packages/backend/openapi.json; Output: packages/frontend/src/api/client (client fetch). The generated files include a core/request.ts that is marked as generated; avoid manual edits.
-- Serving the bundle is not provided in this repo; integrate into your preferred static server or framework. Ensure index.html imports build/index.js as ESM.
+- Serving: not provided; ensure index.html imports build/index.js as ESM.
+- API client generation contract:
+  1) Ensure server Swagger is up to date: npm run swagger:generate --workspace packages/backend
+  2) Generate client: npm run api:generate --workspace packages/frontend
+  3) Commit both packages/backend/openapi.json and packages/frontend/src/api/client/*
+  4) Never hand‑edit generated client (core/request.ts is annotated as generated).
 
-Testing
-Current state
-- No test framework (Jest/Mocha/Vitest) is configured in package.json scripts; no test runner config exists in the repo. package-lock.json may include transitive @jest/schemas due to dev tooling, but it is not a signal that Jest is set up.
 
-Recommended approach (without permanent repo changes)
-- Because the task prohibits leaving extra files, below is a validated, ephemeral procedure to demonstrate adding and running a minimal test using ts-node without adding dependencies:
-  1) Create a temporary script file (do not commit) at packages/backend/src/smoke.test.ts with a simple runtime assertion, for example:
-     - import assert from 'node:assert/strict';
-     - assert.equal(1 + 1, 2);
-     - console.log('smoke ok');
-  2) Execute it directly with ts-node from the root:
-     - npx ts-node packages/backend/src/smoke.test.ts
-     - Expected output: smoke ok and exit code 0.
-  3) Remove the temporary file after verifying. This keeps the repository clean while showing how to execute TypeScript tests quickly.
-- If you want durable tests, choose and add a framework:
-  - Jest (common for TS/Node): add jest, ts-jest, @types/jest; configure ts-jest; add script "test": "jest" at the root and/or per-package workspaces.
-  - Vitest (fast, ESM-friendly): add vitest and tsconfig tweaks; script: "test": "vitest run"; colocate tests as *.test.ts.
-  - Mocha + ts-node: minimal setup; script: "test": "mocha -r ts-node/register 'src/**/*.test.ts'".
-  Ensure the framework is installed in the correct workspace (backend and/or frontend) and that paths align with tsconfig.json includes.
+## Architectural and Coding Conventions
 
-Guidelines for adding new tests (project-specific)
-- Backend
-  - Prefer unit tests close to modules in packages/backend/src (e.g., src/lib/**/__tests__/*.test.ts or *.spec.ts).
-  - For code touching better-sqlite3, use a temporary data file under a test output dir; do not write into packages/backend/data during tests.
-  - For BullMQ or Redis-dependent code, either: mock queue interfaces, or run docker compose up -d and point REDIS_URL to a test database; isolate queues by unique prefixes.
-  - Swagger generation and OpenAPI: verify swagger:generate before regenerating frontend API to keep client/server in sync.
-- Frontend
-  - For API client code (generated), avoid snapshot testing the entire client; instead test integration points around your helper functions wrapping the client.
-  - For UI components, if adding a runner like Vitest + @testing-library/react, configure jsdom and ensure esbuild or ts-node transforms for TSX are in place.
+General
+- Strictly TypeScript throughout. Back end compiled via tsconfig in repo root; front end has its own tsconfig.client.json for typechecks.
+- ESLint + Prettier; align with default configs present in packages; use npm run lint / lint:fix at root or workspace‑scoped.
 
-Additional development information
-- Code style and linting
-  - Backend uses ESLint with @typescript-eslint and Prettier config (see packages/backend devDependencies). Run: npm run lint --workspace packages/backend; auto-fix: npm run lint:fix --workspace packages/backend.
-  - Root scripts include lint and lint:fix that apply across the repo; ensure ESLint respects package tsconfigs.
-  - Frontend depends on prettier-eslint; align formatting with Prettier defaults and ESLint rules.
-- TypeScript configuration
-  - Root tsconfig targets ES2020, CommonJS, decorators enabled with emitDecoratorMetadata for Nest-style code. include is limited to packages/backend/src; frontend uses its own tsconfig.client.json for typechecking.
-- OpenAPI client regeneration contract
-  - When backend APIs change, regenerate swagger JSON (npm run swagger:generate --workspace packages/backend), then regenerate frontend client (npm run api:generate --workspace packages/frontend). Commit both the updated openapi.json and generated client so CI and other devs have consistent types.
-- Native modules
-  - better-sqlite3 requires build tools on the system (python3, make, g++). The Dockerfile installs these. On local machines, ensure XCode CLT (macOS) or build-essential (Linux) are present if npm ci fails building native modules.
-- Runtime tips
-  - Ensure the data directory exists (packages/backend/data). Dockerfile creates it; locally, create it or set DB_PATH to a writable location.
-  - If using Redis-dependent features, start docker-compose and set REDIS_URL appropriately.
-- LLM/AI analysis
-  - LLM service uses OPENAI_API_KEY with baseURL https://api.proxyapi.ru/openrouter/v1 and model mistralai/mistral-medium-3.1.
-  - If OPENAI_API_KEY is missing, any feature depending on LlmService will throw at runtime; guard or mock in local dev.
-- WebSocket streaming
-  - WS endpoint is available at ws://<host>:<PORT>/ws.
-  - Polling intervals controlled by QUOTE_POLL_MS (candles; default 2000) and TRADES_POLL_MS (public trades; default 10000).
-  - Event-driven updates are emitted on job:succeeded for candles.import.tinkoff; ensure Redis connection is configured when using jobs.
+Backend (NestJS + TypeORM)
+- Modules follow Nest conventions: controllers under src/**/controllers, repositories under src/**/repositories, entities under src/**/entities, services under src/**/service.
+- Validation and API DTOs:
+  - Use Zod with nestjs-zod. Controllers return via @ZodResponse({ type: ... }) and validate/shape using schemas (see DocumentsController and DocumentSchema).
+  - When mapping persistence entities to API DTOs, prefer a dedicated mapper that pipes through Zod.parse to ensure response shape (see mapWithScrapers in DocumentsController).
+- TypeORM usage:
+  - Prefer repositories injected via constructor. For lists, use QueryBuilder for complex filters; keep pagination via .skip(offset) and .take(limit), and return total with getManyAndCount.
+  - Use In from typeorm for one‑to‑many joins by IDs when avoiding explicit JOINs (fetch related entities separately; assemble maps).
+- Error handling:
+  - Throw Nest exceptions (NotFoundException, InternalServerErrorException…) from controllers; do not leak raw DB errors.
+  - For date query params: construct Date and guard against NaN before applying filters.
+- Data patterns:
+  - When storing structured content that may be string or object, normalize to string (JSON.stringify if needed) and compute contentHash with sha256 on the final string. Respect inbound contentHash overrides only when explicitly provided at creation; on partial updates, recompute when content changes.
+- Scraper/document conventions:
+  - DocumentsController demonstrates list/get/create/update/delete around scraper‑document relationship with scraperId. Always validate that referenced scraper exists during mapping; fail fast if missing (InternalServerErrorException), as downstream consumers rely on denormalized fields like scraper.name.
+- Swagger/OpenAPI:
+  - Keep DTOs and controllers annotated so swagger:generate produces accurate openapi.json; regenerate client after relevant changes.
+- Queues/Redis:
+  - Queue‑dependent features (e.g., job:succeeded events like candles.import.tinkoff) require configured Redis. Feature‑gate or short‑circuit behavior when REDIS_URL is absent during dev.
+- WebSocket:
+  - WS endpoint: ws://<host>:<PORT>/ws. Polling intervals controlled by QUOTE_POLL_MS and TRADES_POLL_MS. Event‑driven updates are tied to queue events; ensure Redis configured when enabling jobs.
 
-Validated commands (executed during guideline preparation)
-- npm ci at repo root to install workspaces deps.
-- Type checks: npm run build (root/backend) succeeded with the current tsconfig.
-- Frontend bundle: npm run build --workspace packages/frontend produced build/index.js.
-- Temporary smoke test via ts-node (see Testing section) executed successfully and then was removed to keep the repo clean. (Verified again on 2025-10-06 at 01:31 local time.)
+Frontend (React + esbuild)
+- Bundling with esbuild to ESM. Keep imports ESM‑safe.
+- API access goes through generated client under packages/frontend/src/api/client. Do not alter generated files manually; wrap with custom helpers if behavior adjustments are needed.
+- When backend APIs change, follow the generation contract above to maintain type sync.
 
-Cleanup policy
-- Do not commit ad-hoc test or script files. Use the ephemeral ts-node approach for quick validation, or add a proper test framework and commit it explicitly as part of a testing initiative.
+
+## Development Workflow Tips
+
+- Running locally without Redis: set no REDIS_URL to bypass queue features; expect LlmService and any Redis‑dependent code to be inactive or mocked. If OPENAI_API_KEY is missing, features that use LlmService will throw at runtime—guard those paths in UI and services during local dev.
+- Migrations: use provided scripts; do not write tests or dev data to packages/backend/data in automated runs. Prefer temp DB files for ad‑hoc experiments.
+- Native module (better-sqlite3): Requires build toolchain on host. Dockerfile already installs required deps; on local machines ensure Python 3 + C/C++ toolchain (build‑essential or XCode CLT) when running npm ci.
+- Logging/diagnostics: Favor Nest’s built‑in logger and structured errors. Keep sensitive configs in .env.
+- Repository hygiene: Commit both server openapi.json and generated client when API changes. Avoid committing local dev artifacts or temporary test files.
+
+
+## Quick Test Strategy (no permanent test framework)
+
+- Ephemeral ts-node smoke test without adding dependencies:
+  1) Create a temporary file: packages/backend/src/smoke.test.ts with minimal assertion (e.g., assert.equal(1 + 1, 2); console.log('smoke ok')).
+  2) Run: npx ts-node packages/backend/src/smoke.test.ts
+  3) Remove the file after verifying. Do not commit.
+
+If adding durable tests is desired in a dedicated effort, adopt Jest or Vitest scoped to workspaces with proper scripts; keep tests colocated under src and mock external infra (SQLite file paths, Redis, LLM).
+
+
+## Gotchas and Edge Cases Observed
+
+- Date filters: always validate Date objects before using in QueryBuilder to avoid incorrect SQL and silent failures.
+- Content normalization: ensure content is stringified consistently before hashing; otherwise duplicate detection via contentHash fails.
+- Denormalized lookups: when producing API DTOs with related display data (e.g., scraper name), fetch referenced entities in batches (In(ids)) and map; throw if missing to avoid partial responses.
+- OpenAPI drift: client types go stale if backend swagger isn’t regenerated; wire regeneration into your change workflow.
+- WS/queues dependency: Event updates require Redis; without it, only polling operates. Ensure proper envs when debugging real‑time flows.

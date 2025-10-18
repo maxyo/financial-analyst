@@ -99,7 +99,11 @@ function ProfileEditPage(_a) {
                         p = _a.sent();
                         setProfile(p);
                         setName(p.name || '');
-                        setDescription(p.description ? (typeof p.description === 'string' ? p.description : JSON.stringify(p.description)) : '');
+                        setDescription(p.description
+                            ? typeof p.description === 'string'
+                                ? p.description
+                                : JSON.stringify(p.description)
+                            : '');
                         return [4 /*yield*/, loadSources(String(id))];
                     case 3:
                         _a.sent();
@@ -142,7 +146,9 @@ function ProfileEditPage(_a) {
                         items = Array.isArray(data === null || data === void 0 ? void 0 : data.items) ? data.items : [];
                         missing = items.filter(function (s) { return !docsMap[s.documentId]; });
                         if (!missing.length) return [3 /*break*/, 4];
-                        return [4 /*yield*/, Promise.allSettled(missing.map(function (s) { return client_1.DocumentsService.documentsControllerGetOne(s.documentId); }))];
+                        return [4 /*yield*/, Promise.allSettled(missing.map(function (s) {
+                                return client_1.DocumentsService.documentsControllerGetOne(s.documentId);
+                            }))];
                     case 3:
                         fetched = _a.sent();
                         toMerge_1 = {};
@@ -182,7 +188,9 @@ function ProfileEditPage(_a) {
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 4, , 5]);
-                        return [4 /*yield*/, client_1.ProfilesService.profileControllerAssignSource(String(id), { documentId: newDoc.id })];
+                        return [4 /*yield*/, client_1.ProfilesService.profileControllerAssignSource(String(id), {
+                                documentId: newDoc.id,
+                            })];
                     case 2:
                         _a.sent();
                         setNewDoc(null);
@@ -280,13 +288,19 @@ function ProfileEditPage(_a) {
                     case 1:
                         _a.trys.push([1, 6, 7, 8]);
                         if (!isNew) return [3 /*break*/, 3];
-                        payload = { name: name, description: description.trim() ? description : null };
+                        payload = {
+                            name: name,
+                            description: description.trim() ? description : null,
+                        };
                         return [4 /*yield*/, client_1.ProfilesService.profileControllerCreate(payload)];
                     case 2:
                         _a.sent();
                         return [3 /*break*/, 5];
                     case 3:
-                        payload = { name: name, description: description.trim() ? description : null };
+                        payload = {
+                            name: name,
+                            description: description.trim() ? description : null,
+                        };
                         return [4 /*yield*/, client_1.ProfilesService.profileControllerUpdate(String(id), payload)];
                     case 4:
                         _a.sent();
@@ -360,7 +374,9 @@ function ProfileEditPage(_a) {
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 4, 5, 6]);
-                        return [4 /*yield*/, client_1.ProfilesService.profileControllerAssignTask(String(id), { taskId: newTask.id })];
+                        return [4 /*yield*/, client_1.ProfilesService.profileControllerAssignTask(String(id), {
+                                taskId: newTask.id,
+                            })];
                     case 2:
                         _a.sent();
                         setNewTask(null);
@@ -382,95 +398,175 @@ function ProfileEditPage(_a) {
         });
     }
     return (<material_1.Box>
-      <material_1.Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-        <material_1.Button startIcon={<icons_material_1.ArrowBack />} onClick={onBack}>Назад</material_1.Button>
-        <material_1.Typography variant="h6">{isNew ? 'Создать профиль' : "\u0420\u0435\u0434\u0430\u043A\u0442\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u043F\u0440\u043E\u0444\u0438\u043B\u044C".concat(profile ? ": ".concat(profile.name) : '')}</material_1.Typography>
+      <material_1.Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            mb: 2,
+            flexWrap: 'wrap',
+        }}>
+        <material_1.Button startIcon={<icons_material_1.ArrowBack />} onClick={onBack}>
+          Назад
+        </material_1.Button>
+        <material_1.Typography variant="h6">
+          {isNew
+            ? 'Создать профиль'
+            : "\u0420\u0435\u0434\u0430\u043A\u0442\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u043F\u0440\u043E\u0444\u0438\u043B\u044C".concat(profile ? ": ".concat(profile.name) : '')}
+        </material_1.Typography>
       </material_1.Box>
 
       {loading && <material_1.Typography variant="body2">Загрузка...</material_1.Typography>}
-      {error && <material_1.Typography variant="body2" color="error">{error}</material_1.Typography>}
+      {error && (<material_1.Typography variant="body2" color="error">
+          {error}
+        </material_1.Typography>)}
 
       <material_1.Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 640 }}>
-        <material_1.TextField label="Название" value={name} onChange={function (e) { return setName(e.target.value); }} fullWidth autoFocus onKeyDown={function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
-        if (!saving && name.trim())
-            save();
-    } }} helperText="Ctrl/Cmd+Enter — сохранить"/>
+        <material_1.TextField label="Название" value={name} onChange={function (e) { return setName(e.target.value); }} fullWidth autoFocus onKeyDown={function (e) {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                if (!saving && name.trim())
+                    save();
+            }
+        }} helperText="Ctrl/Cmd+Enter — сохранить"/>
         <material_1.TextField label="Описание" value={description} onChange={function (e) { return setDescription(e.target.value); }} fullWidth multiline minRows={6}/>
-        <material_1.Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
-          <material_1.Button variant="contained" startIcon={<icons_material_1.Save />} onClick={save} disabled={saving || !name.trim()}>Сохранить</material_1.Button>
+        <material_1.Box sx={{
+            display: 'flex',
+            gap: 1,
+            alignItems: 'center',
+            flexWrap: 'wrap',
+        }}>
+          <material_1.Button variant="contained" startIcon={<icons_material_1.Save />} onClick={save} disabled={saving || !name.trim()}>
+            Сохранить
+          </material_1.Button>
           {!isNew && (<>
-              <material_1.Button variant="outlined" startIcon={<icons_material_1.Article />} onClick={openReports}>Репорты</material_1.Button>
-              <material_1.Button variant="outlined" color="success" startIcon={<icons_material_1.PlayArrow />} onClick={runProfile} disabled={running} title="Запустить анализ">{running ? 'Запуск...' : 'Запустить'}</material_1.Button>
+              <material_1.Button variant="outlined" startIcon={<icons_material_1.Article />} onClick={openReports}>
+                Репорты
+              </material_1.Button>
+              <material_1.Button variant="outlined" color="success" startIcon={<icons_material_1.PlayArrow />} onClick={runProfile} disabled={running} title="Запустить анализ">
+                {running ? 'Запуск...' : 'Запустить'}
+              </material_1.Button>
             </>)}
         </material_1.Box>
-        {!isNew && runError && <material_1.Typography variant="body2" color="error">{runError}</material_1.Typography>}
+        {!isNew && runError && (<material_1.Typography variant="body2" color="error">
+            {runError}
+          </material_1.Typography>)}
       </material_1.Box>
 
       {!isNew && (<>
           <material_1.Divider sx={{ my: 3 }}/>
-          <material_1.Typography variant="h6" sx={{ mb: 1 }}>Таск профиля</material_1.Typography>
+          <material_1.Typography variant="h6" sx={{ mb: 1 }}>
+            Таск профиля
+          </material_1.Typography>
           {/* Current task display */}
-          <material_1.Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, maxWidth: 640, mb: 1 }}>
-            {currentTaskId ? (<material_1.Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 1, border: '1px solid #eee', borderRadius: 1 }}>
+          <material_1.Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 1,
+                maxWidth: 640,
+                mb: 1,
+            }}>
+            {currentTaskId ? (<material_1.Box sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    p: 1,
+                    border: '1px solid #eee',
+                    borderRadius: 1,
+                }}>
                 <material_1.Box>
                   <material_1.Typography variant="subtitle2">Назначен таск</material_1.Typography>
-                  <material_1.Typography variant="body2">{(_b = currentTask === null || currentTask === void 0 ? void 0 : currentTask.name) !== null && _b !== void 0 ? _b : "ID: ".concat(currentTaskId)}</material_1.Typography>
-                  {(currentTask === null || currentTask === void 0 ? void 0 : currentTask.updated_at) && (<material_1.Typography variant="caption" color="text.secondary">Обновлен: {new Date(currentTask.updated_at).toLocaleString()}</material_1.Typography>)}
+                  <material_1.Typography variant="body2">
+                    {(_b = currentTask === null || currentTask === void 0 ? void 0 : currentTask.name) !== null && _b !== void 0 ? _b : "ID: ".concat(currentTaskId)}
+                  </material_1.Typography>
+                  {(currentTask === null || currentTask === void 0 ? void 0 : currentTask.updated_at) && (<material_1.Typography variant="caption" color="text.secondary">
+                      Обновлен:{' '}
+                      {new Date(currentTask.updated_at).toLocaleString()}
+                    </material_1.Typography>)}
                 </material_1.Box>
-                <material_1.Button variant="text" color="error" onClick={function () { return __awaiter(_this, void 0, void 0, function () { var e_10; return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!id)
-                            return [2 /*return*/];
-                        _a.label = 1;
-                    case 1:
-                        _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, client_1.ProfilesService.profileControllerUnassignTask(String(id))];
-                    case 2:
-                        _a.sent();
-                        setCurrentTaskId(null);
-                        setCurrentTask(null);
-                        return [3 /*break*/, 4];
-                    case 3:
-                        e_10 = _a.sent();
-                        console.error(e_10);
-                        setTaskError('Не удалось убрать таск');
-                        return [3 /*break*/, 4];
-                    case 4: return [2 /*return*/];
-                }
-            }); }); }}>Убрать</material_1.Button>
+                <material_1.Button variant="text" color="error" onClick={function () { return __awaiter(_this, void 0, void 0, function () {
+                    var e_10;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                if (!id)
+                                    return [2 /*return*/];
+                                _a.label = 1;
+                            case 1:
+                                _a.trys.push([1, 3, , 4]);
+                                return [4 /*yield*/, client_1.ProfilesService.profileControllerUnassignTask(String(id))];
+                            case 2:
+                                _a.sent();
+                                setCurrentTaskId(null);
+                                setCurrentTask(null);
+                                return [3 /*break*/, 4];
+                            case 3:
+                                e_10 = _a.sent();
+                                console.error(e_10);
+                                setTaskError('Не удалось убрать таск');
+                                return [3 /*break*/, 4];
+                            case 4: return [2 /*return*/];
+                        }
+                    });
+                }); }}>
+                  Убрать
+                </material_1.Button>
               </material_1.Box>) : (<material_1.Typography variant="body2">Таск не назначен</material_1.Typography>)}
           </material_1.Box>
           {/* Selection */}
-          <material_1.Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end', maxWidth: 640, mb: 1 }}>
+          <material_1.Box sx={{
+                display: 'flex',
+                gap: 1,
+                alignItems: 'flex-end',
+                maxWidth: 640,
+                mb: 1,
+            }}>
             <material_1.Box sx={{ flex: 1 }}>
               <TaskSelectModal_1.TaskSelect value={newTask} onChange={setNewTask} label="Выбрать таск" currentTask={currentTask}/>
             </material_1.Box>
-            <material_1.Button variant="contained" onClick={assignTask} disabled={!newTask || taskAssigning}>{taskAssigning ? 'Назначение...' : 'Назначить'}</material_1.Button>
+            <material_1.Button variant="contained" onClick={assignTask} disabled={!newTask || taskAssigning}>
+              {taskAssigning ? 'Назначение...' : 'Назначить'}
+            </material_1.Button>
           </material_1.Box>
-          {taskError && <material_1.Typography variant="body2" color="error">{taskError}</material_1.Typography>}
+          {taskError && (<material_1.Typography variant="body2" color="error">
+              {taskError}
+            </material_1.Typography>)}
 
           <material_1.Divider sx={{ my: 3 }}/>
-          <material_1.Typography variant="h6" sx={{ mb: 1 }}>Документы профиля</material_1.Typography>
-          <material_1.Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end', maxWidth: 640, mb: 1 }}>
+          <material_1.Typography variant="h6" sx={{ mb: 1 }}>
+            Документы профиля
+          </material_1.Typography>
+          <material_1.Box sx={{
+                display: 'flex',
+                gap: 1,
+                alignItems: 'flex-end',
+                maxWidth: 640,
+                mb: 1,
+            }}>
             <material_1.Box sx={{ flex: 1 }}>
               <DocumentSelectModal_1.DocumentSelect value={newDoc} onChange={setNewDoc} label="Добавить документ"/>
             </material_1.Box>
-            <material_1.Button variant="contained" onClick={assignDoc} disabled={!newDoc}>Добавить</material_1.Button>
+            <material_1.Button variant="contained" onClick={assignDoc} disabled={!newDoc}>
+              Добавить
+            </material_1.Button>
           </material_1.Box>
           {docsLoading && <material_1.Typography variant="body2">Загрузка...</material_1.Typography>}
-          {docsError && <material_1.Typography variant="body2" color="error">{docsError}</material_1.Typography>}
+          {docsError && (<material_1.Typography variant="body2" color="error">
+              {docsError}
+            </material_1.Typography>)}
           <material_1.List dense sx={{ maxWidth: 800 }}>
-            {((_c = sources === null || sources === void 0 ? void 0 : sources.items) === null || _c === void 0 ? void 0 : _c.length) ? sources.items.map(function (s) {
-                var _a, _b, _c, _d;
-                var d = docsMap[s.documentId];
-                return (<material_1.ListItem key={s.id} divider secondaryAction={<material_1.IconButton edge="end" aria-label="remove" onClick={function () { return unassignDoc(s.documentId); }} title="Убрать">
-                    <icons_material_1.Delete />
-                  </material_1.IconButton>}>
-                  <material_1.ListItemText primary={d ? (d.title || d.id) : "\u0414\u043E\u043A\u0443\u043C\u0435\u043D\u0442 ".concat(s.documentId)} secondary={d ? "\u0421\u043A\u0440\u0430\u043F\u0435\u0440: ".concat((_d = (_b = (_a = d.scraper) === null || _a === void 0 ? void 0 : _a.name) !== null && _b !== void 0 ? _b : (_c = d.scraper) === null || _c === void 0 ? void 0 : _c.id) !== null && _d !== void 0 ? _d : '—', " \u2022 \u0418\u0437\u0432\u043B\u0435\u0447\u0435\u043D\u043E: ").concat(new Date(d.scrapedAt).toLocaleString()) : 'Загрузка деталей...'}/>
-                </material_1.ListItem>);
-            }) : (!docsLoading && <material_1.Typography variant="body2">Документы не выбраны</material_1.Typography>)}
+            {((_c = sources === null || sources === void 0 ? void 0 : sources.items) === null || _c === void 0 ? void 0 : _c.length)
+                ? sources.items.map(function (s) {
+                    var _a, _b, _c, _d;
+                    var d = docsMap[s.documentId];
+                    return (<material_1.ListItem key={s.id} divider secondaryAction={<material_1.IconButton edge="end" aria-label="remove" onClick={function () { return unassignDoc(s.documentId); }} title="Убрать">
+                          <icons_material_1.Delete />
+                        </material_1.IconButton>}>
+                      <material_1.ListItemText primary={d ? d.title || d.id : "\u0414\u043E\u043A\u0443\u043C\u0435\u043D\u0442 ".concat(s.documentId)} secondary={d
+                            ? "\u0421\u043A\u0440\u0430\u043F\u0435\u0440: ".concat((_d = (_b = (_a = d.scraper) === null || _a === void 0 ? void 0 : _a.name) !== null && _b !== void 0 ? _b : (_c = d.scraper) === null || _c === void 0 ? void 0 : _c.id) !== null && _d !== void 0 ? _d : '—', " \u2022 \u0418\u0437\u0432\u043B\u0435\u0447\u0435\u043D\u043E: ").concat(new Date(d.scrapedAt).toLocaleString())
+                            : 'Загрузка деталей...'}/>
+                    </material_1.ListItem>);
+                })
+                : !docsLoading && (<material_1.Typography variant="body2">Документы не выбраны</material_1.Typography>)}
           </material_1.List>
         </>)}
     </material_1.Box>);
