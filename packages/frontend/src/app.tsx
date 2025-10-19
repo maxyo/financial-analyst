@@ -13,7 +13,6 @@ import { AnalyticsPanel } from './components/Analytics/AnalyticsPanel';
 import { ReportsPage } from './components/Analytics/ReportsPage';
 import { ProfileEditPage } from './components/Analytics/ProfileEditPage';
 import { ScraperEditPage } from './components/Sources/ScraperEditPage';
-import { JobsList } from './components/Jobs/JobsList';
 import { SourcesPanel } from './components/Sources/SourcesPanel';
 
 function ReportsRouterView() {
@@ -123,11 +122,10 @@ export function App() {
   const useEffect = React.useEffect;
 
   const [route, setRoute] = useState<
-    'jobs' | 'analytics' | 'sources' | 'reports' | 'profile' | 'scraper'
+    'analytics' | 'sources' | 'reports' | 'profile' | 'scraper'
   >(() => {
     if (typeof window !== 'undefined' && window.location) {
       const h = window.location.hash;
-      if (h === '#/jobs') return 'jobs';
       if (h === '#/analytics') return 'analytics';
       if (h === '#/sources') return 'sources';
       if (h.startsWith('#/reports')) return 'reports';
@@ -139,8 +137,7 @@ export function App() {
   useEffect(() => {
     const onHash = () => {
       const h = window.location.hash;
-      if (h === '#/jobs') setRoute('jobs');
-      else if (h === '#/analytics') setRoute('analytics');
+      if (h === '#/analytics') setRoute('analytics');
       else if (h === '#/sources') setRoute('sources');
       else if (h.startsWith('#/reports')) setRoute('reports');
       else if (h.startsWith('#/profile')) setRoute('profile');
@@ -157,17 +154,14 @@ export function App() {
       <Header
         activeRoute={route}
         onNavigate={(r) => {
-          if (r === 'jobs') window.location.hash = '#/jobs';
-          else if (r === 'analytics') window.location.hash = '#/analytics';
+          if (r === 'analytics') window.location.hash = '#/analytics';
           else if (r === 'sources') window.location.hash = '#/sources';
           else window.location.hash = '#/analytics';
         }}
       />
 
       <Container maxWidth="lg" sx={{ mt: 2, mb: 4 }}>
-        {route === 'jobs' ? (
-          <JobsList />
-        ) : route === 'analytics' ? (
+        {route === 'analytics' ? (
           <AnalyticsPanel />
         ) : route === 'sources' ? (
           <SourcesPanel />

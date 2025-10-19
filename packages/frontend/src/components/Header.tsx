@@ -3,23 +3,21 @@ import { AppBar, Tab, Tabs, Toolbar, Typography } from '@mui/material';
 
 interface Props {
   activeRoute:
-    | 'jobs'
     | 'analytics'
     | 'sources'
     | 'reports'
     | 'profile'
     | 'scraper';
-  onNavigate: (route: 'jobs' | 'analytics' | 'sources') => void;
+  onNavigate: (route: 'analytics' | 'sources') => void;
 }
 
 export function Header({ activeRoute, onNavigate }: Props) {
-  // Map nested routes to their parent tab to avoid MUI Tabs value mismatch
-  const tabsValue: 'jobs' | 'analytics' | 'sources' =
+  const tabsValue: 'analytics' | 'sources' =
     activeRoute === 'profile' || activeRoute === 'reports'
       ? 'analytics'
       : activeRoute === 'scraper'
         ? 'sources'
-        : activeRoute;
+        : (activeRoute as 'analytics' | 'sources');
 
   return (
     <AppBar position="static" color="default" enableColorOnDark>
@@ -31,8 +29,7 @@ export function Header({ activeRoute, onNavigate }: Props) {
           value={tabsValue}
           onChange={(_e, v) => onNavigate(v)}
           sx={{ mr: 2 }}
-        >
-          <Tab label="задачи" value="jobs" />
+>
           <Tab label="Аналитика" value="analytics" />
           <Tab label="данные" value="sources" />
         </Tabs>
