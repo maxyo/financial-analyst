@@ -4,12 +4,6 @@
   "version": "0.0.0",
   "type": "commonjs",
   "scripts": {
-    "dev": "ts-node packages/backend/src/main.ts",
-    "build": "tsc --noEmit",
-    "start": "ts-node --transpile-only packages/backend/src/main.ts",
-    "cli": "ts-node packages/backend/src/main.ts",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
   },
   "workspaces": [
     "packages/frontend",
@@ -17,5 +11,8 @@
     "packages/filter"
   ],
   "dependencies": {
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0-beta"
   }
 }
