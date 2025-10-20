@@ -74,8 +74,8 @@ export class ProfileController {
       id: p.id,
       name: p.name,
       description: p.description ?? null,
-      createdAt: p.created_at,
-      updatedAt: p.updated_at,
+      createdAt: p.createdAt,
+      updatedAt: p.updatedAt,
       topicId: (p as any).topic ? (p as any).topic.id : undefined,
     }));
     return {
@@ -100,8 +100,8 @@ export class ProfileController {
       id: item.id,
       name: item.name,
       description: item.description ?? null,
-      createdAt: item.created_at,
-      updatedAt: item.updated_at,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
       topicId: item.topic ? item.topic.id : null,
     } as any;
   }
@@ -118,8 +118,8 @@ export class ProfileController {
     const entity = this.profiles.create({
       name: body.name.trim(),
       description: body.description,
-      created_at: now,
-      updated_at: now,
+      createdAt: now,
+      updatedAt: now,
     });
 
     const saved = await this.profiles.save(entity);
@@ -127,8 +127,8 @@ export class ProfileController {
       id: saved.id,
       name: saved.name,
       description: saved.description ?? null,
-      createdAt: saved.created_at,
-      updatedAt: saved.updated_at,
+      createdAt: saved.createdAt,
+      updatedAt: saved.updatedAt,
       topicId: null,
     } as any;
   }
@@ -145,7 +145,7 @@ export class ProfileController {
     if (!item) throw new NotFoundException('Not found');
     if (body.name !== undefined) item.name = body.name;
     if (body.description !== undefined) item.description = body.description;
-    item.updated_at = new Date().toISOString();
+    item.updatedAt = new Date().toISOString();
     const saved = await this.profiles.save(item);
     if (!saved)
       {throw new InternalServerErrorException('Failed to update profile');}
@@ -153,8 +153,8 @@ export class ProfileController {
       id: saved.id,
       name: saved.name,
       description: saved.description ?? null,
-      createdAt: saved.created_at,
-      updatedAt: saved.updated_at,
+      createdAt: saved.createdAt,
+      updatedAt: saved.updatedAt,
       topicId: undefined,
     } as any;
   }
@@ -177,7 +177,7 @@ export class ProfileController {
     const take = q.limit;
     const skip = q.offset;
     const [items, total] = await this.docSources.findAndCount({
-      where: { profile_id: numId },
+      where: { profileId: numId },
       order: { id: 'DESC' as const },
       take,
       skip,
@@ -214,11 +214,11 @@ export class ProfileController {
     if (!doc) throw new NotFoundException('Document not found');
 
     let link = await this.docSources.findOne({
-      where: { profile_id: numId, documentId: docId },
+      where: { profileId: numId, documentId: docId },
     });
     if (!link) {
       const entity = this.docSources.create({
-        profile_id: numId,
+        profileId: numId,
         documentId: docId,
       });
 
@@ -249,7 +249,7 @@ export class ProfileController {
       throw new BadRequestException('documentId is required (uuid string)');
     }
     const link = await this.docSources.findOne({
-      where: { profile_id: numId, documentId },
+      where: { profileId: numId, documentId },
     });
     if (!link) throw new NotFoundException('Not found');
     await this.docSources.delete({ id: link.id });
@@ -281,7 +281,7 @@ export class ProfileController {
 
     // Assign task by loading entity and saving to avoid deep-partial typing issues
     profile.task = task;
-    profile.updated_at = new Date().toISOString();
+    profile.updatedAt = new Date().toISOString();
     await this.profiles.save(profile);
     return { taskId } as ProfileTaskDto;
   }
@@ -323,7 +323,7 @@ export class ProfileController {
     if (!profile) throw new NotFoundException('Not found');
     // Unassign task by loading entity and saving
     profile.task = null;
-    profile.updated_at = new Date().toISOString();
+    profile.updatedAt = new Date().toISOString();
     await this.profiles.save(profile);
     return { ok: true };
   }
@@ -344,9 +344,9 @@ export class ProfileController {
     });
     if (!profile) throw new NotFoundException('Not found');
     const execEntity = this.executions.create({
-      profile_id: numId,
+      profileId: numId,
       status: 'pending',
-      created_at: new Date(),
+      createdAt: new Date(),
     });
     const exec = await this.executions.save(execEntity);
     // Enqueue job and update execution with job id and running status
@@ -358,9 +358,9 @@ export class ProfileController {
     await this.executions.update(
       { id: exec.id },
       {
-        job_id: String(job.id),
+        jobId: String(job.id),
         status: 'running',
-        started_at: new Date(),
+        startedAt: new Date(),
       },
     );
     return {

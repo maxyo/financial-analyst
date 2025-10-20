@@ -21,7 +21,6 @@ import {
   TasksListResponseDtoClass as TasksListResponseDto,
   TaskUpdateDtoClass as TaskUpdateDto
 } from '../dto/tasks.dto';
-import { TaskEntity } from '../entities/task.entity';
 import { TasksRepository } from '../repositories/tasks.repository';
 
 @ApiTags('Tasks')
@@ -41,8 +40,8 @@ export class TasksController {
       name: t.name,
       description: t.description ?? null,
       prompt: t.prompt,
-      createdAt: t.created_at,
-      updatedAt: t.updated_at,
+      createdAt: t.createdAt,
+      updatedAt: t.updatedAt,
     }));
     return { items: shaped, total, limit: take, offset: skip };
   }
@@ -60,8 +59,8 @@ export class TasksController {
       name: item.name,
       description: item.description ?? null,
       prompt: item.prompt,
-      createdAt: item.created_at,
-      updatedAt: item.updated_at,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
     };
   }
 
@@ -72,8 +71,8 @@ export class TasksController {
     const now = new Date().toISOString();
     const entity = this.tasks.create({
       ...body,
-      created_at: now,
-      updated_at: now,
+      createdAt: now,
+      updatedAt: now,
     });
 
     const saved = await this.tasks.save(entity);
@@ -82,8 +81,8 @@ export class TasksController {
       name: saved.name,
       description: saved.description ?? null,
       prompt: saved.prompt,
-      createdAt: saved.created_at,
-      updatedAt: saved.updated_at,
+      createdAt: saved.createdAt,
+      updatedAt: saved.updatedAt,
     };
   }
 
@@ -95,18 +94,19 @@ export class TasksController {
     if (!Number.isFinite(numId)) throw new NotFoundException('Not found');
     const item = await this.tasks.findOne({ where: { id: numId } });
     if (!item) throw new NotFoundException('Not found');
-    const patch: Partial<TaskEntity> = body;
-    patch.updated_at = new Date().toISOString();
-    await this.tasks.update({ id: numId }, body);
-    const fresh = await this.tasks.findOne({ where: { id: numId } });
-    if(!fresh) throw new InternalServerErrorException('Failed to update task');
+    if (body.name !== undefined) item.name = body.name;
+    if (body.description !== undefined) item.description = body.description;
+    if (body.prompt !== undefined) item.prompt = body.prompt;
+    item.updatedAt = new Date().toISOString();
+    const saved = await this.tasks.save(item);
+    if (!saved) throw new InternalServerErrorException('Failed to update task');
     return {
-      id: fresh.id,
-      name: fresh.name,
-      description: fresh.description ?? null,
-      prompt: fresh.prompt,
-      createdAt: fresh.created_at,
-      updatedAt: fresh.updated_at,
+      id: saved.id,
+      name: saved.name,
+      description: saved.description ?? null,
+      prompt: saved.prompt,
+      createdAt: saved.createdAt,
+      updatedAt: saved.updatedAt,
     };
   }
 

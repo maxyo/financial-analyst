@@ -33,8 +33,8 @@ export class TopicEntity {
   collections!: CollectionEntity[];
 
   @Column({ type: 'text', name: 'created_at' })
-  created_at!: string;
+  createdAt!: string;
 
   @Column({ type: 'text', name: 'updated_at' })
-  updated_at!: string;
+  updatedAt!: string;
 }

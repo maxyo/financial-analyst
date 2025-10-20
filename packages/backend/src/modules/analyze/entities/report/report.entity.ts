@@ -11,13 +11,13 @@ import { ProfileEntity } from '../profile.entity';
 import { reportStructures } from './report-structure';
 
 @Entity({ name: 'reports' })
-@Index(['profile_id', 'created_at'])
+@Index(['profileId', 'createdAt'])
 export class ReportEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
   @Column({ type: 'integer', name: 'profile_id' })
-  profile_id!: number;
+  profileId!: number;
 
   @ManyToOne(() => ProfileEntity)
   @JoinColumn({ name: 'profile_id', referencedColumnName: 'id' })
@@ -33,13 +33,13 @@ export class ReportEntity {
   llmModel!: string | null;
 
   @Column({ type: 'datetime', name: 'created_at' })
-  created_at!: Date;
+  createdAt!: Date;
 
   @Column({ type: 'integer', name: 'tokens_in', nullable: true })
-  tokens_in!: number | null;
+  tokensIn!: number | null;
 
   @Column({ type: 'integer', name: 'tokens_out', nullable: true })
-  tokens_out!: number | null;
+  tokensOut!: number | null;
 
   @Column({ type: 'real', nullable: true })
   cost!: number | null;

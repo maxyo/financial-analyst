@@ -24,8 +24,8 @@ export class TopicsController {
       name: t.name,
       description: t.description ?? null,
       parentId: t.parent ? t.parent.id : null,
-      createdAt: t.created_at,
-      updatedAt: t.updated_at,
+      createdAt: t.createdAt,
+      updatedAt: t.updatedAt,
     }));
     return { items: shaped, total, limit: take, offset: skip };
   }
@@ -43,8 +43,8 @@ export class TopicsController {
       name: item.name,
       description: item.description ?? null,
       parentId: item.parent ? item.parent.id : null,
-      createdAt: item.created_at,
-      updatedAt: item.updated_at,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
     };
     return shaped;
   }
@@ -66,8 +66,8 @@ export class TopicsController {
       name: body.name,
       description: body.description ?? null,
       parent,
-      created_at: now,
-      updated_at: now,
+      createdAt: now,
+      updatedAt: now,
     });
 
     const saved = await this.topics.save(entity);
@@ -76,8 +76,8 @@ export class TopicsController {
       name: saved.name,
       description: saved.description ?? null,
       parentId: saved.parent ? saved.parent.id : null,
-      createdAt: saved.created_at,
-      updatedAt: saved.updated_at,
+      createdAt: saved.createdAt,
+      updatedAt: saved.updatedAt,
     };
   }
 
@@ -103,7 +103,7 @@ export class TopicsController {
         item.parent = p;
       }
     }
-    item.updated_at = new Date().toISOString();
+    item.updatedAt = new Date().toISOString();
 
     const fresh = await this.topics.save(item);
     // reload with relation to shape consistently
@@ -115,8 +115,8 @@ export class TopicsController {
       name: reloaded.name,
       description: reloaded.description ?? null,
       parentId: reloaded.parent ? reloaded.parent.id : null,
-      createdAt: reloaded.created_at,
-      updatedAt: reloaded.updated_at,
+      createdAt: reloaded.createdAt,
+      updatedAt: reloaded.updatedAt,
     };
   }
 

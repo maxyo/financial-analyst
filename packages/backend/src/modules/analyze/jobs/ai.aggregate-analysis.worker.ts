@@ -35,14 +35,14 @@ export class AiAggregateAnalysisWorker extends WorkerHost {
     const executionId: string | undefined = payload.executionId;
     if (executionId) {
       try {
-        await this.executions.update({ id: executionId }, { status: 'running', started_at: new Date(), job_id: String(job.id) });
+        await this.executions.update({ id: executionId }, { status: 'running', startedAt: new Date(), jobId: String(job.id) });
       } catch (e) {
         // ignore execution update errors
       }
     }
 
     // Load assigned document IDs for profile
-    const links = await this.docSources.find({ where: { profile_id: profileId }, order: { id: 'DESC' } });
+    const links = await this.docSources.find({ where: { profileId: profileId }, order: { id: 'DESC' } });
     const docIds = links.map((l: any) => l.documentId);
 
     // Minimal payload fields remaining in Report: content, llmModel, tokens, cost
@@ -117,18 +117,18 @@ export class AiAggregateAnalysisWorker extends WorkerHost {
     }
 
     const insertRes = await this.reportsRepo.insert({
-      profile_id: profileId,
+      profileId: profileId,
       llmModel: llmModel,
       content: contentText,
-      tokens_in: tokensIn,
-      tokens_out: tokensOut,
+      tokensIn: tokensIn,
+      tokensOut: tokensOut,
       cost: cost,
-      created_at: new Date(),
+      createdAt: new Date(),
     });
     const reportId = insertRes.identifiers?.[0]?.id ?? insertRes.raw?.id ?? undefined;
     if (executionId) {
       try {
-        await this.executions.update({ id: executionId }, { status: 'succeeded', finished_at: new Date(), report_id: reportId ?? null });
+        await this.executions.update({ id: executionId }, { status: 'succeeded', finishedAt: new Date(), reportId: reportId ?? null });
       } catch (e) {
         // ignore execution update errors
       }

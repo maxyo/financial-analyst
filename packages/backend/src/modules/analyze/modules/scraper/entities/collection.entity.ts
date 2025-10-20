@@ -24,8 +24,8 @@ export class CollectionEntity {
   topic!: TopicEntity | null;
 
   @Column({ type: 'datetime', name: 'created_at' })
-  created_at!: Date;
+  createdAt!: Date;
 
   @Column({ type: 'datetime', name: 'updated_at' })
-  updated_at!: Date;
+  updatedAt!: Date;
 }

@@ -65,18 +65,18 @@ export function EditProfilePage() {
         } else if (typeof formData.task_id === 'number') {
           await ProfilesService.profileControllerAssignTask(String(profileId), {
             taskId: formData.task_id,
-          } as any);
+          });
         }
         toast.success('Profile updated successfully');
       } else {
         const created = await ProfilesService.profileControllerCreate({
           name: formData.name,
           description: formData.description || null,
-        } as any);
+        });
         if (formData.task_id != null) {
           await ProfilesService.profileControllerAssignTask(
             String(created.id),
-            { taskId: formData.task_id } as any,
+            { taskId: formData.task_id },
           );
         }
         toast.success('Profile created successfully');

@@ -40,10 +40,10 @@ export class ReportController {
     const take = q.limit;
     const skip = q.offset;
     const where: Record<string, number> = {};
-    if (q.profileId != null) where.profile_id = q.profileId;
+    if (q.profileId != null) (where as any).profileId = q.profileId;
     const [items, total] = await this.reports.findAndCount({
       where,
-      order: { created_at: 'DESC' as const },
+      order: { createdAt: 'DESC' as const },
       take,
       skip,
     });
@@ -76,10 +76,10 @@ export class ReportController {
     const now = new Date();
     const entity = this.reports.create({
       ...body,
-      profile_id: profileId,
-      created_at: now,
-      tokens_in: body.tokensIn,
-      tokens_out: body.tokensOut,
+      profileId,
+      createdAt: now,
+      tokensIn: body.tokensIn,
+      tokensOut: body.tokensOut,
     });
 
     return ReportSchema.parse(await this.reports.save(entity));
@@ -96,8 +96,8 @@ export class ReportController {
     if (body.type !== undefined) item.type = body.type;
     if (body.content !== undefined) item.content = body.content;
     if (body.llmModel !== undefined) item.llmModel = body.llmModel;
-    if (body.tokensIn !== undefined) item.tokens_in = body.tokensIn;
-    if (body.tokensOut !== undefined) item.tokens_out = body.tokensOut;
+    if (body.tokensIn !== undefined) item.tokensIn = body.tokensIn;
+    if (body.tokensOut !== undefined) item.tokensOut = body.tokensOut;
     if (body.cost !== undefined) item.cost = body.cost;
 
     const saved = await this.reports.save(item);

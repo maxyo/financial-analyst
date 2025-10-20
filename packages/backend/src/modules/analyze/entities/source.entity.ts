@@ -14,17 +14,17 @@ export abstract class SourceEntity {
   id!: number;
 
   @Column({ type: 'integer', name: 'profile_id' })
-  profile_id!: number;
+  profileId!: number;
 
   @ManyToOne(() => ProfileEntity)
   @JoinColumn({ name: 'profile_id', referencedColumnName: 'id' })
   profile!: ProfileEntity;
 }
 
-@Index(['profile_id'])
+@Index(['profileId'])
 @Entity({ name: 'document_sources' })
 export class DocumentSourceEntity extends SourceEntity {
   @Column({ type: 'uuid', name: 'document_id' })
-  @Index(['document_id'])
+  @Index(['documentId'])
   documentId!: string;
 }

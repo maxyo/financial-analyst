@@ -497,7 +497,7 @@
             }
           },
           {
-            "name": "profile_id",
+            "name": "profileId",
             "required": false,
             "in": "query",
             "schema": {
@@ -2052,7 +2052,7 @@
                   "format": "uuid",
                   "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                 },
-                "profile_id": {
+                "profileId": {
                   "anyOf": [
                     {
                       "type": "integer",
@@ -2094,8 +2094,8 @@
                     }
                   ]
                 },
-                "created_at": {},
-                "tokens_in": {
+                "createdAt": {},
+                "tokensIn": {
                   "anyOf": [
                     {
                       "type": "integer",
@@ -2107,7 +2107,7 @@
                     }
                   ]
                 },
-                "tokens_out": {
+                "tokensOut": {
                   "anyOf": [
                     {
                       "type": "integer",
@@ -2133,13 +2133,13 @@
               },
               "required": [
                 "id",
-                "profile_id",
+                "profileId",
                 "type",
                 "content",
                 "llmModel",
-                "created_at",
-                "tokens_in",
-                "tokens_out",
+                "createdAt",
+                "tokensIn",
+                "tokensOut",
                 "cost"
               ],
               "additionalProperties": false
@@ -2186,7 +2186,7 @@
             "x-nestjs_zod-has-null": true,
             "x-nestjs_zod-parent-additional-properties": false
           },
-          "profile_id": {
+          "profileId": {
             "anyOf": [
               {
                 "type": "integer",
@@ -2240,13 +2240,13 @@
             "x-nestjs_zod-empty-type": true,
             "x-nestjs_zod-parent-additional-properties": false
           },
-          "created_at": {
+          "createdAt": {
             "type": "",
             "x-nestjs_zod-has-null": true,
             "x-nestjs_zod-empty-type": true,
             "x-nestjs_zod-parent-additional-properties": false
           },
-          "tokens_in": {
+          "tokensIn": {
             "anyOf": [
               {
                 "type": "integer",
@@ -2261,7 +2261,7 @@
             "x-nestjs_zod-empty-type": true,
             "x-nestjs_zod-parent-additional-properties": false
           },
-          "tokens_out": {
+          "tokensOut": {
             "anyOf": [
               {
                 "type": "integer",
@@ -2293,20 +2293,20 @@
         },
         "required": [
           "id",
-          "profile_id",
+          "profileId",
           "type",
           "content",
           "llmModel",
-          "created_at",
-          "tokens_in",
-          "tokens_out",
+          "createdAt",
+          "tokensIn",
+          "tokensOut",
           "cost"
         ]
       },
       "ReportCreateDto": {
         "type": "object",
         "properties": {
-          "profile_id": {
+          "profileId": {
             "type": "integer",
             "exclusiveMinimum": 0,
             "maximum": 9007199254740991
@@ -2324,12 +2324,12 @@
           "llmModel": {
             "type": "string"
           },
-          "tokens_in": {
+          "tokensIn": {
             "type": "integer",
             "minimum": 0,
             "maximum": 9007199254740991
           },
-          "tokens_out": {
+          "tokensOut": {
             "type": "integer",
             "minimum": 0,
             "maximum": 9007199254740991
@@ -2340,12 +2340,12 @@
           }
         },
         "required": [
-          "profile_id",
+          "profileId",
           "type",
           "content",
           "llmModel",
-          "tokens_in",
-          "tokens_out",
+          "tokensIn",
+          "tokensOut",
           "cost"
         ]
       },
@@ -2365,12 +2365,12 @@
           "llmModel": {
             "type": "string"
           },
-          "tokens_in": {
+          "tokensIn": {
             "type": "integer",
             "minimum": 0,
             "maximum": 9007199254740991
           },
-          "tokens_out": {
+          "tokensOut": {
             "type": "integer",
             "minimum": 0,
             "maximum": 9007199254740991
@@ -2384,8 +2384,8 @@
           "type",
           "content",
           "llmModel",
-          "tokens_in",
-          "tokens_out",
+          "tokensIn",
+          "tokensOut",
           "cost"
         ]
       },
