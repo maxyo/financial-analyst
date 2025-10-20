@@ -13,9 +13,10 @@ export type ScraperConfiguration = {
   };
   [ScraperType.HTML]: {
     url: string;
-    selectors: { name: string; selector: string }[];
+    selectors: { name: string; selector: string; attr?: string; asHtml?: boolean }[];
     headers: Record<string, string>;
     timeoutMs: number;
+    delayMs?: number;
     pagination?: {
       nextSelector?: string;
       nextUrlTemplate?: string;
@@ -45,10 +46,13 @@ export const htmlScraperConfigurationSchema = z
       z.object({
         name: z.string(),
         selector: z.string(),
+        attr: z.string().optional(),
+        asHtml: z.boolean().optional(),
       }),
     ),
     headers: z.record(z.string(), z.string()),
     timeoutMs: z.number().positive(),
+    delayMs: z.number().int().nonnegative().optional(),
   })
   .extend({
     pagination: z

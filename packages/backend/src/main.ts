@@ -28,9 +28,8 @@ async function bootstrap() {
     .setDescription('Auto-generated OpenAPI documentation for Trade backend')
     .setVersion('1.0.0')
     .addServer('http://localhost:3000')
-    .setContact('API', '', '')
     .build();
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  const document = SwaggerModule.createDocument(app, swaggerConfig, {ignoreGlobalPrefix: true});
   SwaggerModule.setup('api/docs', app, document);
   const outPath = join(resolve(__dirname, '..'), 'openapi.json');
   writeFileSync(outPath, JSON.stringify(document, null, 2), 'utf-8');

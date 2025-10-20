@@ -1,6 +1,7 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 
 import { PostProcessorConfiguration, PostProcessorType, ScraperConfiguration, ScraperType } from '../types';
+import { TopicEntity } from '../../../entities/topic.entity';
 
 @Entity({ name: 'scrapers' })
 export class Scraper<T extends ScraperType = ScraperType> {
@@ -19,4 +20,9 @@ export class Scraper<T extends ScraperType = ScraperType> {
   // Hardcoded (code-defined) post-processors configuration per scraper, not stored as a separate entity
   @Column({ type: 'simple-json', nullable: true })
   postProcessors?: { type: PostProcessorType; config: PostProcessorConfiguration[PostProcessorType] }[];
+
+  // Optional topic association
+  @ManyToOne(() => TopicEntity, (topic) => topic.scrapers, { nullable: true })
+  @JoinColumn({ name: 'topic_id', referencedColumnName: 'id' })
+  topic!: TopicEntity | null;
 }

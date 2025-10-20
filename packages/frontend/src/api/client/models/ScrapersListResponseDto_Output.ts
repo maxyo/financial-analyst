@@ -41,6 +41,8 @@ export type ScrapersListResponseDto_Output = {
                     linkAttr?: string;
                     titleSelector?: string;
                     contentSelector?: string;
+                    dateSelector?: string;
+                    dateAttr?: string;
                     baseUrl?: string;
                     maxDocsPerPage?: number;
                 };

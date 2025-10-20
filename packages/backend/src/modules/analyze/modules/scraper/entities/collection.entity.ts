@@ -1,5 +1,6 @@
 import { Filter } from '@trade/filter';
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { TopicEntity } from '../../../entities/topic.entity';
 
 @Entity({ name: 'collections' })
 @Index(['name'], { unique: true })
@@ -16,6 +17,11 @@ export class CollectionEntity {
   // JSON string that stores filter criteria
   @Column({ type: 'simple-json', default: '{}' })
   filters!: Filter;
+
+  // Optional topic association
+  @ManyToOne(() => TopicEntity, (topic) => topic.collections, { nullable: true })
+  @JoinColumn({ name: 'topic_id', referencedColumnName: 'id' })
+  topic!: TopicEntity | null;
 
   @Column({ type: 'datetime', name: 'created_at' })
   created_at!: Date;

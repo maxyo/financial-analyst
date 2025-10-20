@@ -9,7 +9,6 @@ var AnalyticsPanel_1 = require("./components/Analytics/AnalyticsPanel");
 var ReportsPage_1 = require("./components/Analytics/ReportsPage");
 var ProfileEditPage_1 = require("./components/Analytics/ProfileEditPage");
 var ScraperEditPage_1 = require("./components/Sources/ScraperEditPage");
-var JobsList_1 = require("./components/Jobs/JobsList");
 var SourcesPanel_1 = require("./components/Sources/SourcesPanel");
 function ReportsRouterView() {
     var _a = react_1.default.useState(null), profileId = _a[0], setProfileId = _a[1];
@@ -107,8 +106,6 @@ function App() {
     var _a = useState(function () {
         if (typeof window !== 'undefined' && window.location) {
             var h = window.location.hash;
-            if (h === '#/jobs')
-                return 'jobs';
             if (h === '#/analytics')
                 return 'analytics';
             if (h === '#/sources')
@@ -125,9 +122,7 @@ function App() {
     useEffect(function () {
         var onHash = function () {
             var h = window.location.hash;
-            if (h === '#/jobs')
-                setRoute('jobs');
-            else if (h === '#/analytics')
+            if (h === '#/analytics')
                 setRoute('analytics');
             else if (h === '#/sources')
                 setRoute('sources');
@@ -146,9 +141,7 @@ function App() {
     return (<styles_1.ThemeProvider theme={theme}>
       <material_1.CssBaseline />
       <Header_1.Header activeRoute={route} onNavigate={function (r) {
-            if (r === 'jobs')
-                window.location.hash = '#/jobs';
-            else if (r === 'analytics')
+            if (r === 'analytics')
                 window.location.hash = '#/analytics';
             else if (r === 'sources')
                 window.location.hash = '#/sources';
@@ -157,7 +150,7 @@ function App() {
         }}/>
 
       <material_1.Container maxWidth="lg" sx={{ mt: 2, mb: 4 }}>
-        {route === 'jobs' ? (<JobsList_1.JobsList />) : route === 'analytics' ? (<AnalyticsPanel_1.AnalyticsPanel />) : route === 'sources' ? (<SourcesPanel_1.SourcesPanel />) : route === 'reports' ? (<material_1.Card>
+        {route === 'analytics' ? (<AnalyticsPanel_1.AnalyticsPanel />) : route === 'sources' ? (<SourcesPanel_1.SourcesPanel />) : route === 'reports' ? (<material_1.Card>
             <material_1.CardHeader title="Аналитика"/>
             <material_1.CardContent>
               <ReportsRouterView />

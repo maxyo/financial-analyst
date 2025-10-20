@@ -1,5 +1,7 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
+
+import { isoDate } from '../../../../../dto/utils';
 // Classes for nestjs-zod
 
 export const CollectionFiltersSchema = z.any();
@@ -53,7 +55,7 @@ export const DocumentSchema = z.object({
   content: z.string(),
   scraperId: z.string(),
   contentHash: z.string(),
-  scrapedAt: z.iso.date(),
+  scrapedAt: isoDate,
 });
 
 export class CollectionDto extends createZodDto(CollectionSchema) {}

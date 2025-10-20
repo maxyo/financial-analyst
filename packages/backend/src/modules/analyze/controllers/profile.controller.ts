@@ -30,7 +30,6 @@ import {
   ProfileTaskDto,
   ProfileUpdateDto
 } from '../dto/profile.dto';
-import { ProfileEntity } from '../entities/profile.entity';
 import { DocumentsRepository } from '../modules/scraper/repositories/documents.repository';
 import { AnalysisProfilesRepository } from '../repositories/analysis-profiles.repository';
 import { DocumentSourcesRepository } from '../repositories/document-sources.repository';
@@ -117,15 +116,13 @@ export class ProfileController {
     }
     const item = await this.profiles.findOne({ where: { id: numId } });
     if (!item) throw new NotFoundException('Not found');
-    const patch: Partial<ProfileEntity> = body;
-    patch.updated_at = new Date().toISOString();
-    await this.profiles.update({ id: numId }, patch);
-    const fresh = await this.profiles.findOne({
-      where: { id: numId },
-    });
-    if (!fresh)
+    if (body.name !== undefined) item.name = body.name;
+    if (body.description !== undefined) item.description = body.description;
+    item.updated_at = new Date().toISOString();
+    const saved = await this.profiles.save(item);
+    if (!saved)
       {throw new InternalServerErrorException('Failed to update profile');}
-    return fresh;
+    return saved;
   }
 
   @Get(':id/document-sources')
@@ -244,11 +241,10 @@ export class ProfileController {
     const task = await this.tasks.findOne({ where: { id: taskId } });
     if (!task) throw new NotFoundException('Task not found');
 
-    const patch: Partial<ProfileEntity> = {
-      task: task,
-      updated_at: new Date().toISOString(),
-    };
-    await this.profiles.update({ id: numId }, patch);
+    // Assign task by loading entity and saving to avoid deep-partial typing issues
+    profile.task = task;
+    profile.updated_at = new Date().toISOString();
+    await this.profiles.save(profile);
     return { taskId } as ProfileTaskDto;
   }
 
@@ -285,11 +281,10 @@ export class ProfileController {
       where: { id: numId },
     });
     if (!profile) throw new NotFoundException('Not found');
-    const patch: Partial<ProfileEntity> = {
-      task: null,
-      updated_at: new Date().toISOString(),
-    };
-    await this.profiles.update({ id: numId }, patch);
+    // Unassign task by loading entity and saving
+    profile.task = null;
+    profile.updated_at = new Date().toISOString();
+    await this.profiles.save(profile);
     return { ok: true };
   }
 

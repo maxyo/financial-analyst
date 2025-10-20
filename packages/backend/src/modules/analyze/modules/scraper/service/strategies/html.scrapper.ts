@@ -1,4 +1,5 @@
 import * as $ from 'cheerio';
+import iconv from 'iconv-lite';
 
 import { Scraper } from '../../entities/scrapper.entity';
 import { ScrapedItem, ScraperType } from '../../types';
@@ -12,19 +13,62 @@ function resolveUrl(baseUrl: string, href: string) {
   }
 }
 
+function sleep(ms?: number) {
+  if (!ms || ms <= 0) return Promise.resolve();
+  return new Promise((res) => setTimeout(res, ms));
+}
+
+function parseCharsetFromContentType(ct: string | null | undefined): string | undefined {
+  if (!ct) return undefined;
+  const m = /charset=([^;]+)/i.exec(ct);
+  return m?.[1]?.trim();
+}
+
 export async function* htmlScraper(
   scrapper: Scraper<ScraperType.HTML>,
 ): AsyncGenerator<ScrapedItem<string>> {
   const cfg = scrapper.config;
   const headers = new Headers(cfg.headers || {});
+  if (!headers.has('user-agent')) {
+    headers.set(
+      'user-agent',
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 TradeScraper/1.0',
+    );
+  }
+  if (!headers.has('accept-language')) {
+    headers.set('accept-language', 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7');
+  }
 
   const fetchText = async (url: string, timeoutMs?: number) => {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), timeoutMs ?? cfg.timeoutMs ?? 15000);
+    const timeout = setTimeout(
+      () => controller.abort(),
+      timeoutMs ?? cfg.timeoutMs ?? 15000,
+    );
     try {
       const res = await fetch(url, { headers, signal: controller.signal });
-      const html = await res.text();
-      return html;
+      const buf = Buffer.from(await res.arrayBuffer());
+      const ct = res.headers.get('content-type');
+      let charset = parseCharsetFromContentType(ct)?.toLowerCase();
+
+      let text: string;
+      if (charset && charset !== 'utf-8' && iconv.encodingExists(charset)) {
+        text = iconv.decode(buf, charset);
+      } else {
+        // default attempt utf-8
+        text = buf.toString('utf-8');
+        // sniff meta charset if present and not utf-8
+        const metaMatch =
+          /<meta[^>]*charset=["']?([^"'>\s]+)/i.exec(text) ||
+          /charset=([a-zA-Z0-9_-]+)/i.exec(text);
+        const meta = metaMatch?.[1]?.toLowerCase();
+        if (meta && meta !== 'utf-8' && iconv.encodingExists(meta)) {
+          text = iconv.decode(buf, meta);
+        }
+      }
+      // polite delay between requests if configured
+      await sleep(cfg.delayMs);
+      return text;
     } finally {
       clearTimeout(timeout);
     }
@@ -174,8 +218,22 @@ export async function* htmlScraper(
   root('script, style, noscript').remove();
   for (const rule of cfg.selectors) {
     for (const item of root(rule.selector)) {
-      const value = root(item).text();
-      if (value != null) yield { content: value, title: rule.name ?? 'Unknown' };
+      const $el = root(item);
+      let value: string | undefined;
+      if (rule.attr) {
+        const raw = $el.attr(rule.attr) || '';
+        if (rule.attr.toLowerCase() === 'href') {
+          value = resolveUrl(cfg.url, raw);
+        } else {
+          value = raw;
+        }
+      } else if (rule.asHtml) {
+        value = $el.html() || '';
+      } else {
+        value = $el.text() || '';
+      }
+      value = value.trim();
+      if (value) yield { content: value, title: rule.name ?? 'Unknown' };
     }
   }
 }

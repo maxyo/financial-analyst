@@ -12,7 +12,7 @@ import {
   Post,
   Query
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ZodResponse } from 'nestjs-zod';
 import { In } from 'typeorm';
 

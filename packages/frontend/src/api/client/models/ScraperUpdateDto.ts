@@ -40,6 +40,8 @@ export type ScraperUpdateDto = {
                 linkAttr?: string;
                 titleSelector?: string;
                 contentSelector?: string;
+                dateSelector?: string;
+                dateAttr?: string;
                 baseUrl?: string;
                 maxDocsPerPage?: number;
             };

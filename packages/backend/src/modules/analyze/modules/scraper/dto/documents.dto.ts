@@ -23,7 +23,7 @@ export const DocumentCreateSchema = z.object({
   title: z.string().min(1),
   scraperId: z.uuid(),
   content: z.any(),
-  scrapedAt: z.union([z.string(), z.iso.date()]).optional(),
+  scrapedAt: isoDate.optional(),
   contentHash: z.string().optional(),
 });
 
@@ -32,7 +32,7 @@ export const DocumentUpdateSchema = z
     title: z.string().min(1).optional(),
     content: z.any().optional(),
     scraperId: z.string().uuid().optional(),
-    scrapedAt: z.union([z.string(), z.iso.date()]).optional(),
+    scrapedAt: isoDate.optional(),
     type: z.enum(DocumentType),
   })
   .refine((v) => Object.keys(v).length > 0, {

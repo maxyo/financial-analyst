@@ -10,7 +10,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ZodResponse } from 'nestjs-zod';
 
 import { OkResponseDto } from '../../../dto/response';
@@ -30,6 +30,7 @@ export class TasksController {
   constructor(private readonly tasks: TasksRepository) {}
 
   @Get()
+  @ApiOperation({ summary: 'List tasks', description: 'Returns a paginated list of tasks ordered by id DESC.' })
   @ZodResponse({ type: TasksListResponseDto })
   async list(@Query() q: TasksListQueryDto) {
     const take = q.limit;
@@ -39,6 +40,7 @@ export class TasksController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get task by ID', description: 'Fetch a single task by its numeric ID.' })
   @ZodResponse({ type: TaskDto })
   async getOne(@Param('id') id: string) {
     const numId = Number(id);
@@ -49,6 +51,7 @@ export class TasksController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Create task', description: 'Create a new analysis task with name, optional description, and prompt.' })
   @ZodResponse({ type: TaskDto, status: 201 })
   async create(@Body() body: TaskCreateDto) {
     const now = new Date().toISOString();
@@ -62,6 +65,7 @@ export class TasksController {
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Update task', description: 'Partially update task fields by numeric ID.' })
   @ZodResponse({ type: TaskDto })
   async update(@Param('id') id: string, @Body() body: TaskUpdateDto) {
     const numId = Number(id);
@@ -77,6 +81,7 @@ export class TasksController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete task', description: 'Delete a task by numeric ID.' })
   @ZodResponse({ type: OkResponseDto })
   async remove(@Param('id') id: string) {
     const numId = Number(id);

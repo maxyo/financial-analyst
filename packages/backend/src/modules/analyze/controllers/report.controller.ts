@@ -10,7 +10,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ZodResponse } from 'nestjs-zod';
 
 import { OkResponseDto } from '../../../dto/response';
@@ -22,7 +22,6 @@ import {
   ReportsListResponseDto, ReportsListResponseSchema,
   ReportUpdateDto,
 } from '../dto/report.dto';
-import { ReportEntity } from '../entities/report/report.entity';
 import { AnalysisProfilesRepository } from '../repositories/analysis-profiles.repository';
 import { ReportsRepository } from '../repositories/reports.repository';
 
@@ -35,6 +34,7 @@ export class ReportController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'List reports', description: 'Returns a paginated list of reports, optionally filtered by profile_id, ordered by created_at DESC.' })
   @ZodResponse({ type: ReportsListResponseDto })
   async list(@Query() q: ReportsListQueryDto) {
     const take = q.limit;
@@ -56,6 +56,7 @@ export class ReportController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get report by ID', description: 'Fetch a single report by its UUID.' })
   @ZodResponse({ type: ReportDto })
   async getOne(@Param('id') id: string) {
     const item = await this.reports.findOne({ where: { id } });
@@ -64,6 +65,7 @@ export class ReportController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Create report', description: 'Create a new report for a given analysis profile and payload.' })
   @ZodResponse({ type: ReportDto, status: 201 })
   async create(@Body() body: ReportCreateDto) {
     const profileId = Number(body?.profile_id);
@@ -82,22 +84,30 @@ export class ReportController {
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Update report', description: 'Partially update report fields by UUID.' })
   @ZodResponse({ type: ReportDto })
   async update(@Param('id') id: string, @Body() body: ReportUpdateDto) {
     const item = await this.reports.findOne({ where: { id } });
     if (!item) throw new NotFoundException('Not found');
-    const patch: Partial<ReportEntity> = body;
-    await this.reports.update({ id }, patch);
 
-    const result = await this.reports.findOne({ where: { id } });
-    if (!result) {
+    // Assign allowed fields and save to avoid deep-partial typing issues
+    if (body.type !== undefined) item.type = body.type;
+    if (body.content !== undefined) item.content = body.content;
+    if (body.llmModel !== undefined) item.llmModel = body.llmModel;
+    if (body.tokens_in !== undefined) item.tokens_in = body.tokens_in;
+    if (body.tokens_out !== undefined) item.tokens_out = body.tokens_out;
+    if (body.cost !== undefined) item.cost = body.cost;
+
+    const saved = await this.reports.save(item);
+    if (!saved) {
       throw new InternalServerErrorException('Failed to update report');
     }
 
-    return ReportSchema.parse(result);
+    return ReportSchema.parse(saved);
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete report', description: 'Delete a report by UUID.' })
   @ZodResponse({ type: OkResponseDto })
   async remove(@Param('id') id: string) {
     const item = await this.reports.findOne({ where: { id } });

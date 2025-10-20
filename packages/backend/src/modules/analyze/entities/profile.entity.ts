@@ -2,6 +2,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn, ManyToOne, JoinColum
 
 import { DocumentSourceEntity } from './source.entity';
 import { TaskEntity } from './task.entity';
+import { TopicEntity } from './topic.entity';
 
 @Entity({ name: 'profile' })
 export class ProfileEntity {
@@ -27,4 +28,9 @@ export class ProfileEntity {
   @ManyToOne(() => TaskEntity, { nullable: true })
   @JoinColumn({ name: 'task_id', referencedColumnName: 'id' })
   task!: TaskEntity | null;
+
+  // Optional topic this profile belongs to
+  @ManyToOne(() => TopicEntity, (topic) => topic.profiles, { nullable: true })
+  @JoinColumn({ name: 'topic_id', referencedColumnName: 'id' })
+  topic!: TopicEntity | null;
 }

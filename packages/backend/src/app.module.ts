@@ -14,6 +14,7 @@ import { ProfileEntity } from './modules/analyze/entities/profile.entity';
 import { ReportEntity } from './modules/analyze/entities/report/report.entity';
 import { DocumentSourceEntity } from './modules/analyze/entities/source.entity';
 import { TaskEntity } from './modules/analyze/entities/task.entity';
+import { TopicEntity } from './modules/analyze/entities/topic.entity';
 import { CollectionEntity } from './modules/analyze/modules/scraper/entities/collection.entity';
 import { DocumentEntity } from './modules/analyze/modules/scraper/entities/document.entity';
 import { Scraper } from './modules/analyze/modules/scraper/entities/scrapper.entity';
@@ -45,6 +46,7 @@ import { Scraper } from './modules/analyze/modules/scraper/entities/scrapper.ent
       ReportEntity,
       Scraper,
       TaskEntity,
+      TopicEntity,
       CollectionEntity,
       ProfileExecutionEntity,
     ]),
