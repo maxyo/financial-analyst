@@ -12,7 +12,7 @@ import {
   Post,
   Query
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { createZodDto, ZodResponse } from 'nestjs-zod';
 import { z } from 'zod';
 
@@ -60,6 +60,7 @@ export class ProfileController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'List profiles', description: 'Returns a paginated list of analysis profiles. Sorted by id DESC. Query params: limit, offset.' })
   @ZodResponse({ type: ProfilesListResponseDto })
   async list(@Query() q: ProfilesListQueryDto) {
     const take = q.limit ?? 50;
@@ -78,6 +79,7 @@ export class ProfileController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get profile', description: 'Returns a profile by numeric identifier.' })
   @ZodResponse({ type: ProfileDto, description: 'Profile by id' })
   async getOne(@Param('id') id: string) {
     const numId = Number(id);
@@ -90,6 +92,7 @@ export class ProfileController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Create profile', description: 'Creates a new analysis profile.' })
   @ZodResponse({
     type: ProfileDto,
     status: 201,
@@ -108,6 +111,7 @@ export class ProfileController {
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Update profile', description: 'Partially updates profile fields by ID.' })
   @ZodResponse({ type: ProfileDto, description: 'Updated profile' })
   async update(@Param('id') id: string, @Body() body: ProfileUpdateDto) {
     const numId = Number(id);
@@ -126,6 +130,7 @@ export class ProfileController {
   }
 
   @Get(':id/document-sources')
+  @ApiOperation({ summary: 'List profile document sources', description: 'Returns a paginated list of documents linked to the profile.' })
   @ZodResponse({
     type: DocumentSourcesListResponseDto,
     description: 'List document sources assigned to profile',
@@ -156,6 +161,7 @@ export class ProfileController {
   }
 
   @Post(':id/document-sources')
+  @ApiOperation({ summary: 'Assign document to profile', description: 'Creates a profile-document link if it does not exist.' })
   @ZodResponse({
     type: DocumentSourceDto,
     status: 201,
@@ -192,6 +198,7 @@ export class ProfileController {
   }
 
   @Delete(':id/document-sources/:documentId')
+  @ApiOperation({ summary: 'Unassign document from profile', description: 'Deletes the profile-document link.' })
   @ZodResponse({
     type: OkResponseDto,
     description: 'Unassign result',
@@ -220,6 +227,7 @@ export class ProfileController {
   }
 
   @Post(':id/task')
+  @ApiOperation({ summary: 'Assign task to profile', description: 'Links an analysis task to the profile.' })
   @ZodResponse({
     type: ProfileTaskDto,
     status: 201,
@@ -249,6 +257,7 @@ export class ProfileController {
   }
 
   @Get(':id/task')
+  @ApiOperation({ summary: 'Get profile task', description: 'Returns the identifier of the task assigned to the profile (or null).' })
   @ZodResponse({
     type: ProfileTaskDto,
     description: 'Get assigned task for profile',
@@ -268,6 +277,7 @@ export class ProfileController {
   }
 
   @Delete(':id/task')
+  @ApiOperation({ summary: 'Unassign task from profile', description: 'Unlinks the previously assigned analysis task from the profile.' })
   @ZodResponse({
     type: OkResponseDto,
     description: 'Unassign task from profile',
@@ -289,6 +299,7 @@ export class ProfileController {
   }
 
   @Post(':id/run')
+  @ApiOperation({ summary: 'Run aggregate analysis', description: 'Enqueues an aggregate analysis job for the profile.' })
   @ZodResponse({
     type: ProfileRunResponseDto,
     description: 'Enqueue aggregate analysis job for profile',
@@ -330,6 +341,7 @@ export class ProfileController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete profile', description: 'Deletes a profile by ID.' })
   @ZodResponse({
     type: OkResponseDto,
     description: 'Delete result',

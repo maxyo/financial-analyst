@@ -44,8 +44,8 @@ export const ScraperCreateSchema = z.object({
 export const ScraperUpdateSchema = ScraperCreateSchema;
 
 // Output schemas include id inside data
-const ScraperOutputHtmlSchema = ScraperCreateHtmlSchema.extend({ id: z.uuid() });
-const ScraperOutputApiSchema = ScraperCreateApiSchema.extend({ id: z.uuid() });
+const ScraperOutputHtmlSchema = ScraperCreateHtmlSchema.extend({ id: z.uuid(), topicId: z.number().int().positive().nullable().optional() });
+const ScraperOutputApiSchema = ScraperCreateApiSchema.extend({ id: z.uuid(), topicId: z.number().int().positive().nullable().optional() });
 
 export const ScraperSchema = z.object({
   data: z.discriminatedUnion('type', [

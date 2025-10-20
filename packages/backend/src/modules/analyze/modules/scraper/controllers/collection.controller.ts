@@ -10,7 +10,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { applyFilter } from '@trade/filter';
 import { createZodDto, ZodResponse } from 'nestjs-zod';
 import { z } from 'zod';
@@ -39,6 +39,7 @@ export class CollectionController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'List collections', description: 'Returns a paginated list of collections, optionally filtered by name (q). Ordered by created_at DESC.' })
   @ZodResponse({ type: CollectionsListResponseDto })
   async list(@Query() q: CollectionsListQueryDto) {
     const take = q.limit;
@@ -60,6 +61,7 @@ export class CollectionController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get collection by ID', description: 'Fetch a single collection by its UUID.' })
   @ZodResponse({ type: CollectionDto })
   async getOne(@Param('id') id: string) {
     const item = await this.collections.findOne({ where: { id } });
@@ -68,6 +70,7 @@ export class CollectionController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Create collection', description: 'Create a new collection with name, optional description, and optional filter definition.' })
   @ZodResponse({ type: CollectionDto })
   async create(@Body() body: CollectionCreateDto) {
     const entity = this.collections.create(body);
@@ -76,6 +79,7 @@ export class CollectionController {
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Update collection', description: 'Partially update a collection by UUID.' })
   @ZodResponse({ type: CollectionDto })
   async update(@Param('id') id: string, @Body() body: CollectionUpdateDto) {
     const item = await this.collections.findOne({ where: { id } });
@@ -91,6 +95,7 @@ export class CollectionController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete collection', description: 'Delete a collection by UUID.' })
   @ZodResponse({ type: OkResponseDto })
   async remove(@Param('id') id: string) {
     const item = await this.collections.findOne({ where: { id } });
@@ -100,6 +105,7 @@ export class CollectionController {
   }
 
   @Get(':id/documents')
+  @ApiOperation({ summary: 'List documents in collection', description: 'Returns documents that match the collection filters with pagination (ordered by scraped_at DESC).' })
   @ZodResponse({ type: createZodDto(z.array(DocumentSchema)) })
   async documents(
     @Param('id') id: string,

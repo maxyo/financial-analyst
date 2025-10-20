@@ -73,6 +73,7 @@ export class DocumentsController {
     return item as T extends DocumentEntity[] ? DocumentDto[] : DocumentDto;
   }
   @Get()
+  @ApiOperation({ summary: 'List documents', description: 'Returns a paginated list of documents with filters (title, free-text q, scraperId, dateFrom/dateTo). Ordered by scrapedAt DESC.' })
   @ZodResponse({ type: DocumentsListResponseDto })
   async list(@Query() q: DocumentsListQueryDto) {
     const take = q.limit;
@@ -110,6 +111,7 @@ export class DocumentsController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get document by ID', description: 'Fetch a single document by its UUID and include its scraper display info.' })
   @ZodResponse({ type: DocumentDto })
   async getOne(@Param('id') id: string) {
     const item = await this.documents.findOne({ where: { id } });
@@ -119,6 +121,7 @@ export class DocumentsController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Create document', description: 'Create a new document. Content is normalized to string; contentHash is auto-computed if not provided.' })
   @ZodResponse({ type: DocumentDto })
   async create(@Body() body: DocumentCreateDto) {
     const title = body.title;
@@ -141,6 +144,7 @@ export class DocumentsController {
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Update document', description: 'Partially update document fields by UUID. Recomputes contentHash when content changes.' })
   @ZodResponse({ type: DocumentDto })
   async update(@Param('id') id: string, @Body() body: DocumentUpdateDto) {
     const item = await this.documents.findOne({ where: { id } });
@@ -169,6 +173,7 @@ export class DocumentsController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete document', description: 'Delete a document by UUID.' })
   @ZodResponse({ type: OkResponseDto })
   async remove(@Param('id') id: string) {
     const item = await this.documents.findOne({ where: { id } });

@@ -1,20 +1,28 @@
 import { z } from 'zod';
 
-export const TaskSchema = z.object({
-  id: z.number().int().positive(),
-  name: z.string().min(1),
-  description: z.string().nullable(),
-  prompt: z.string().min(1),
-  created_at: z.string(),
-  updated_at: z.string(),
-});
+export const TaskSchema = z
+  .object({
+    id: z.number().int().positive().describe('Идентификатор задачи'),
+    name: z.string().min(1).describe('Название задачи'),
+    description: z.string().nullable().describe('Описание задачи (может отсутствовать)'),
+    prompt: z.string().min(1).describe('Подсказка/шаблон запроса для ИИ'),
+    created_at: z.string().describe('Время создания (ISO 8601)'),
+    updated_at: z.string().describe('Время обновления (ISO 8601)'),
+  })
+  .describe('Задача анализа');
 export type TaskDto = z.infer<typeof TaskSchema>;
 
-export const TaskCreateSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().nullable().optional(),
-  prompt: z.string().min(1),
-});
+export const TaskCreateSchema = z
+  .object({
+    name: z.string().min(1).describe('Название задачи'),
+    description: z
+      .string()
+      .nullable()
+      .optional()
+      .describe('Описание задачи (необязательно)'),
+    prompt: z.string().min(1).describe('Подсказка/шаблон запроса для ИИ'),
+  })
+  .describe('Создание задачи');
 export type TaskCreateDto = z.infer<typeof TaskCreateSchema>;
 
 export const TaskUpdateSchema = z
