@@ -5,16 +5,16 @@ export const TopicSchema = z.object({
   id: z.number().int().positive(),
   name: z.string().min(1),
   description: z.string().nullable(),
-  parent_id: z.number().int().positive().nullable(),
-  created_at: z.string(),
-  updated_at: z.string(),
+  parentId: z.number().int().positive().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
 });
 export type TopicDto = z.infer<typeof TopicSchema>;
 
 export const TopicCreateSchema = z.object({
   name: z.string().min(1),
   description: z.string().nullable().optional(),
-  parent_id: z.number().int().positive().nullable().optional(),
+  parentId: z.number().int().positive().nullable().optional(),
 });
 export type TopicCreateDto = z.infer<typeof TopicCreateSchema>;
 
@@ -22,7 +22,7 @@ export const TopicUpdateSchema = z
   .object({
     name: z.string().min(1).optional(),
     description: z.string().nullable().optional(),
-    parent_id: z.number().int().positive().nullable().optional(),
+    parentId: z.number().int().positive().nullable().optional(),
   })
   .refine((v) => Object.keys(v).length > 0, {
     message: 'At least one field must be provided',

@@ -23,9 +23,9 @@ export class TopicsController {
       id: t.id,
       name: t.name,
       description: t.description ?? null,
-      parent_id: t.parent ? t.parent.id : null,
-      created_at: t.created_at,
-      updated_at: t.updated_at,
+      parentId: t.parent ? t.parent.id : null,
+      createdAt: t.created_at,
+      updatedAt: t.updated_at,
     }));
     return { items: shaped, total, limit: take, offset: skip };
   }
@@ -42,9 +42,9 @@ export class TopicsController {
       id: item.id,
       name: item.name,
       description: item.description ?? null,
-      parent_id: item.parent ? item.parent.id : null,
-      created_at: item.created_at,
-      updated_at: item.updated_at,
+      parentId: item.parent ? item.parent.id : null,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at,
     };
     return shaped;
   }
@@ -56,8 +56,8 @@ export class TopicsController {
     const now = new Date().toISOString();
 
     let parent: TopicEntity | null = null;
-    if (body.parent_id != null) {
-      const p = await this.topics.findOne({ where: { id: body.parent_id } });
+    if (body.parentId != null) {
+      const p = await this.topics.findOne({ where: { id: body.parentId } });
       if (!p) throw new NotFoundException('Parent topic not found');
       parent = p;
     }
@@ -75,9 +75,9 @@ export class TopicsController {
       id: saved.id,
       name: saved.name,
       description: saved.description ?? null,
-      parent_id: saved.parent ? saved.parent.id : null,
-      created_at: saved.created_at,
-      updated_at: saved.updated_at,
+      parentId: saved.parent ? saved.parent.id : null,
+      createdAt: saved.created_at,
+      updatedAt: saved.updated_at,
     };
   }
 
@@ -93,11 +93,11 @@ export class TopicsController {
     // apply changes to loaded entity and save to avoid partial-type casts
     if (body.name !== undefined) item.name = body.name;
     if (body.description !== undefined) item.description = body.description;
-    if ('parent_id' in body) {
-      if (body.parent_id == null) {
+    if ('parentId' in body) {
+      if (body.parentId == null) {
         item.parent = null;
       } else {
-        const p = await this.topics.findOne({ where: { id: body.parent_id } });
+        const p = await this.topics.findOne({ where: { id: body.parentId } });
         if (!p) throw new NotFoundException('Parent topic not found');
         if (p.id === numId) throw new NotFoundException('Parent cannot be self');
         item.parent = p;
@@ -114,9 +114,9 @@ export class TopicsController {
       id: reloaded.id,
       name: reloaded.name,
       description: reloaded.description ?? null,
-      parent_id: reloaded.parent ? reloaded.parent.id : null,
-      created_at: reloaded.created_at,
-      updated_at: reloaded.updated_at,
+      parentId: reloaded.parent ? reloaded.parent.id : null,
+      createdAt: reloaded.created_at,
+      updatedAt: reloaded.updated_at,
     };
   }
 

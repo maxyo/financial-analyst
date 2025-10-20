@@ -27,8 +27,8 @@ export const CollectionSchema = z.object({
   name: z.string(),
   description: z.string().nullable(),
   filters: CollectionFiltersSchema.nullable(),
-  created_at: z.iso.date(),
-  updated_at: z.iso.date(),
+  createdAt: z.iso.date(),
+  updatedAt: z.iso.date(),
 });
 
 export const CollectionsListQuerySchema = z.object({

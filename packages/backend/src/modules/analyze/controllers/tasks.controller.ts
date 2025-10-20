@@ -36,7 +36,15 @@ export class TasksController {
     const take = q.limit;
     const skip = q.offset;
     const [items, total] = await this.tasks.findAndCount({ order: { id: 'DESC' as const }, take, skip });
-    return { items, total, limit: take, offset: skip };
+    const shaped = items.map((t) => ({
+      id: t.id,
+      name: t.name,
+      description: t.description ?? null,
+      prompt: t.prompt,
+      createdAt: t.created_at,
+      updatedAt: t.updated_at,
+    }));
+    return { items: shaped, total, limit: take, offset: skip };
   }
 
   @Get(':id')
@@ -47,7 +55,14 @@ export class TasksController {
     if (!Number.isFinite(numId)) throw new NotFoundException('Not found');
     const item = await this.tasks.findOne({ where: { id: numId } });
     if (!item) throw new NotFoundException('Not found');
-    return item;
+    return {
+      id: item.id,
+      name: item.name,
+      description: item.description ?? null,
+      prompt: item.prompt,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at,
+    };
   }
 
   @Post()
@@ -61,7 +76,15 @@ export class TasksController {
       updated_at: now,
     });
 
-    return await this.tasks.save(entity);
+    const saved = await this.tasks.save(entity);
+    return {
+      id: saved.id,
+      name: saved.name,
+      description: saved.description ?? null,
+      prompt: saved.prompt,
+      createdAt: saved.created_at,
+      updatedAt: saved.updated_at,
+    };
   }
 
   @Patch(':id')
@@ -77,7 +100,14 @@ export class TasksController {
     await this.tasks.update({ id: numId }, body);
     const fresh = await this.tasks.findOne({ where: { id: numId } });
     if(!fresh) throw new InternalServerErrorException('Failed to update task');
-    return fresh;
+    return {
+      id: fresh.id,
+      name: fresh.name,
+      description: fresh.description ?? null,
+      prompt: fresh.prompt,
+      createdAt: fresh.created_at,
+      updatedAt: fresh.updated_at,
+    };
   }
 
   @Delete(':id')

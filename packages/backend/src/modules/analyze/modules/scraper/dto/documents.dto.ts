@@ -1,6 +1,7 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
+import { ScraperSchema } from './scrapers.dto';
 import { isoDate } from '../../../../../dto/utils';
 import { DocumentType } from '../entities/document.entity';
 
@@ -14,10 +15,7 @@ export const DocumentsListQuerySchema = z.object({
   dateTo: z.string().optional(),
 });
 
-export const ScraperShortSchema = z.object({
-  id: z.uuid(),
-  name: z.string(),
-});
+export const ScraperShortSchema = ScraperSchema;
 
 export const DocumentCreateSchema = z.object({
   title: z.string().min(1),
@@ -58,8 +56,12 @@ export const DocumentsListResponseSchema = z.object({
   offset: z.number().int().min(0),
 });
 
-export class DocumentsListQueryDto extends createZodDto(DocumentsListQuerySchema) {}
+export class DocumentsListQueryDto extends createZodDto(
+  DocumentsListQuerySchema,
+) {}
 export class DocumentCreateDto extends createZodDto(DocumentCreateSchema) {}
 export class DocumentUpdateDto extends createZodDto(DocumentUpdateSchema) {}
 export class DocumentDto extends createZodDto(DocumentSchema) {}
-export class DocumentsListResponseDto extends createZodDto(DocumentsListResponseSchema) {}
+export class DocumentsListResponseDto extends createZodDto(
+  DocumentsListResponseSchema,
+) {}

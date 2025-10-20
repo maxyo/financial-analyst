@@ -28,9 +28,9 @@ export const ProfileSchema = z
     id: z.number().int().positive().describe('Profile ID'),
     name: z.string().describe('Profile name'),
     description: z.string().nullable().describe('Profile description (may be absent)'),
-    created_at: z.string().describe('Creation time (ISO 8601)'),
-    updated_at: z.string().describe('Update time (ISO 8601)'),
-    topic_id: z
+    createdAt: z.string().describe('Creation time (ISO 8601)'),
+    updatedAt: z.string().describe('Update time (ISO 8601)'),
+    topicId: z
       .number()
       .int()
       .positive()

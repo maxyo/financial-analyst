@@ -34,13 +34,13 @@ export class ReportController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'List reports', description: 'Returns a paginated list of reports, optionally filtered by profile_id, ordered by created_at DESC.' })
+  @ApiOperation({ summary: 'List reports', description: 'Returns a paginated list of reports, optionally filtered by profileId, ordered by createdAt DESC.' })
   @ZodResponse({ type: ReportsListResponseDto })
   async list(@Query() q: ReportsListQueryDto) {
     const take = q.limit;
     const skip = q.offset;
     const where: Record<string, number> = {};
-    if (q.profile_id != null) where.profile_id = q.profile_id;
+    if (q.profileId != null) where.profile_id = q.profileId;
     const [items, total] = await this.reports.findAndCount({
       where,
       order: { created_at: 'DESC' as const },
@@ -68,7 +68,7 @@ export class ReportController {
   @ApiOperation({ summary: 'Create report', description: 'Create a new report for a given analysis profile and payload.' })
   @ZodResponse({ type: ReportDto, status: 201 })
   async create(@Body() body: ReportCreateDto) {
-    const profileId = Number(body?.profile_id);
+    const profileId = Number(body?.profileId);
     const profile = await this.profiles.findOne({
       where: { id: profileId },
     });
@@ -78,6 +78,8 @@ export class ReportController {
       ...body,
       profile_id: profileId,
       created_at: now,
+      tokens_in: body.tokensIn,
+      tokens_out: body.tokensOut,
     });
 
     return ReportSchema.parse(await this.reports.save(entity));
@@ -94,8 +96,8 @@ export class ReportController {
     if (body.type !== undefined) item.type = body.type;
     if (body.content !== undefined) item.content = body.content;
     if (body.llmModel !== undefined) item.llmModel = body.llmModel;
-    if (body.tokens_in !== undefined) item.tokens_in = body.tokens_in;
-    if (body.tokens_out !== undefined) item.tokens_out = body.tokens_out;
+    if (body.tokensIn !== undefined) item.tokens_in = body.tokensIn;
+    if (body.tokensOut !== undefined) item.tokens_out = body.tokensOut;
     if (body.cost !== undefined) item.cost = body.cost;
 
     const saved = await this.reports.save(item);

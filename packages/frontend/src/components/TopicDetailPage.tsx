@@ -227,25 +227,25 @@ export function TopicDetailPage() {
               ) : (
                 <div className="grid gap-4">
                   {scrapers.map((scraper) => (
-                    <Card key={scraper.data.id}>
+                    <Card key={scraper.id}>
                       <CardHeader>
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <CardTitle className="text-lg">
-                                {scraper.data.name}
+                                {scraper.name}
                               </CardTitle>
-                              <Badge variant="secondary">{scraper.data.type}</Badge>
+                              <Badge variant="secondary">{scraper.type}</Badge>
                             </div>
                             <CardDescription className="mt-1 line-clamp-1">
-                              {scraper.data.config.url}
+                              {scraper.config.url}
                             </CardDescription>
                           </div>
                           <div className="flex gap-2">
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => runScraper(scraper.data.id)}
+                              onClick={() => runScraper(scraper.id)}
                             >
                               <Play className="w-4 h-4 mr-2" />
                               Run
@@ -255,7 +255,7 @@ export function TopicDetailPage() {
                               variant="outline"
                               onClick={() =>
                                 navigate(
-                                  `/topics/${topicId}/scrapers/${scraper.data.id}/view`,
+                                  `/topics/${topicId}/scrapers/${scraper.id}/view`,
                                 )
                               }
                             >
@@ -266,7 +266,7 @@ export function TopicDetailPage() {
                               variant="outline"
                               onClick={() =>
                                 navigate(
-                                  `/topics/${topicId}/scrapers/${scraper.data.id}/edit`,
+                                  `/topics/${topicId}/scrapers/${scraper.id}/edit`,
                                 )
                               }
                             >

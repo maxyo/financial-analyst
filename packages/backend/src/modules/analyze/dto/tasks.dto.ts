@@ -6,8 +6,8 @@ export const TaskSchema = z
     name: z.string().min(1).describe('Название задачи'),
     description: z.string().nullable().describe('Описание задачи (может отсутствовать)'),
     prompt: z.string().min(1).describe('Подсказка/шаблон запроса для ИИ'),
-    created_at: z.string().describe('Время создания (ISO 8601)'),
-    updated_at: z.string().describe('Время обновления (ISO 8601)'),
+    createdAt: z.string().describe('Время создания (ISO 8601)'),
+    updatedAt: z.string().describe('Время обновления (ISO 8601)'),
   })
   .describe('Задача анализа');
 export type TaskDto = z.infer<typeof TaskSchema>;

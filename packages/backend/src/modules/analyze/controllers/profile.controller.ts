@@ -70,8 +70,16 @@ export class ProfileController {
       take,
       skip,
     });
+    const shaped = items.map((p) => ({
+      id: p.id,
+      name: p.name,
+      description: p.description ?? null,
+      createdAt: p.created_at,
+      updatedAt: p.updated_at,
+      topicId: (p as any).topic ? (p as any).topic.id : undefined,
+    }));
     return {
-      items,
+      items: shaped as any,
       total,
       limit: take,
       offset: skip,
@@ -86,9 +94,16 @@ export class ProfileController {
     if (!Number.isFinite(numId)) {
       throw new BadRequestException('id must be a number');
     }
-    const item = await this.profiles.findOne({ where: { id: numId } });
+    const item = await this.profiles.findOne({ where: { id: numId }, relations: ['topic'] });
     if (!item) throw new NotFoundException('Not found');
-    return item;
+    return {
+      id: item.id,
+      name: item.name,
+      description: item.description ?? null,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at,
+      topicId: item.topic ? item.topic.id : null,
+    } as any;
   }
 
   @Post()
@@ -107,7 +122,15 @@ export class ProfileController {
       updated_at: now,
     });
 
-    return await this.profiles.save(entity);
+    const saved = await this.profiles.save(entity);
+    return {
+      id: saved.id,
+      name: saved.name,
+      description: saved.description ?? null,
+      createdAt: saved.created_at,
+      updatedAt: saved.updated_at,
+      topicId: null,
+    } as any;
   }
 
   @Patch(':id')
@@ -126,7 +149,14 @@ export class ProfileController {
     const saved = await this.profiles.save(item);
     if (!saved)
       {throw new InternalServerErrorException('Failed to update profile');}
-    return saved;
+    return {
+      id: saved.id,
+      name: saved.name,
+      description: saved.description ?? null,
+      createdAt: saved.created_at,
+      updatedAt: saved.updated_at,
+      topicId: undefined,
+    } as any;
   }
 
   @Get(':id/document-sources')

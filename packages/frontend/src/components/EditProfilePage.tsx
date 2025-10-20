@@ -41,11 +41,11 @@ export function EditProfilePage() {
       );
       const taskInfo = await ProfilesService.profileControllerGetTask(
         String(profileId),
-      ).catch(() => ({ task_id: null }) as any);
+      ).catch(() => ({ taskId: null }) as any);
       setFormData({
         name: profile.name,
         description: profile.description || '',
-        task_id: (taskInfo as any).task_id ?? null,
+        task_id: (taskInfo as any).taskId ?? null,
       });
     }
   };
@@ -64,20 +64,19 @@ export function EditProfilePage() {
           );
         } else if (typeof formData.task_id === 'number') {
           await ProfilesService.profileControllerAssignTask(String(profileId), {
-            task_id: formData.task_id,
-          });
+            taskId: formData.task_id,
+          } as any);
         }
         toast.success('Profile updated successfully');
       } else {
         const created = await ProfilesService.profileControllerCreate({
           name: formData.name,
           description: formData.description || null,
-          topic_id: Number(topicId) as any,
-        });
+        } as any);
         if (formData.task_id != null) {
           await ProfilesService.profileControllerAssignTask(
             String(created.id),
-            { task_id: formData.task_id },
+            { taskId: formData.task_id } as any,
           );
         }
         toast.success('Profile created successfully');

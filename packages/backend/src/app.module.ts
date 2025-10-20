@@ -3,11 +3,12 @@ import * as path from 'path';
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_PIPE } from '@nestjs/core';
+import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ZodValidationPipe } from 'nestjs-zod';
 
 import { HealthController } from './controllers/health.controller';
+import { ZodSerializerInterceptor } from './dto/interceptor';
 import { AnalyzeModule } from './modules/analyze/analyze.module';
 import { ProfileExecutionEntity } from './modules/analyze/entities/profile-execution.entity';
 import { ProfileEntity } from './modules/analyze/entities/profile.entity';
@@ -66,6 +67,10 @@ import { Scraper } from './modules/analyze/modules/scraper/entities/scrapper.ent
     {
       provide: APP_PIPE,
       useClass: ZodValidationPipe,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ZodSerializerInterceptor,
     },
   ],
   exports: [],
