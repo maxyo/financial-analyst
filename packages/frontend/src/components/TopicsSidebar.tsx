@@ -121,25 +121,23 @@ export function TopicsSidebar() {
         <DialogTrigger />
         <DialogContent>
           <DialogTitle>New Topic</DialogTitle>
-          <DialogDescription>
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor="topic-name">Name</Label>
-                <Input
-                  id="topic-name"
-                  placeholder="Enter topic name"
-                  value={newTopicName}
-                  onChange={(e) => setNewTopicName(e.target.value)}
-                  autoFocus
-                />
-              </div>
-              {error ? (
-                <div className="text-destructive text-sm" role="alert">
-                  {error}
-                </div>
-              ) : null}
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <Label htmlFor="topic-name">Name</Label>
+              <Input
+                id="topic-name"
+                placeholder="Enter topic name"
+                value={newTopicName}
+                onChange={(e) => setNewTopicName(e.target.value)}
+                autoFocus
+              />
             </div>
-          </DialogDescription>
+            {error ? (
+              <div className="text-destructive text-sm" role="alert">
+                {error}
+              </div>
+            ) : null}
+          </div>
           <DialogFooter>
             <Button
               variant="outline"
