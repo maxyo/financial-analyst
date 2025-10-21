@@ -237,9 +237,9 @@ export const getResponseBody = async (response: Response): Promise<any> => {
                 const jsonTypes = ['application/json', 'application/problem+json']
                 const isJSON = jsonTypes.some(type => contentType.toLowerCase().startsWith(type));
                 if (isJSON) {
-                    return await response.json();
+                    return await response.clone().json();
                 } else {
-                    return await response.text();
+                    return await response.clone().text();
                 }
             }
         } catch (error) {
