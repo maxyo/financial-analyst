@@ -8,6 +8,10 @@ export type ProfileCreateDto = {
      */
     name: string;
     /**
+     * Topic ID
+     */
+    topicId: number;
+    /**
      * Profile description (optional)
      */
     description?: (string | null);

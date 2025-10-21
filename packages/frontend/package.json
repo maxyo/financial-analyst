@@ -55,7 +55,8 @@
     "@types/react": "^19.2.2",
     "@vitejs/plugin-react-swc": "^3.10.2",
     "typescript": "^5.9.0-beta",
-    "vite": "7.1.11"
+    "vite": "7.1.11",
+    "openapi-typescript-codegen": "^0.29.0"
   },
   "scripts": {
     "dev": "vite",

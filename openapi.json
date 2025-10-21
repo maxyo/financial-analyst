@@ -17,6 +17,628 @@
         ]
       }
     },
+    "/api/documents": {
+      "get": {
+        "operationId": "DocumentsController_list",
+        "summary": "List documents",
+        "description": "Returns a paginated list of documents with filters (title, free-text q, scraperId, dateFrom/dateTo). Ordered by scrapedAt DESC.",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "maximum": 9007199254740991,
+              "default": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "title",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scraperId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentsListResponseDto_Output"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      },
+      "post": {
+        "operationId": "DocumentsController_create",
+        "summary": "Create document",
+        "description": "Create a new document. Content is normalized to string; contentHash is auto-computed if not provided.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentDto_Output"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/api/documents/{id}": {
+      "get": {
+        "operationId": "DocumentsController_getOne",
+        "summary": "Get document by ID",
+        "description": "Fetch a single document by its UUID and include its scraper display info.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentDto_Output"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      },
+      "patch": {
+        "operationId": "DocumentsController_update",
+        "summary": "Update document",
+        "description": "Partially update document fields by UUID. Recomputes contentHash when content changes.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentDto_Output"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      },
+      "delete": {
+        "operationId": "DocumentsController_remove",
+        "summary": "Delete document",
+        "description": "Delete a document by UUID.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto_Output"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/api/scrapers": {
+      "get": {
+        "operationId": "ScrapersController_list",
+        "summary": "List scrapers",
+        "description": "Returns a paginated list of configured scrapers ordered by name.",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Количество элементов на странице",
+            "schema": {
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Смещение для пагинации",
+            "schema": {
+              "minimum": 0,
+              "maximum": 9007199254740991,
+              "default": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScrapersListResponseDto_Output"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Scrapers"
+        ]
+      },
+      "post": {
+        "operationId": "ScrapersController_create",
+        "summary": "Create scraper",
+        "description": "Create a new scraper of type HTML or API with configuration and optional post-processors.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScraperCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScraperDto_Output"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Scrapers"
+        ]
+      }
+    },
+    "/api/scrapers/{id}": {
+      "get": {
+        "operationId": "ScrapersController_getOne",
+        "summary": "Get scraper by ID",
+        "description": "Fetch a single scraper by its UUID.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScraperDto_Output"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Scrapers"
+        ]
+      },
+      "patch": {
+        "operationId": "ScrapersController_update",
+        "summary": "Update scraper",
+        "description": "Partially update scraper fields by ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScraperUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScraperDto_Output"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Scrapers"
+        ]
+      },
+      "delete": {
+        "operationId": "ScrapersController_remove",
+        "summary": "Delete scraper",
+        "description": "Delete a scraper by ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto_Output"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Scrapers"
+        ]
+      }
+    },
+    "/api/scrapers/{id}/run": {
+      "post": {
+        "operationId": "ScrapersController_run",
+        "summary": "Run scraper",
+        "description": "Enqueue a background job to run the scraper. Requires Redis to be configured.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScraperRunResponseDto_Output"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Scrapers"
+        ]
+      }
+    },
+    "/api/collections": {
+      "get": {
+        "operationId": "CollectionController_list",
+        "summary": "List collections",
+        "description": "Returns a paginated list of collections, optionally filtered by name (q). Ordered by created_at DESC.",
+        "parameters": [],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionsListResponseDto_Output"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Collections"
+        ]
+      },
+      "post": {
+        "operationId": "CollectionController_create",
+        "summary": "Create collection",
+        "description": "Create a new collection with name, optional description, and optional filter definition.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Function"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionDto_Output"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Collections"
+        ]
+      }
+    },
+    "/api/collections/{id}": {
+      "get": {
+        "operationId": "CollectionController_getOne",
+        "summary": "Get collection by ID",
+        "description": "Fetch a single collection by its UUID.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionDto_Output"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Collections"
+        ]
+      },
+      "patch": {
+        "operationId": "CollectionController_update",
+        "summary": "Update collection",
+        "description": "Partially update a collection by UUID.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Function"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionDto_Output"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Collections"
+        ]
+      },
+      "delete": {
+        "operationId": "CollectionController_remove",
+        "summary": "Delete collection",
+        "description": "Delete a collection by UUID.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto_Output"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Collections"
+        ]
+      }
+    },
+    "/api/collections/{id}/documents": {
+      "get": {
+        "operationId": "CollectionController_documents",
+        "summary": "List documents in collection",
+        "description": "Returns documents that match the collection filters with pagination (ordered by scraped_at DESC).",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AugmentedZodDto_Output"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Collections"
+        ]
+      }
+    },
     "/api/profiles": {
       "get": {
         "operationId": "ProfileController_list",
@@ -44,6 +666,17 @@
               "minimum": 0,
               "maximum": 9007199254740991,
               "default": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "topicId",
+            "required": true,
+            "in": "query",
+            "description": "Topic ID (Required)",
+            "schema": {
+              "minimum": 0,
+              "maximum": 9007199254740991,
               "type": "integer"
             }
           }
@@ -233,6 +866,17 @@
               "minimum": 0,
               "maximum": 9007199254740991,
               "default": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "topicId",
+            "required": true,
+            "in": "query",
+            "description": "Topic ID (Required)",
+            "schema": {
+              "minimum": 0,
+              "maximum": 9007199254740991,
               "type": "integer"
             }
           }
@@ -1014,628 +1658,6 @@
           "Topics"
         ]
       }
-    },
-    "/api/documents": {
-      "get": {
-        "operationId": "DocumentsController_list",
-        "summary": "List documents",
-        "description": "Returns a paginated list of documents with filters (title, free-text q, scraperId, dateFrom/dateTo). Ordered by scrapedAt DESC.",
-        "parameters": [
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "maximum": 200,
-              "default": 50,
-              "type": "integer"
-            }
-          },
-          {
-            "name": "offset",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 0,
-              "maximum": 9007199254740991,
-              "default": 0,
-              "type": "integer"
-            }
-          },
-          {
-            "name": "title",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "q",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "scraperId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-              "type": "string"
-            }
-          },
-          {
-            "name": "dateFrom",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "dateTo",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DocumentsListResponseDto_Output"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Documents"
-        ]
-      },
-      "post": {
-        "operationId": "DocumentsController_create",
-        "summary": "Create document",
-        "description": "Create a new document. Content is normalized to string; contentHash is auto-computed if not provided.",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DocumentCreateDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DocumentDto_Output"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Documents"
-        ]
-      }
-    },
-    "/api/documents/{id}": {
-      "get": {
-        "operationId": "DocumentsController_getOne",
-        "summary": "Get document by ID",
-        "description": "Fetch a single document by its UUID and include its scraper display info.",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DocumentDto_Output"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Documents"
-        ]
-      },
-      "patch": {
-        "operationId": "DocumentsController_update",
-        "summary": "Update document",
-        "description": "Partially update document fields by UUID. Recomputes contentHash when content changes.",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DocumentUpdateDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DocumentDto_Output"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Documents"
-        ]
-      },
-      "delete": {
-        "operationId": "DocumentsController_remove",
-        "summary": "Delete document",
-        "description": "Delete a document by UUID.",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OkResponseDto_Output"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Documents"
-        ]
-      }
-    },
-    "/api/scrapers": {
-      "get": {
-        "operationId": "ScrapersController_list",
-        "summary": "List scrapers",
-        "description": "Returns a paginated list of configured scrapers ordered by name.",
-        "parameters": [
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "description": "Количество элементов на странице",
-            "schema": {
-              "minimum": 1,
-              "maximum": 200,
-              "default": 50,
-              "type": "integer"
-            }
-          },
-          {
-            "name": "offset",
-            "required": false,
-            "in": "query",
-            "description": "Смещение для пагинации",
-            "schema": {
-              "minimum": 0,
-              "maximum": 9007199254740991,
-              "default": 0,
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ScrapersListResponseDto_Output"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Scrapers"
-        ]
-      },
-      "post": {
-        "operationId": "ScrapersController_create",
-        "summary": "Create scraper",
-        "description": "Create a new scraper of type HTML or API with configuration and optional post-processors.",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ScraperCreateDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ScraperDto_Output"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Scrapers"
-        ]
-      }
-    },
-    "/api/scrapers/{id}": {
-      "get": {
-        "operationId": "ScrapersController_getOne",
-        "summary": "Get scraper by ID",
-        "description": "Fetch a single scraper by its UUID.",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ScraperDto_Output"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Scrapers"
-        ]
-      },
-      "patch": {
-        "operationId": "ScrapersController_update",
-        "summary": "Update scraper",
-        "description": "Partially update scraper fields by ID.",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ScraperUpdateDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ScraperDto_Output"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Scrapers"
-        ]
-      },
-      "delete": {
-        "operationId": "ScrapersController_remove",
-        "summary": "Delete scraper",
-        "description": "Delete a scraper by ID.",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OkResponseDto_Output"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Scrapers"
-        ]
-      }
-    },
-    "/api/scrapers/{id}/run": {
-      "post": {
-        "operationId": "ScrapersController_run",
-        "summary": "Run scraper",
-        "description": "Enqueue a background job to run the scraper. Requires Redis to be configured.",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ScraperRunResponseDto_Output"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Scrapers"
-        ]
-      }
-    },
-    "/api/collections": {
-      "get": {
-        "operationId": "CollectionController_list",
-        "summary": "List collections",
-        "description": "Returns a paginated list of collections, optionally filtered by name (q). Ordered by created_at DESC.",
-        "parameters": [],
-        "responses": {
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CollectionsListResponseDto_Output"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Collections"
-        ]
-      },
-      "post": {
-        "operationId": "CollectionController_create",
-        "summary": "Create collection",
-        "description": "Create a new collection with name, optional description, and optional filter definition.",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Function"
-              }
-            }
-          }
-        },
-        "responses": {
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CollectionDto_Output"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Collections"
-        ]
-      }
-    },
-    "/api/collections/{id}": {
-      "get": {
-        "operationId": "CollectionController_getOne",
-        "summary": "Get collection by ID",
-        "description": "Fetch a single collection by its UUID.",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CollectionDto_Output"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Collections"
-        ]
-      },
-      "patch": {
-        "operationId": "CollectionController_update",
-        "summary": "Update collection",
-        "description": "Partially update a collection by UUID.",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Function"
-              }
-            }
-          }
-        },
-        "responses": {
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CollectionDto_Output"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Collections"
-        ]
-      },
-      "delete": {
-        "operationId": "CollectionController_remove",
-        "summary": "Delete collection",
-        "description": "Delete a collection by UUID.",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OkResponseDto_Output"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Collections"
-        ]
-      }
-    },
-    "/api/collections/{id}/documents": {
-      "get": {
-        "operationId": "CollectionController_documents",
-        "summary": "List documents in collection",
-        "description": "Returns documents that match the collection filters with pagination (ordered by scraped_at DESC).",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AugmentedZodDto_Output"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Collections"
-        ]
-      }
     }
   },
   "info": {
@@ -1652,1179 +1674,6 @@
   ],
   "components": {
     "schemas": {
-      "ProfilesListResponseDto_Output": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "description": "Profiles list",
-            "items": {
-              "description": "Analysis profile",
-              "type": "object",
-              "properties": {
-                "id": {
-                  "description": "Profile ID",
-                  "type": "integer",
-                  "exclusiveMinimum": 0,
-                  "maximum": 9007199254740991
-                },
-                "name": {
-                  "description": "Profile name",
-                  "type": "string"
-                },
-                "description": {
-                  "description": "Profile description (may be absent)",
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "createdAt": {
-                  "description": "Creation time (ISO 8601)",
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "description": "Update time (ISO 8601)",
-                  "type": "string"
-                },
-                "topicId": {
-                  "description": "Related topic (if used)",
-                  "anyOf": [
-                    {
-                      "type": "integer",
-                      "exclusiveMinimum": 0,
-                      "maximum": 9007199254740991
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                }
-              },
-              "required": [
-                "id",
-                "name",
-                "description",
-                "createdAt",
-                "updatedAt"
-              ],
-              "additionalProperties": false
-            },
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "total": {
-            "type": "integer",
-            "description": "Total profiles count",
-            "minimum": 0,
-            "maximum": 9007199254740991,
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "limit": {
-            "type": "integer",
-            "description": "Page size",
-            "minimum": 1,
-            "maximum": 9007199254740991,
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "offset": {
-            "type": "integer",
-            "description": "Offset",
-            "minimum": 0,
-            "maximum": 9007199254740991,
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          }
-        },
-        "required": [
-          "items",
-          "total",
-          "limit",
-          "offset"
-        ]
-      },
-      "ProfileDto_Output": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "description": "Profile ID",
-            "exclusiveMinimum": 0,
-            "maximum": 9007199254740991,
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "name": {
-            "type": "string",
-            "description": "Profile name",
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "description": {
-            "description": "Profile description (may be absent)",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "createdAt": {
-            "type": "string",
-            "description": "Creation time (ISO 8601)",
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "updatedAt": {
-            "type": "string",
-            "description": "Update time (ISO 8601)",
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "topicId": {
-            "description": "Related topic (if used)",
-            "anyOf": [
-              {
-                "type": "integer",
-                "exclusiveMinimum": 0,
-                "maximum": 9007199254740991
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "description",
-          "createdAt",
-          "updatedAt"
-        ]
-      },
-      "ProfileCreateDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "Profile name",
-            "type": "string",
-            "minLength": 1,
-            "x-nestjs_zod-has-null": true
-          },
-          "description": {
-            "description": "Profile description (optional)",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
-      "ProfileUpdateDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "Profile name",
-            "type": "string",
-            "minLength": 1,
-            "x-nestjs_zod-has-null": true
-          },
-          "description": {
-            "description": "Profile description",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true
-          }
-        }
-      },
-      "DocumentSourcesListResponseDto_Output": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "description": "List of linked documents",
-            "items": {
-              "description": "Document linked to a profile",
-              "type": "object",
-              "properties": {
-                "id": {
-                  "description": "Profile-document link identifier",
-                  "type": "integer",
-                  "exclusiveMinimum": 0,
-                  "maximum": 9007199254740991
-                },
-                "documentId": {
-                  "description": "Document UUID",
-                  "type": "string",
-                  "format": "uuid",
-                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                }
-              },
-              "required": [
-                "id",
-                "documentId"
-              ],
-              "additionalProperties": false
-            },
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "total": {
-            "type": "integer",
-            "description": "Total links count",
-            "minimum": 0,
-            "maximum": 9007199254740991,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "limit": {
-            "type": "integer",
-            "description": "Page size",
-            "minimum": 1,
-            "maximum": 9007199254740991,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "offset": {
-            "type": "integer",
-            "description": "Offset",
-            "minimum": 0,
-            "maximum": 9007199254740991,
-            "x-nestjs_zod-parent-additional-properties": false
-          }
-        },
-        "required": [
-          "items",
-          "total",
-          "limit",
-          "offset"
-        ]
-      },
-      "AssignDocumentSourceDto": {
-        "type": "object",
-        "properties": {
-          "documentId": {
-            "description": "UUID of the document to be linked to the profile",
-            "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-          }
-        },
-        "required": [
-          "documentId"
-        ]
-      },
-      "DocumentSourceDto_Output": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "description": "Profile-document link identifier",
-            "exclusiveMinimum": 0,
-            "maximum": 9007199254740991,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "documentId": {
-            "type": "string",
-            "description": "Document UUID",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-            "x-nestjs_zod-parent-additional-properties": false
-          }
-        },
-        "required": [
-          "id",
-          "documentId"
-        ]
-      },
-      "OkResponseDto_Output": {
-        "type": "object",
-        "properties": {
-          "ok": {
-            "type": "boolean",
-            "x-nestjs_zod-parent-additional-properties": false
-          }
-        },
-        "required": [
-          "ok"
-        ]
-      },
-      "AssignTaskDto": {
-        "type": "object",
-        "properties": {
-          "taskId": {
-            "description": "ID задачи анализа, которую нужно назначить профилю",
-            "type": "integer",
-            "exclusiveMinimum": 0,
-            "maximum": 9007199254740991
-          }
-        },
-        "required": [
-          "taskId"
-        ]
-      },
-      "ProfileTaskDto_Output": {
-        "type": "object",
-        "properties": {
-          "taskId": {
-            "description": "ID назначенной задачи или null, если не назначена",
-            "anyOf": [
-              {
-                "type": "integer",
-                "exclusiveMinimum": 0,
-                "maximum": 9007199254740991
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          }
-        },
-        "required": [
-          "taskId"
-        ]
-      },
-      "ProfileRunResponseDto_Output": {
-        "type": "object",
-        "properties": {
-          "ok": {
-            "type": "boolean",
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "jobId": {
-            "type": "string",
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "executionId": {
-            "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-            "x-nestjs_zod-parent-additional-properties": false
-          }
-        },
-        "required": [
-          "ok",
-          "jobId",
-          "executionId"
-        ]
-      },
-      "ReportsListResponseDto_Output": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "format": "uuid",
-                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                },
-                "profileId": {
-                  "anyOf": [
-                    {
-                      "type": "integer",
-                      "exclusiveMinimum": 0,
-                      "maximum": 9007199254740991
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "type": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "content": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "llmModel": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "createdAt": {},
-                "tokensIn": {
-                  "anyOf": [
-                    {
-                      "type": "integer",
-                      "minimum": 0,
-                      "maximum": 9007199254740991
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "tokensOut": {
-                  "anyOf": [
-                    {
-                      "type": "integer",
-                      "minimum": 0,
-                      "maximum": 9007199254740991
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "cost": {
-                  "anyOf": [
-                    {
-                      "type": "number",
-                      "minimum": 0
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                }
-              },
-              "required": [
-                "id",
-                "profileId",
-                "type",
-                "content",
-                "llmModel",
-                "createdAt",
-                "tokensIn",
-                "tokensOut",
-                "cost"
-              ],
-              "additionalProperties": false
-            },
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "total": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991,
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "limit": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991,
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "offset": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991,
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          }
-        },
-        "required": [
-          "items",
-          "total",
-          "limit",
-          "offset"
-        ]
-      },
-      "ReportDto_Output": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "profileId": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "exclusiveMinimum": 0,
-                "maximum": 9007199254740991
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "content": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "llmModel": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "createdAt": {
-            "type": "",
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "tokensIn": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 9007199254740991
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "tokensOut": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 9007199254740991
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "cost": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          }
-        },
-        "required": [
-          "id",
-          "profileId",
-          "type",
-          "content",
-          "llmModel",
-          "createdAt",
-          "tokensIn",
-          "tokensOut",
-          "cost"
-        ]
-      },
-      "ReportCreateDto": {
-        "type": "object",
-        "properties": {
-          "profileId": {
-            "type": "integer",
-            "exclusiveMinimum": 0,
-            "maximum": 9007199254740991
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "md",
-              "article"
-            ]
-          },
-          "content": {
-            "type": "string"
-          },
-          "llmModel": {
-            "type": "string"
-          },
-          "tokensIn": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991
-          },
-          "tokensOut": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991
-          },
-          "cost": {
-            "type": "number",
-            "minimum": 0
-          }
-        },
-        "required": [
-          "profileId",
-          "type",
-          "content",
-          "llmModel",
-          "tokensIn",
-          "tokensOut",
-          "cost"
-        ]
-      },
-      "ReportUpdateDto": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "md",
-              "article"
-            ]
-          },
-          "content": {
-            "type": "string"
-          },
-          "llmModel": {
-            "type": "string"
-          },
-          "tokensIn": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991
-          },
-          "tokensOut": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991
-          },
-          "cost": {
-            "type": "number",
-            "minimum": 0
-          }
-        },
-        "required": [
-          "type",
-          "content",
-          "llmModel",
-          "tokensIn",
-          "tokensOut",
-          "cost"
-        ]
-      },
-      "TasksListResponseDtoClass_Output": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "description": "Задача анализа",
-              "type": "object",
-              "properties": {
-                "id": {
-                  "description": "Идентификатор задачи",
-                  "type": "integer",
-                  "exclusiveMinimum": 0,
-                  "maximum": 9007199254740991
-                },
-                "name": {
-                  "description": "Название задачи",
-                  "type": "string",
-                  "minLength": 1
-                },
-                "description": {
-                  "description": "Описание задачи (может отсутствовать)",
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "prompt": {
-                  "description": "Подсказка/шаблон запроса для ИИ",
-                  "type": "string",
-                  "minLength": 1
-                },
-                "createdAt": {
-                  "description": "Время создания (ISO 8601)",
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "description": "Время обновления (ISO 8601)",
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "name",
-                "description",
-                "prompt",
-                "createdAt",
-                "updatedAt"
-              ],
-              "additionalProperties": false
-            },
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "total": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991,
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "limit": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991,
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "offset": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991,
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          }
-        },
-        "required": [
-          "items",
-          "total",
-          "limit",
-          "offset"
-        ]
-      },
-      "TaskDtoClass_Output": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "description": "Идентификатор задачи",
-            "exclusiveMinimum": 0,
-            "maximum": 9007199254740991,
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "name": {
-            "type": "string",
-            "description": "Название задачи",
-            "minLength": 1,
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "description": {
-            "description": "Описание задачи (может отсутствовать)",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "prompt": {
-            "type": "string",
-            "description": "Подсказка/шаблон запроса для ИИ",
-            "minLength": 1,
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "createdAt": {
-            "type": "string",
-            "description": "Время создания (ISO 8601)",
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "updatedAt": {
-            "type": "string",
-            "description": "Время обновления (ISO 8601)",
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "description",
-          "prompt",
-          "createdAt",
-          "updatedAt"
-        ]
-      },
-      "TaskCreateDtoClass": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "Название задачи",
-            "type": "string",
-            "minLength": 1,
-            "x-nestjs_zod-has-null": true
-          },
-          "description": {
-            "description": "Описание задачи (необязательно)",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true
-          },
-          "prompt": {
-            "description": "Подсказка/шаблон запроса для ИИ",
-            "type": "string",
-            "minLength": 1,
-            "x-nestjs_zod-has-null": true
-          }
-        },
-        "required": [
-          "name",
-          "prompt"
-        ]
-      },
-      "TaskUpdateDtoClass": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "x-nestjs_zod-has-null": true
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true
-          },
-          "prompt": {
-            "type": "string",
-            "minLength": 1,
-            "x-nestjs_zod-has-null": true
-          }
-        }
-      },
-      "TopicsListResponseDtoClass_Output": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "integer",
-                  "exclusiveMinimum": 0,
-                  "maximum": 9007199254740991
-                },
-                "name": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "description": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "parentId": {
-                  "anyOf": [
-                    {
-                      "type": "integer",
-                      "exclusiveMinimum": 0,
-                      "maximum": 9007199254740991
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "createdAt": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "name",
-                "description",
-                "parentId",
-                "createdAt",
-                "updatedAt"
-              ],
-              "additionalProperties": false
-            },
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "total": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991,
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "limit": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9007199254740991,
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "offset": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991,
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          }
-        },
-        "required": [
-          "items",
-          "total",
-          "limit",
-          "offset"
-        ]
-      },
-      "TopicDtoClass_Output": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "exclusiveMinimum": 0,
-            "maximum": 9007199254740991,
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "parentId": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "exclusiveMinimum": 0,
-                "maximum": 9007199254740991
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "createdAt": {
-            "type": "string",
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          },
-          "updatedAt": {
-            "type": "string",
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-parent-additional-properties": false
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "description",
-          "parentId",
-          "createdAt",
-          "updatedAt"
-        ]
-      },
-      "TopicCreateDtoClass": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "x-nestjs_zod-has-null": true
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true
-          },
-          "parentId": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "exclusiveMinimum": 0,
-                "maximum": 9007199254740991
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
-      "TopicUpdateDtoClass": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "x-nestjs_zod-has-null": true
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true
-          },
-          "parentId": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "exclusiveMinimum": 0,
-                "maximum": 9007199254740991
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-empty-type": true
-          }
-        }
-      },
       "DocumentsListResponseDto_Output": {
         "type": "object",
         "properties": {
@@ -3678,6 +2527,18 @@
         },
         "required": [
           "type"
+        ]
+      },
+      "OkResponseDto_Output": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "x-nestjs_zod-parent-additional-properties": false
+          }
+        },
+        "required": [
+          "ok"
         ]
       },
       "ScrapersListResponseDto_Output": {
@@ -5080,6 +3941,1174 @@
               "additionalProperties": false
             },
             "x-nestjs_zod-unwrap-root": true
+          }
+        }
+      },
+      "ProfilesListResponseDto_Output": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "Profiles list",
+            "items": {
+              "description": "Analysis profile",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Profile ID",
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "name": {
+                  "description": "Profile name",
+                  "type": "string"
+                },
+                "description": {
+                  "description": "Profile description (may be absent)",
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdAt": {
+                  "description": "Creation time (ISO 8601)",
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "description": "Update time (ISO 8601)",
+                  "type": "string"
+                },
+                "topicId": {
+                  "description": "Related topic (if used)",
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "description",
+                "createdAt",
+                "updatedAt"
+              ],
+              "additionalProperties": false
+            },
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total profiles count",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Page size",
+            "minimum": 1,
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Offset",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ]
+      },
+      "ProfileDto_Output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Profile ID",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "name": {
+            "type": "string",
+            "description": "Profile name",
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "description": {
+            "description": "Profile description (may be absent)",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Creation time (ISO 8601)",
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Update time (ISO 8601)",
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "topicId": {
+            "description": "Related topic (if used)",
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "ProfileCreateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Profile name",
+            "type": "string",
+            "minLength": 1,
+            "x-nestjs_zod-has-null": true
+          },
+          "topicId": {
+            "description": "Topic ID",
+            "type": "number",
+            "minimum": 1,
+            "x-nestjs_zod-has-null": true
+          },
+          "description": {
+            "description": "Profile description (optional)",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true
+          }
+        },
+        "required": [
+          "name",
+          "topicId"
+        ]
+      },
+      "ProfileUpdateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Profile name",
+            "type": "string",
+            "minLength": 1,
+            "x-nestjs_zod-has-null": true
+          },
+          "description": {
+            "description": "Profile description",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true
+          }
+        }
+      },
+      "DocumentSourcesListResponseDto_Output": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "List of linked documents",
+            "items": {
+              "description": "Document linked to a profile",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Profile-document link identifier",
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "documentId": {
+                  "description": "Document UUID",
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                }
+              },
+              "required": [
+                "id",
+                "documentId"
+              ],
+              "additionalProperties": false
+            },
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total links count",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Page size",
+            "minimum": 1,
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Offset",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-parent-additional-properties": false
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ]
+      },
+      "AssignDocumentSourceDto": {
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "description": "UUID of the document to be linked to the profile",
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "documentId"
+        ]
+      },
+      "DocumentSourceDto_Output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Profile-document link identifier",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "documentId": {
+            "type": "string",
+            "description": "Document UUID",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "x-nestjs_zod-parent-additional-properties": false
+          }
+        },
+        "required": [
+          "id",
+          "documentId"
+        ]
+      },
+      "AssignTaskDto": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "description": "ID задачи анализа, которую нужно назначить профилю",
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "taskId"
+        ]
+      },
+      "ProfileTaskDto_Output": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "description": "ID назначенной задачи или null, если не назначена",
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          }
+        },
+        "required": [
+          "taskId"
+        ]
+      },
+      "ProfileRunResponseDto_Output": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "jobId": {
+            "type": "string",
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "executionId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "x-nestjs_zod-parent-additional-properties": false
+          }
+        },
+        "required": [
+          "ok",
+          "jobId",
+          "executionId"
+        ]
+      },
+      "ReportsListResponseDto_Output": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "profileId": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "type": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "content": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "llmModel": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdAt": {},
+                "tokensIn": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "tokensOut": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "cost": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "profileId",
+                "type",
+                "content",
+                "llmModel",
+                "createdAt",
+                "tokensIn",
+                "tokensOut",
+                "cost"
+              ],
+              "additionalProperties": false
+            },
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ]
+      },
+      "ReportDto_Output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "profileId": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "llmModel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "createdAt": {
+            "type": "",
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "tokensIn": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "tokensOut": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "cost": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          }
+        },
+        "required": [
+          "id",
+          "profileId",
+          "type",
+          "content",
+          "llmModel",
+          "createdAt",
+          "tokensIn",
+          "tokensOut",
+          "cost"
+        ]
+      },
+      "ReportCreateDto": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "md",
+              "article"
+            ]
+          },
+          "content": {
+            "type": "string"
+          },
+          "llmModel": {
+            "type": "string"
+          },
+          "tokensIn": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "tokensOut": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "cost": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "profileId",
+          "type",
+          "content",
+          "llmModel",
+          "tokensIn",
+          "tokensOut",
+          "cost"
+        ]
+      },
+      "ReportUpdateDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "md",
+              "article"
+            ]
+          },
+          "content": {
+            "type": "string"
+          },
+          "llmModel": {
+            "type": "string"
+          },
+          "tokensIn": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "tokensOut": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "cost": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "type",
+          "content",
+          "llmModel",
+          "tokensIn",
+          "tokensOut",
+          "cost"
+        ]
+      },
+      "TasksListResponseDtoClass_Output": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "description": "Задача анализа",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Идентификатор задачи",
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "name": {
+                  "description": "Название задачи",
+                  "type": "string",
+                  "minLength": 1
+                },
+                "description": {
+                  "description": "Описание задачи (может отсутствовать)",
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "prompt": {
+                  "description": "Подсказка/шаблон запроса для ИИ",
+                  "type": "string",
+                  "minLength": 1
+                },
+                "createdAt": {
+                  "description": "Время создания (ISO 8601)",
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "description": "Время обновления (ISO 8601)",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "description",
+                "prompt",
+                "createdAt",
+                "updatedAt"
+              ],
+              "additionalProperties": false
+            },
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ]
+      },
+      "TaskDtoClass_Output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Идентификатор задачи",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "name": {
+            "type": "string",
+            "description": "Название задачи",
+            "minLength": 1,
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "description": {
+            "description": "Описание задачи (может отсутствовать)",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "prompt": {
+            "type": "string",
+            "description": "Подсказка/шаблон запроса для ИИ",
+            "minLength": 1,
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Время создания (ISO 8601)",
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Время обновления (ISO 8601)",
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "prompt",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "TaskCreateDtoClass": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Название задачи",
+            "type": "string",
+            "minLength": 1,
+            "x-nestjs_zod-has-null": true
+          },
+          "description": {
+            "description": "Описание задачи (необязательно)",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true
+          },
+          "prompt": {
+            "description": "Подсказка/шаблон запроса для ИИ",
+            "type": "string",
+            "minLength": 1,
+            "x-nestjs_zod-has-null": true
+          }
+        },
+        "required": [
+          "name",
+          "prompt"
+        ]
+      },
+      "TaskUpdateDtoClass": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "x-nestjs_zod-has-null": true
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true
+          },
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "x-nestjs_zod-has-null": true
+          }
+        }
+      },
+      "TopicsListResponseDtoClass_Output": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "description": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "parentId": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "description",
+                "parentId",
+                "createdAt",
+                "updatedAt"
+              ],
+              "additionalProperties": false
+            },
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ]
+      },
+      "TopicDtoClass_Output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "parentId": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "createdAt": {
+            "type": "string",
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "updatedAt": {
+            "type": "string",
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "parentId",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "TopicCreateDtoClass": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "x-nestjs_zod-has-null": true
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true
+          },
+          "parentId": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "TopicUpdateDtoClass": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "x-nestjs_zod-has-null": true
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true
+          },
+          "parentId": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-empty-type": true
           }
         }
       }

@@ -43,7 +43,7 @@ export function TopicDetailPage() {
   const loadTopicData = async (id: number) => {
     const [topicData, profilesRes, scrapersRes, documentsRes, reportsRes, tasksRes] = await Promise.all([
       TopicsService.topicsControllerGetOne(String(id)),
-      ProfilesService.profileControllerList(50),
+      ProfilesService.profileControllerList(Number(topicId), 50),
       ScrapersService.scrapersControllerList(50),
       DocumentsService.documentsControllerList(50, 0, undefined, undefined, undefined, undefined, undefined),
       ReportsService.reportControllerList(50, 0, id),
@@ -51,7 +51,7 @@ export function TopicDetailPage() {
     ]);
 
     setTopic(topicData);
-    setProfiles(profilesRes.items.filter((p: any) => (p as any).topic_id === id));
+    setProfiles(profilesRes.items);
     setScrapers(scrapersRes.items);
     setDocuments(documentsRes.items);
     setReports(reportsRes.items);

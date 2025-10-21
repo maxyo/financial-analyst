@@ -6,7 +6,7 @@ export type DocumentCreateDto = {
     title: string;
     scraperId: string;
     content: any;
-    scrapedAt?: string;
+    scrapedAt?: any;
     contentHash?: string;
 };
 

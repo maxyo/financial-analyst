@@ -22,10 +22,10 @@ export type TaskDtoClass_Output = {
     /**
      * Время создания (ISO 8601)
      */
-    created_at: string;
+    createdAt: string;
     /**
      * Время обновления (ISO 8601)
      */
-    updated_at: string;
+    updatedAt: string;
 };
 

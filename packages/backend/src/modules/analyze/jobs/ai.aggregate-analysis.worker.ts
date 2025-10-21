@@ -3,9 +3,9 @@ import { Injectable } from '@nestjs/common';
 import { In } from 'typeorm';
 
 import { LlmService } from '../modules/llm/services/llm.service';
-import { DocumentsRepository } from '../modules/scraper/repositories/documents.repository';
 import { AnalysisProfilesRepository } from '../repositories/analysis-profiles.repository';
 import { DocumentSourcesRepository } from '../repositories/document-sources.repository';
+import { DocumentsRepository } from '../repositories/documents.repository';
 import { ProfileExecutionsRepository } from '../repositories/profile-executions.repository';
 import { ReportsRepository } from '../repositories/reports.repository';
 

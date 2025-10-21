@@ -14,7 +14,7 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ZodResponse } from 'nestjs-zod';
 
-import { OkResponseDto } from '../../../../../dto/response';
+import { OkResponseDto } from '../../../dto/response';
 import {
   ListQueryDto,
   ScraperCreateDto,

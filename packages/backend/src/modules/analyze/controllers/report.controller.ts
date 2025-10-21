@@ -40,7 +40,7 @@ export class ReportController {
     const take = q.limit;
     const skip = q.offset;
     const where: Record<string, number> = {};
-    if (q.profileId != null) (where as any).profileId = q.profileId;
+    if (q.profileId != null) where.profileId = q.profileId;
     const [items, total] = await this.reports.findAndCount({
       where,
       order: { createdAt: 'DESC' as const },

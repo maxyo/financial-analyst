@@ -41,11 +41,11 @@ export function EditProfilePage() {
       );
       const taskInfo = await ProfilesService.profileControllerGetTask(
         String(profileId),
-      ).catch(() => ({ taskId: null }) as any);
+      ).catch(() => ({ taskId: null }));
       setFormData({
         name: profile.name,
         description: profile.description || '',
-        task_id: (taskInfo as any).taskId ?? null,
+        task_id: taskInfo.taskId ?? null,
       });
     }
   };
@@ -72,6 +72,7 @@ export function EditProfilePage() {
         const created = await ProfilesService.profileControllerCreate({
           name: formData.name,
           description: formData.description || null,
+          topicId: Number(topicId)
         });
         if (formData.task_id != null) {
           await ProfilesService.profileControllerAssignTask(

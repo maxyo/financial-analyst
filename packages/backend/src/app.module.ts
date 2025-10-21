@@ -10,15 +10,15 @@ import { ZodValidationPipe } from 'nestjs-zod';
 import { HealthController } from './controllers/health.controller';
 import { ZodSerializerInterceptor } from './dto/interceptor';
 import { AnalyzeModule } from './modules/analyze/analyze.module';
+import { CollectionEntity } from './modules/analyze/entities/collection.entity';
+import { DocumentEntity } from './modules/analyze/entities/document.entity';
 import { ProfileExecutionEntity } from './modules/analyze/entities/profile-execution.entity';
 import { ProfileEntity } from './modules/analyze/entities/profile.entity';
 import { ReportEntity } from './modules/analyze/entities/report/report.entity';
+import { Scraper } from './modules/analyze/entities/scrapper.entity';
 import { DocumentSourceEntity } from './modules/analyze/entities/source.entity';
 import { TaskEntity } from './modules/analyze/entities/task.entity';
 import { TopicEntity } from './modules/analyze/entities/topic.entity';
-import { CollectionEntity } from './modules/analyze/modules/scraper/entities/collection.entity';
-import { DocumentEntity } from './modules/analyze/modules/scraper/entities/document.entity';
-import { Scraper } from './modules/analyze/modules/scraper/entities/scrapper.entity';
 
 @Module({
   imports: [

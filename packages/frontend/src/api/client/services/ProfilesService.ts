@@ -20,12 +20,14 @@ export class ProfilesService {
     /**
      * List profiles
      * Returns a paginated list of analysis profiles. Sorted by id DESC. Query params: limit, offset.
+     * @param topicId Topic ID (Required)
      * @param limit Page size (default 50, up to 200)
      * @param offset Offset/start index (default 0)
      * @returns ProfilesListResponseDto_Output
      * @throws ApiError
      */
     public static profileControllerList(
+        topicId: number,
         limit: number = 50,
         offset?: number,
     ): CancelablePromise<ProfilesListResponseDto_Output> {
@@ -35,6 +37,7 @@ export class ProfilesService {
             query: {
                 'limit': limit,
                 'offset': offset,
+                'topicId': topicId,
             },
         });
     }
@@ -117,6 +120,7 @@ export class ProfilesService {
      * List profile document sources
      * Returns a paginated list of documents linked to the profile.
      * @param id
+     * @param topicId Topic ID (Required)
      * @param limit Page size (default 50, up to 200)
      * @param offset Offset/start index (default 0)
      * @returns DocumentSourcesListResponseDto_Output List document sources assigned to profile
@@ -124,6 +128,7 @@ export class ProfilesService {
      */
     public static profileControllerListSources(
         id: string,
+        topicId: number,
         limit: number = 50,
         offset?: number,
     ): CancelablePromise<DocumentSourcesListResponseDto_Output> {
@@ -136,6 +141,7 @@ export class ProfilesService {
             query: {
                 'limit': limit,
                 'offset': offset,
+                'topicId': topicId,
             },
         });
     }

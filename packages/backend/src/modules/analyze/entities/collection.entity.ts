@@ -1,6 +1,7 @@
 import { Filter } from '@trade/filter';
 import { Column, Entity, Index, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { TopicEntity } from '../../../entities/topic.entity';
+
+import { TopicEntity } from './topic.entity';
 
 @Entity({ name: 'collections' })
 @Index(['name'], { unique: true })

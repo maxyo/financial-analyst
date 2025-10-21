@@ -2,7 +2,7 @@ import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
 import { ScraperSchema } from './scrapers.dto';
-import { isoDate } from '../../../../../dto/utils';
+import { isoDate } from '../../../dto/utils';
 import { DocumentType } from '../entities/document.entity';
 
 export const DocumentsListQuerySchema = z.object({

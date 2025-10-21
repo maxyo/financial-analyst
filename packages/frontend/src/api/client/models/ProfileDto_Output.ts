@@ -18,14 +18,14 @@ export type ProfileDto_Output = {
     /**
      * Creation time (ISO 8601)
      */
-    created_at: string;
+    createdAt: string;
     /**
      * Update time (ISO 8601)
      */
-    updated_at: string;
+    updatedAt: string;
     /**
      * Related topic (if used)
      */
-    topic_id?: (number | null);
+    topicId?: (number | null);
 };
 

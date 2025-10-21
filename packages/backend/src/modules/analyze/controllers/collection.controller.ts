@@ -15,8 +15,7 @@ import { applyFilter } from '@trade/filter';
 import { createZodDto, ZodResponse } from 'nestjs-zod';
 import { z } from 'zod';
 
-import { OkResponseDto } from '../../../../../dto/response';
-import { CollectionsRepository } from '../../../repositories/collections.repository';
+import { OkResponseDto } from '../../../dto/response';
 import {
   type CollectionCreateDto,
   type CollectionDocumentsQueryDto,
@@ -28,6 +27,7 @@ import {
   type CollectionUpdateDto,
   DocumentSchema,
 } from '../dto/collection.dto';
+import { CollectionsRepository } from '../repositories/collections.repository';
 import { DocumentsRepository } from '../repositories/documents.repository';
 
 @ApiTags('Collections')

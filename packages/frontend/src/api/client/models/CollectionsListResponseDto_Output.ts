@@ -8,8 +8,8 @@ export type CollectionsListResponseDto_Output = {
         name: string;
         description: (string | null);
         filters: null;
-        created_at: string;
-        updated_at: string;
+        createdAt: string;
+        updatedAt: string;
     }>;
     total: number;
     limit: number;

@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const ProfileCreateSchema = z
   .object({
     name: z.string().min(1).describe('Profile name'),
+    topicId: z.number().min(1).describe('Topic ID'),
     description: z
       .string()
       .nullable()
@@ -42,23 +43,22 @@ export const ProfileSchema = z
 
 export const ProfilesListQuerySchema = z
   .object({
-    limit: z
-      .coerce
+    limit: z.coerce
       .number()
       .int()
       .min(1)
       .max(200)
       .default(50)
       .describe('Page size (default 50, up to 200)'),
-    offset: z
-      .coerce
+    offset: z.coerce
       .number()
       .int()
       .min(0)
       .default(0)
       .describe('Offset/start index (default 0)'),
+    topicId: z.coerce.number().int().min(0).describe('Topic ID (Required)'),
   })
-  .describe('Pagination parameters');
+  .describe('Pagination parameters and filter');
 
 export const ProfilesListResponseSchema = z
   .object({

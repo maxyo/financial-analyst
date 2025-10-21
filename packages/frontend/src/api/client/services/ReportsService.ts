@@ -13,7 +13,7 @@ import { request as __request } from '../core/request';
 export class ReportsService {
     /**
      * List reports
-     * Returns a paginated list of reports, optionally filtered by profile_id, ordered by created_at DESC.
+     * Returns a paginated list of reports, optionally filtered by profileId, ordered by createdAt DESC.
      * @param limit
      * @param offset
      * @param profileId
@@ -31,7 +31,7 @@ export class ReportsService {
             query: {
                 'limit': limit,
                 'offset': offset,
-                'profile_id': profileId,
+                'profileId': profileId,
             },
         });
     }

@@ -1,7 +1,7 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
-import { isoDate } from '../../../../../dto/utils';
+import { isoDate } from '../../../dto/utils';
 // Classes for nestjs-zod
 
 export const CollectionFiltersSchema = z.any();
