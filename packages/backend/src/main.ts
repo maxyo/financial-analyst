@@ -8,6 +8,7 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { config as configDotenv } from 'dotenv';
 import * as express from 'express';
+import { cleanupOpenApiDoc } from 'nestjs-zod';
 
 import { AppModule } from './app.module';
 
@@ -30,7 +31,7 @@ async function bootstrap() {
     .addServer('http://localhost:3000')
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig, {ignoreGlobalPrefix: true});
-  SwaggerModule.setup('api/docs', app, document);
+  SwaggerModule.setup('api/docs', app, cleanupOpenApiDoc(document));
   const outPath = join(resolve(__dirname, '..'), 'openapi.json');
   writeFileSync(outPath, JSON.stringify(document, null, 2), 'utf-8');
 

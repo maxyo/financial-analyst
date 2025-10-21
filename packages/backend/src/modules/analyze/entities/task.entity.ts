@@ -17,10 +17,10 @@ export class TaskEntity {
   prompt!: string; // the prompt/content describing the task to execute
 
   @Column({ type: 'text', name: 'created_at' })
-  created_at!: string;
+  createdAt!: string;
 
   @Column({ type: 'text', name: 'updated_at' })
-  updated_at!: string;
+  updatedAt!: string;
 
   // One task can be assigned to many profiles, but each profile has at most one task.
   @OneToMany(() => ProfileEntity, (profile) => profile.task)

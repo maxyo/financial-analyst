@@ -3,12 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 export type ReportCreateDto = {
-    profile_id: number;
+    profileId: number;
     type: ReportCreateDto.type;
     content: string;
     llmModel: string;
-    tokens_in: number;
-    tokens_out: number;
+    tokensIn: number;
+    tokensOut: number;
     cost: number;
 };
 export namespace ReportCreateDto {

@@ -47,12 +47,10 @@ export const ScraperUpdateSchema = ScraperCreateSchema;
 const ScraperOutputHtmlSchema = ScraperCreateHtmlSchema.extend({ id: z.uuid(), topicId: z.number().int().positive().nullable().optional() });
 const ScraperOutputApiSchema = ScraperCreateApiSchema.extend({ id: z.uuid(), topicId: z.number().int().positive().nullable().optional() });
 
-export const ScraperSchema = z.object({
-  data: z.discriminatedUnion('type', [
-    ScraperOutputApiSchema,
-    ScraperOutputHtmlSchema,
-  ]),
-});
+export const ScraperSchema = z.discriminatedUnion('type', [
+  ScraperOutputApiSchema,
+  ScraperOutputHtmlSchema,
+]);
 
 export const ScrapersListResponseSchema = z.object({
   items: z.array(ScraperSchema),
@@ -69,7 +67,9 @@ export const ScraperRunResponseSchema = z.object({
 export class ListQueryDto extends createZodDto(ListQuerySchema) {}
 export class ScraperCreateDto extends createZodDto(ScraperCreateSchema) {}
 export class ScraperUpdateDto extends createZodDto(ScraperUpdateSchema) {}
-export class ScraperDto extends createZodDto(ScraperSchema) {}
+export class ScraperDto extends createZodDto(z.object({
+  data: ScraperSchema,
+})) {}
 export class ScrapersListResponseDto extends createZodDto(
   ScrapersListResponseSchema,
 ) {}

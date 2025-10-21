@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 
 import { PostProcessorConfiguration, PostProcessorType, ScraperConfiguration, ScraperType } from '../types';
-import { TopicEntity } from '../../../entities/topic.entity';
+import { TopicEntity } from './topic.entity';
 
 @Entity({ name: 'scrapers' })
 export class Scraper<T extends ScraperType = ScraperType> {

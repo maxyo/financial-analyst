@@ -1,6 +1,7 @@
 import { Filter } from '@trade/filter';
 import { Column, Entity, Index, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { TopicEntity } from '../../../entities/topic.entity';
+
+import { TopicEntity } from './topic.entity';
 
 @Entity({ name: 'collections' })
 @Index(['name'], { unique: true })
@@ -24,8 +25,8 @@ export class CollectionEntity {
   topic!: TopicEntity | null;
 
   @Column({ type: 'datetime', name: 'created_at' })
-  created_at!: Date;
+  createdAt!: Date;
 
   @Column({ type: 'datetime', name: 'updated_at' })
-  updated_at!: Date;
+  updatedAt!: Date;
 }

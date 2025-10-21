@@ -23,7 +23,4 @@
   "include": [
     "src"
   ],
-  "exclude": [
-    "packages/backend/src/api.ts"
-  ]
 }

@@ -16,7 +16,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ZodResponse } from 'nestjs-zod';
 import { In } from 'typeorm';
 
-import { OkResponseDto } from '../../../../../dto/response';
+import { OkResponseDto } from '../../../dto/response';
 import {
   DocumentCreateDto,
   DocumentDto,

@@ -21,7 +21,6 @@ import {
   TasksListResponseDtoClass as TasksListResponseDto,
   TaskUpdateDtoClass as TaskUpdateDto
 } from '../dto/tasks.dto';
-import { TaskEntity } from '../entities/task.entity';
 import { TasksRepository } from '../repositories/tasks.repository';
 
 @ApiTags('Tasks')
@@ -36,7 +35,15 @@ export class TasksController {
     const take = q.limit;
     const skip = q.offset;
     const [items, total] = await this.tasks.findAndCount({ order: { id: 'DESC' as const }, take, skip });
-    return { items, total, limit: take, offset: skip };
+    const shaped = items.map((t) => ({
+      id: t.id,
+      name: t.name,
+      description: t.description ?? null,
+      prompt: t.prompt,
+      createdAt: t.createdAt,
+      updatedAt: t.updatedAt,
+    }));
+    return { items: shaped, total, limit: take, offset: skip };
   }
 
   @Get(':id')
@@ -47,7 +54,14 @@ export class TasksController {
     if (!Number.isFinite(numId)) throw new NotFoundException('Not found');
     const item = await this.tasks.findOne({ where: { id: numId } });
     if (!item) throw new NotFoundException('Not found');
-    return item;
+    return {
+      id: item.id,
+      name: item.name,
+      description: item.description ?? null,
+      prompt: item.prompt,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+    };
   }
 
   @Post()
@@ -57,11 +71,19 @@ export class TasksController {
     const now = new Date().toISOString();
     const entity = this.tasks.create({
       ...body,
-      created_at: now,
-      updated_at: now,
+      createdAt: now,
+      updatedAt: now,
     });
 
-    return await this.tasks.save(entity);
+    const saved = await this.tasks.save(entity);
+    return {
+      id: saved.id,
+      name: saved.name,
+      description: saved.description ?? null,
+      prompt: saved.prompt,
+      createdAt: saved.createdAt,
+      updatedAt: saved.updatedAt,
+    };
   }
 
   @Patch(':id')
@@ -72,12 +94,20 @@ export class TasksController {
     if (!Number.isFinite(numId)) throw new NotFoundException('Not found');
     const item = await this.tasks.findOne({ where: { id: numId } });
     if (!item) throw new NotFoundException('Not found');
-    const patch: Partial<TaskEntity> = body;
-    patch.updated_at = new Date().toISOString();
-    await this.tasks.update({ id: numId }, body);
-    const fresh = await this.tasks.findOne({ where: { id: numId } });
-    if(!fresh) throw new InternalServerErrorException('Failed to update task');
-    return fresh;
+    if (body.name !== undefined) item.name = body.name;
+    if (body.description !== undefined) item.description = body.description;
+    if (body.prompt !== undefined) item.prompt = body.prompt;
+    item.updatedAt = new Date().toISOString();
+    const saved = await this.tasks.save(item);
+    if (!saved) throw new InternalServerErrorException('Failed to update task');
+    return {
+      id: saved.id,
+      name: saved.name,
+      description: saved.description ?? null,
+      prompt: saved.prompt,
+      createdAt: saved.createdAt,
+      updatedAt: saved.updatedAt,
+    };
   }
 
   @Delete(':id')

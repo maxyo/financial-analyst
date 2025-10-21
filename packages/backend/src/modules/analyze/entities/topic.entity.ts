@@ -1,8 +1,8 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
+import { CollectionEntity } from './collection.entity';
 import { ProfileEntity } from './profile.entity';
-import { Scraper } from '../modules/scraper/entities/scrapper.entity';
-import { CollectionEntity } from '../modules/scraper/entities/collection.entity';
+import { Scraper } from './scrapper.entity';
 
 @Entity({ name: 'topics' })
 export class TopicEntity {
@@ -33,8 +33,8 @@ export class TopicEntity {
   collections!: CollectionEntity[];
 
   @Column({ type: 'text', name: 'created_at' })
-  created_at!: string;
+  createdAt!: string;
 
   @Column({ type: 'text', name: 'updated_at' })
-  updated_at!: string;
+  updatedAt!: string;
 }

@@ -6,8 +6,8 @@ export type ReportUpdateDto = {
     type: ReportUpdateDto.type;
     content: string;
     llmModel: string;
-    tokens_in: number;
-    tokens_out: number;
+    tokensIn: number;
+    tokensOut: number;
     cost: number;
 };
 export namespace ReportUpdateDto {

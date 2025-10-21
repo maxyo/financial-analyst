@@ -30,9 +30,9 @@ import {
   ProfileTaskDto,
   ProfileUpdateDto
 } from '../dto/profile.dto';
-import { DocumentsRepository } from '../modules/scraper/repositories/documents.repository';
 import { AnalysisProfilesRepository } from '../repositories/analysis-profiles.repository';
 import { DocumentSourcesRepository } from '../repositories/document-sources.repository';
+import { DocumentsRepository } from '../repositories/documents.repository';
 import { ProfileExecutionsRepository } from '../repositories/profile-executions.repository';
 import { TasksRepository } from '../repositories/tasks.repository';
 
@@ -60,18 +60,33 @@ export class ProfileController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'List profiles', description: 'Returns a paginated list of analysis profiles. Sorted by id DESC. Query params: limit, offset.' })
+  @ApiOperation({
+    summary: 'List profiles',
+    description:
+      'Returns a paginated list of analysis profiles. Sorted by id DESC. Query params: limit, offset.',
+  })
   @ZodResponse({ type: ProfilesListResponseDto })
   async list(@Query() q: ProfilesListQueryDto) {
     const take = q.limit ?? 50;
     const skip = q.offset ?? 0;
     const [items, total] = await this.profiles.findAndCount({
+      where: {
+        topic: { id: q.topicId },
+      },
       order: { id: 'DESC' as const },
       take,
       skip,
     });
+    const shaped = items.map((p) => ({
+      id: p.id,
+      name: p.name,
+      description: p.description ?? null,
+      createdAt: p.createdAt,
+      updatedAt: p.updatedAt,
+      topicId: p.topic?.id,
+    }));
     return {
-      items,
+      items: shaped,
       total,
       limit: take,
       offset: skip,
@@ -79,20 +94,36 @@ export class ProfileController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get profile', description: 'Returns a profile by numeric identifier.' })
+  @ApiOperation({
+    summary: 'Get profile',
+    description: 'Returns a profile by numeric identifier.',
+  })
   @ZodResponse({ type: ProfileDto, description: 'Profile by id' })
   async getOne(@Param('id') id: string) {
     const numId = Number(id);
     if (!Number.isFinite(numId)) {
       throw new BadRequestException('id must be a number');
     }
-    const item = await this.profiles.findOne({ where: { id: numId } });
+    const item = await this.profiles.findOne({
+      where: { id: numId },
+      relations: ['topic'],
+    });
     if (!item) throw new NotFoundException('Not found');
-    return item;
+    return {
+      id: item.id,
+      name: item.name,
+      description: item.description ?? null,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+      topicId: item.topic ? item.topic.id : null,
+    };
   }
 
   @Post()
-  @ApiOperation({ summary: 'Create profile', description: 'Creates a new analysis profile.' })
+  @ApiOperation({
+    summary: 'Create profile',
+    description: 'Creates a new analysis profile.',
+  })
   @ZodResponse({
     type: ProfileDto,
     status: 201,
@@ -103,15 +134,27 @@ export class ProfileController {
     const entity = this.profiles.create({
       name: body.name.trim(),
       description: body.description,
-      created_at: now,
-      updated_at: now,
+      createdAt: now,
+      updatedAt: now,
+      topic: { id: body.topicId },
     });
 
-    return await this.profiles.save(entity);
+    const saved = await this.profiles.save(entity);
+    return {
+      id: saved.id,
+      name: saved.name,
+      description: saved.description ?? null,
+      createdAt: saved.createdAt,
+      updatedAt: saved.updatedAt,
+      topicId: saved.topic?.id,
+    };
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update profile', description: 'Partially updates profile fields by ID.' })
+  @ApiOperation({
+    summary: 'Update profile',
+    description: 'Partially updates profile fields by ID.',
+  })
   @ZodResponse({ type: ProfileDto, description: 'Updated profile' })
   async update(@Param('id') id: string, @Body() body: ProfileUpdateDto) {
     const numId = Number(id);
@@ -122,15 +165,26 @@ export class ProfileController {
     if (!item) throw new NotFoundException('Not found');
     if (body.name !== undefined) item.name = body.name;
     if (body.description !== undefined) item.description = body.description;
-    item.updated_at = new Date().toISOString();
+    item.updatedAt = new Date().toISOString();
     const saved = await this.profiles.save(item);
-    if (!saved)
-      {throw new InternalServerErrorException('Failed to update profile');}
-    return saved;
+    if (!saved) {
+      throw new InternalServerErrorException('Failed to update profile');
+    }
+    return {
+      id: saved.id,
+      name: saved.name,
+      description: saved.description ?? null,
+      createdAt: saved.createdAt,
+      updatedAt: saved.updatedAt,
+      topicId: undefined,
+    };
   }
 
   @Get(':id/document-sources')
-  @ApiOperation({ summary: 'List profile document sources', description: 'Returns a paginated list of documents linked to the profile.' })
+  @ApiOperation({
+    summary: 'List profile document sources',
+    description: 'Returns a paginated list of documents linked to the profile.',
+  })
   @ZodResponse({
     type: DocumentSourcesListResponseDto,
     description: 'List document sources assigned to profile',
@@ -147,7 +201,7 @@ export class ProfileController {
     const take = q.limit;
     const skip = q.offset;
     const [items, total] = await this.docSources.findAndCount({
-      where: { profile_id: numId },
+      where: { profileId: numId },
       order: { id: 'DESC' as const },
       take,
       skip,
@@ -161,7 +215,10 @@ export class ProfileController {
   }
 
   @Post(':id/document-sources')
-  @ApiOperation({ summary: 'Assign document to profile', description: 'Creates a profile-document link if it does not exist.' })
+  @ApiOperation({
+    summary: 'Assign document to profile',
+    description: 'Creates a profile-document link if it does not exist.',
+  })
   @ZodResponse({
     type: DocumentSourceDto,
     status: 201,
@@ -184,11 +241,11 @@ export class ProfileController {
     if (!doc) throw new NotFoundException('Document not found');
 
     let link = await this.docSources.findOne({
-      where: { profile_id: numId, documentId: docId },
+      where: { profileId: numId, documentId: docId },
     });
     if (!link) {
       const entity = this.docSources.create({
-        profile_id: numId,
+        profileId: numId,
         documentId: docId,
       });
 
@@ -198,7 +255,10 @@ export class ProfileController {
   }
 
   @Delete(':id/document-sources/:documentId')
-  @ApiOperation({ summary: 'Unassign document from profile', description: 'Deletes the profile-document link.' })
+  @ApiOperation({
+    summary: 'Unassign document from profile',
+    description: 'Deletes the profile-document link.',
+  })
   @ZodResponse({
     type: OkResponseDto,
     description: 'Unassign result',
@@ -219,7 +279,7 @@ export class ProfileController {
       throw new BadRequestException('documentId is required (uuid string)');
     }
     const link = await this.docSources.findOne({
-      where: { profile_id: numId, documentId },
+      where: { profileId: numId, documentId },
     });
     if (!link) throw new NotFoundException('Not found');
     await this.docSources.delete({ id: link.id });
@@ -227,7 +287,10 @@ export class ProfileController {
   }
 
   @Post(':id/task')
-  @ApiOperation({ summary: 'Assign task to profile', description: 'Links an analysis task to the profile.' })
+  @ApiOperation({
+    summary: 'Assign task to profile',
+    description: 'Links an analysis task to the profile.',
+  })
   @ZodResponse({
     type: ProfileTaskDto,
     status: 201,
@@ -251,13 +314,17 @@ export class ProfileController {
 
     // Assign task by loading entity and saving to avoid deep-partial typing issues
     profile.task = task;
-    profile.updated_at = new Date().toISOString();
+    profile.updatedAt = new Date().toISOString();
     await this.profiles.save(profile);
     return { taskId } as ProfileTaskDto;
   }
 
   @Get(':id/task')
-  @ApiOperation({ summary: 'Get profile task', description: 'Returns the identifier of the task assigned to the profile (or null).' })
+  @ApiOperation({
+    summary: 'Get profile task',
+    description:
+      'Returns the identifier of the task assigned to the profile (or null).',
+  })
   @ZodResponse({
     type: ProfileTaskDto,
     description: 'Get assigned task for profile',
@@ -277,7 +344,11 @@ export class ProfileController {
   }
 
   @Delete(':id/task')
-  @ApiOperation({ summary: 'Unassign task from profile', description: 'Unlinks the previously assigned analysis task from the profile.' })
+  @ApiOperation({
+    summary: 'Unassign task from profile',
+    description:
+      'Unlinks the previously assigned analysis task from the profile.',
+  })
   @ZodResponse({
     type: OkResponseDto,
     description: 'Unassign task from profile',
@@ -293,13 +364,16 @@ export class ProfileController {
     if (!profile) throw new NotFoundException('Not found');
     // Unassign task by loading entity and saving
     profile.task = null;
-    profile.updated_at = new Date().toISOString();
+    profile.updatedAt = new Date().toISOString();
     await this.profiles.save(profile);
     return { ok: true };
   }
 
   @Post(':id/run')
-  @ApiOperation({ summary: 'Run aggregate analysis', description: 'Enqueues an aggregate analysis job for the profile.' })
+  @ApiOperation({
+    summary: 'Run aggregate analysis',
+    description: 'Enqueues an aggregate analysis job for the profile.',
+  })
   @ZodResponse({
     type: ProfileRunResponseDto,
     description: 'Enqueue aggregate analysis job for profile',
@@ -314,9 +388,9 @@ export class ProfileController {
     });
     if (!profile) throw new NotFoundException('Not found');
     const execEntity = this.executions.create({
-      profile_id: numId,
+      profileId: numId,
       status: 'pending',
-      created_at: new Date(),
+      createdAt: new Date(),
     });
     const exec = await this.executions.save(execEntity);
     // Enqueue job and update execution with job id and running status
@@ -328,9 +402,9 @@ export class ProfileController {
     await this.executions.update(
       { id: exec.id },
       {
-        job_id: String(job.id),
+        jobId: String(job.id),
         status: 'running',
-        started_at: new Date(),
+        startedAt: new Date(),
       },
     );
     return {
@@ -341,7 +415,10 @@ export class ProfileController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete profile', description: 'Deletes a profile by ID.' })
+  @ApiOperation({
+    summary: 'Delete profile',
+    description: 'Deletes a profile by ID.',
+  })
   @ZodResponse({
     type: OkResponseDto,
     description: 'Delete result',

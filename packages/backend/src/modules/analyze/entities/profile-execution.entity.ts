@@ -7,13 +7,13 @@ import { ReportEntity } from './report/report.entity';
 // Holds run-related metadata, status and links to profile and generated report
 // Using a separate table allows keeping history of runs for the same profile
 @Entity({ name: 'profile_executions' })
-@Index(['profile_id', 'created_at'])
+@Index(['profileId', 'createdAt'])
 export class ProfileExecutionEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
   @Column({ type: 'integer', name: 'profile_id' })
-  profile_id!: number;
+  profileId!: number;
 
   @ManyToOne(() => ProfileEntity)
   @JoinColumn({ name: 'profile_id', referencedColumnName: 'id' })
@@ -21,7 +21,7 @@ export class ProfileExecutionEntity {
 
   // Optional link to a produced report as a result of this execution
   @Column({ type: 'text', name: 'report_id', nullable: true })
-  report_id!: string | null;
+  reportId!: string | null;
 
   @ManyToOne(() => ReportEntity, { nullable: true })
   @JoinColumn({ name: 'report_id', referencedColumnName: 'id' })
@@ -29,7 +29,7 @@ export class ProfileExecutionEntity {
 
   // Queue/job identification if applicable
   @Column({ type: 'text', name: 'job_id', nullable: true })
-  job_id!: string | null;
+  jobId!: string | null;
 
   // Execution status lifecycle
   // pending -> running -> succeeded | failed | cancelled
@@ -41,11 +41,11 @@ export class ProfileExecutionEntity {
   error!: string | null;
 
   @Column({ type: 'datetime', name: 'created_at', default: () => "(datetime('now'))" })
-  created_at!: Date;
+  createdAt!: Date;
 
   @Column({ type: 'datetime', name: 'started_at', nullable: true })
-  started_at!: Date | null;
+  startedAt!: Date | null;
 
   @Column({ type: 'datetime', name: 'finished_at', nullable: true })
-  finished_at!: Date | null;
+  finishedAt!: Date | null;
 }

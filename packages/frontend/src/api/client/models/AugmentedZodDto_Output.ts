@@ -9,7 +9,7 @@ export type AugmentedZodDto_Output = {
         content: string;
         scraperId: string;
         contentHash: string;
-        scrapedAt: string;
+        scrapedAt: any;
     }>;
 };
 

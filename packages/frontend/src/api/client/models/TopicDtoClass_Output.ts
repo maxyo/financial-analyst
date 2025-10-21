@@ -6,8 +6,8 @@ export type TopicDtoClass_Output = {
     id: number;
     name: string;
     description: (string | null);
-    parent_id: (number | null);
-    created_at: string;
-    updated_at: string;
+    parentId: (number | null);
+    createdAt: string;
+    updatedAt: string;
 };
 

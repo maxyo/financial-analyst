@@ -40,13 +40,13 @@ export function EditScraperPage() {
   const loadScraper = async () => {
     if (!scraperId || scraperId === 'new') return;
     const scraper = await ScrapersService.scrapersControllerGetOne(scraperId);
-    setScraperType(scraper.data.type);
+    setScraperType(scraper.type);
     setFormData({
-      name: scraper.data.name,
-      url: scraper.data.config.url,
+      name: scraper.name,
+      url: scraper.config.url,
       selectors:
-        scraper.data.type === 'HTML' && scraper.data.config.selectors
-          ? scraper.data.config.selectors
+        scraper.type === 'HTML' && scraper.config.selectors
+          ? scraper.config.selectors
           : [{ name: '', selector: '', attr: '', asHtml: false }],
     });
   };

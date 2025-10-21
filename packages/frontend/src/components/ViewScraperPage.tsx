@@ -63,8 +63,8 @@ export function ViewScraperPage() {
               Back
             </Button>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl">{scraper.data.name}</h1>
-              <Badge variant="secondary">{scraper.data.type}</Badge>
+              <h1 className="text-2xl">{scraper.name}</h1>
+              <Badge variant="secondary">{scraper.type}</Badge>
             </div>
           </div>
           <div className="flex gap-2">
@@ -96,7 +96,7 @@ export function ViewScraperPage() {
               <div>
                 <div className="text-sm text-muted-foreground mb-1">URL</div>
                 <div className="font-mono text-sm bg-muted p-2 rounded">
-                  {scraper.data.config.url}
+                  {scraper.config.url}
                 </div>
               </div>
 
@@ -104,10 +104,10 @@ export function ViewScraperPage() {
 
               <div>
                 <div className="text-sm text-muted-foreground mb-1">Type</div>
-                <div>{scraper.data.type}</div>
+                <div>{scraper.type}</div>
               </div>
 
-              {scraper.data.type === 'HTML' && scraper.data.config.selectors && (
+              {scraper.type === 'HTML' && scraper.config.selectors && (
                 <>
                   <Separator />
                   <div>
@@ -115,7 +115,7 @@ export function ViewScraperPage() {
                       CSS Selectors
                     </div>
                     <div className="space-y-2">
-                      {scraper.data.config.selectors.map((selector, idx) => (
+                      {scraper.config.selectors.map((selector, idx) => (
                         <div
                           key={idx}
                           className="bg-muted p-3 rounded space-y-1"
@@ -136,14 +136,14 @@ export function ViewScraperPage() {
                 </>
               )}
 
-              {scraper.data.config.timeoutMs && (
+              {scraper.config.timeoutMs && (
                 <>
                   <Separator />
                   <div>
                     <div className="text-sm text-muted-foreground mb-1">
                       Timeout
                     </div>
-                    <div>{scraper.data.config.timeoutMs}ms</div>
+                    <div>{scraper.config.timeoutMs}ms</div>
                   </div>
                 </>
               )}

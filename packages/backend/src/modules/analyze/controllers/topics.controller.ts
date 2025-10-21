@@ -23,9 +23,9 @@ export class TopicsController {
       id: t.id,
       name: t.name,
       description: t.description ?? null,
-      parent_id: t.parent ? t.parent.id : null,
-      created_at: t.created_at,
-      updated_at: t.updated_at,
+      parentId: t.parent ? t.parent.id : null,
+      createdAt: t.createdAt,
+      updatedAt: t.updatedAt,
     }));
     return { items: shaped, total, limit: take, offset: skip };
   }
@@ -42,9 +42,9 @@ export class TopicsController {
       id: item.id,
       name: item.name,
       description: item.description ?? null,
-      parent_id: item.parent ? item.parent.id : null,
-      created_at: item.created_at,
-      updated_at: item.updated_at,
+      parentId: item.parent ? item.parent.id : null,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
     };
     return shaped;
   }
@@ -56,8 +56,8 @@ export class TopicsController {
     const now = new Date().toISOString();
 
     let parent: TopicEntity | null = null;
-    if (body.parent_id != null) {
-      const p = await this.topics.findOne({ where: { id: body.parent_id } });
+    if (body.parentId != null) {
+      const p = await this.topics.findOne({ where: { id: body.parentId } });
       if (!p) throw new NotFoundException('Parent topic not found');
       parent = p;
     }
@@ -66,8 +66,8 @@ export class TopicsController {
       name: body.name,
       description: body.description ?? null,
       parent,
-      created_at: now,
-      updated_at: now,
+      createdAt: now,
+      updatedAt: now,
     });
 
     const saved = await this.topics.save(entity);
@@ -75,9 +75,9 @@ export class TopicsController {
       id: saved.id,
       name: saved.name,
       description: saved.description ?? null,
-      parent_id: saved.parent ? saved.parent.id : null,
-      created_at: saved.created_at,
-      updated_at: saved.updated_at,
+      parentId: saved.parent ? saved.parent.id : null,
+      createdAt: saved.createdAt,
+      updatedAt: saved.updatedAt,
     };
   }
 
@@ -93,17 +93,17 @@ export class TopicsController {
     // apply changes to loaded entity and save to avoid partial-type casts
     if (body.name !== undefined) item.name = body.name;
     if (body.description !== undefined) item.description = body.description;
-    if ('parent_id' in body) {
-      if (body.parent_id == null) {
+    if ('parentId' in body) {
+      if (body.parentId == null) {
         item.parent = null;
       } else {
-        const p = await this.topics.findOne({ where: { id: body.parent_id } });
+        const p = await this.topics.findOne({ where: { id: body.parentId } });
         if (!p) throw new NotFoundException('Parent topic not found');
         if (p.id === numId) throw new NotFoundException('Parent cannot be self');
         item.parent = p;
       }
     }
-    item.updated_at = new Date().toISOString();
+    item.updatedAt = new Date().toISOString();
 
     const fresh = await this.topics.save(item);
     // reload with relation to shape consistently
@@ -114,9 +114,9 @@ export class TopicsController {
       id: reloaded.id,
       name: reloaded.name,
       description: reloaded.description ?? null,
-      parent_id: reloaded.parent ? reloaded.parent.id : null,
-      created_at: reloaded.created_at,
-      updated_at: reloaded.updated_at,
+      parentId: reloaded.parent ? reloaded.parent.id : null,
+      createdAt: reloaded.createdAt,
+      updatedAt: reloaded.updatedAt,
     };
   }
 

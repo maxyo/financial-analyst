@@ -30,9 +30,9 @@ function mapTopic(t: TopicDtoClass_Output): Topic {
     id: t.id,
     name: t.name,
     description: t.description ?? null,
-    parent_id: t.parent_id ?? null,
-    created_at: t.created_at,
-    updated_at: t.updated_at,
+    parent_id: (t as any).parentId ?? null,
+    created_at: (t as any).createdAt,
+    updated_at: (t as any).updatedAt,
   };
 }
 
@@ -41,10 +41,10 @@ function mapProfile(p: ProfileDto_Output): Profile {
     id: p.id,
     name: p.name,
     description: p.description ?? null,
-    topic_id: (p as any).topic_id ?? null, // backend exposes topic_id in DTO
-    task_id: (p as any).task_id ?? null, // use dedicated task API for strictness if needed
-    created_at: (p as any).created_at ?? '',
-    updated_at: (p as any).updated_at ?? '',
+    topic_id: (p as any).topicId ?? null,
+    task_id: (p as any).taskId ?? null,
+    created_at: (p as any).createdAt ?? '',
+    updated_at: (p as any).updatedAt ?? '',
   };
 }
 
@@ -135,8 +135,10 @@ export const api = {
     // Also try get task id via dedicated API if not present
     try {
       const t = await ProfilesService.profileControllerGetTask(String(id));
-      (p as any).task_id = t.task_id ?? null;
-    } catch {}
+      (p as any).taskId = (t as any).taskId ?? null;
+    } catch (e) {
+      // ignore missing task
+    }
     return mapProfile(p);
   },
   async createProfile(data: Partial<Profile>) {

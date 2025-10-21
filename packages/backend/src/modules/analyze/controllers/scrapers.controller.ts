@@ -14,7 +14,7 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ZodResponse } from 'nestjs-zod';
 
-import { OkResponseDto } from '../../../../../dto/response';
+import { OkResponseDto } from '../../../dto/response';
 import {
   ListQueryDto,
   ScraperCreateDto,
@@ -38,7 +38,11 @@ export class ScrapersController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'List scrapers', description: 'Returns a paginated list of configured scrapers ordered by name.' })
+  @ApiOperation({
+    summary: 'List scrapers',
+    description:
+      'Returns a paginated list of configured scrapers ordered by name.',
+  })
   @ZodResponse({ type: ScrapersListResponseDto })
   async list(@Query() q: ListQueryDto) {
     const take = q.limit;
@@ -50,13 +54,11 @@ export class ScrapersController {
     });
     return ScrapersListResponseSchema.parse({
       items: items.map((i) => ({
-        data: {
-          id: i.id,
-          name: i.name,
-          type: i.type,
-          config: i.config,
-          ...(i.postProcessors ? { postProcessors: i.postProcessors } : {}),
-        },
+        id: i.id,
+        name: i.name,
+        type: i.type,
+        config: i.config,
+        ...(i.postProcessors ? { postProcessors: i.postProcessors } : {}),
       })),
       total,
       limit: take,
@@ -65,24 +67,31 @@ export class ScrapersController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get scraper by ID', description: 'Fetch a single scraper by its UUID.' })
+  @ApiOperation({
+    summary: 'Get scraper by ID',
+    description: 'Fetch a single scraper by its UUID.',
+  })
   @ZodResponse({ type: ScraperDto })
   async getOne(@Param('id') id: string) {
     const item = await this.scrapers.findOne({ where: { id } });
     if (!item) throw new NotFoundException('Not found');
-    return ScraperSchema.parse({
-      data: {
+    return {
+      data: ScraperSchema.parse({
         id: item.id,
         name: item.name,
         type: item.type,
         config: item.config,
         ...(item.postProcessors ? { postProcessors: item.postProcessors } : {}),
-      },
-    });
+      }),
+    };
   }
 
   @Post()
-  @ApiOperation({ summary: 'Create scraper', description: 'Create a new scraper of type HTML or API with configuration and optional post-processors.' })
+  @ApiOperation({
+    summary: 'Create scraper',
+    description:
+      'Create a new scraper of type HTML or API with configuration and optional post-processors.',
+  })
   @ZodResponse({ type: ScraperDto })
   async create(@Body() body: ScraperCreateDto) {
     const name = body.data.name.trim();
@@ -91,8 +100,8 @@ export class ScrapersController {
     const postProcessors = body.data.postProcessors;
     const entity = this.scrapers.create({ name, type, config, postProcessors });
     const created = await this.scrapers.save(entity);
-    return ScraperSchema.parse({
-      data: {
+    return {
+      data: ScraperSchema.parse({
         id: created.id,
         name: created.name,
         type: created.type,
@@ -100,12 +109,15 @@ export class ScrapersController {
         ...(created.postProcessors
           ? { postProcessors: created.postProcessors }
           : {}),
-      },
-    });
+      }),
+    };
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update scraper', description: 'Partially update scraper fields by ID.' })
+  @ApiOperation({
+    summary: 'Update scraper',
+    description: 'Partially update scraper fields by ID.',
+  })
   @ZodResponse({ type: ScraperDto })
   async update(@Param('id') id: string, @Body() body: ScraperUpdateDto) {
     const item = await this.scrapers.findOne({ where: { id } });
@@ -113,9 +125,11 @@ export class ScrapersController {
     await this.scrapers.update({ id }, body.data);
     const fresh = await this.scrapers.findOne({ where: { id } });
 
-    if(!fresh) throw new InternalServerErrorException('Failed to update scraper');
-    return ScraperSchema.parse({
-      data: {
+    if (!fresh) {
+      throw new InternalServerErrorException('Failed to update scraper');
+    }
+    return {
+      data: ScraperSchema.parse({
         id: fresh.id,
         name: fresh.name,
         type: fresh.type,
@@ -123,12 +137,15 @@ export class ScrapersController {
         ...(fresh.postProcessors
           ? { postProcessors: fresh.postProcessors }
           : {}),
-      },
-    });
+      }),
+    };
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete scraper', description: 'Delete a scraper by ID.' })
+  @ApiOperation({
+    summary: 'Delete scraper',
+    description: 'Delete a scraper by ID.',
+  })
   @ZodResponse({ type: OkResponseDto })
   async remove(@Param('id') id: string) {
     const item = await this.scrapers.findOne({ where: { id } });
@@ -138,12 +155,20 @@ export class ScrapersController {
   }
 
   @Post(':id/run')
-  @ApiOperation({ summary: 'Run scraper', description: 'Enqueue a background job to run the scraper. Requires Redis to be configured.' })
+  @ApiOperation({
+    summary: 'Run scraper',
+    description:
+      'Enqueue a background job to run the scraper. Requires Redis to be configured.',
+  })
   @ZodResponse({ type: ScraperRunResponseDto })
   async run(@Param('id') id: string) {
     const item = await this.scrapers.findOne({ where: { id } });
     if (!item) throw new NotFoundException('Not found');
-    const job = await this.scrapQueue.add('run', { scraperId: id }, { removeOnComplete: true, removeOnFail: 10 });
+    const job = await this.scrapQueue.add(
+      'run',
+      { scraperId: id },
+      { removeOnComplete: true, removeOnFail: 10 },
+    );
     return { ok: true, jobId: job.id };
   }
 }

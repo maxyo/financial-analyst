@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "commonjs",
   "scripts": {
-    "dev": "nodemon --watch \"src/**\" --ext \"ts,json\" --ignore \"src/**/*.spec.ts\" --exec \"ts-node src/main.ts\"\n",
+    "dev": "nest start --watch --debug",
     "build": "tsc --noEmit",
     "start": "ts-node --transpile-only src/main.ts",
     "cli": "ts-node src/main.ts",
@@ -30,7 +30,7 @@
     "nodemon": "^3.1.10",
     "prettier": "^3.3.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.2.2"
+    "typescript": "^5.9.0-beta"
   },
   "dependencies": {
     "@nestjs/bullmq": "^10.2.1",
@@ -55,6 +55,6 @@
     "tinkoff-invest-api": "^7.0.1",
     "typeorm": "^0.3.20",
     "ws": "^8.18.3",
-    "zod": "^4.1.11"
+    "zod": "^4.1.12"
   }
 }

@@ -6,7 +6,7 @@ export type DocumentUpdateDto = {
     title?: string;
     content?: any;
     scraperId?: string;
-    scrapedAt?: string;
+    scrapedAt?: any;
     type: DocumentUpdateDto.type;
 };
 export namespace DocumentUpdateDto {

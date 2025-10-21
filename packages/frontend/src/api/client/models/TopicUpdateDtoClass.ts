@@ -5,6 +5,6 @@
 export type TopicUpdateDtoClass = {
     name?: string;
     description?: (string | null);
-    parent_id?: (number | null);
+    parentId?: (number | null);
 };
 
