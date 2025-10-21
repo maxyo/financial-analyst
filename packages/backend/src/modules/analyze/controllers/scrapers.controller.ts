@@ -47,10 +47,13 @@ export class ScrapersController {
   async list(@Query() q: ListQueryDto) {
     const take = q.limit;
     const skip = q.offset;
+    const where = q.topicId ? { topic: { id: q.topicId } } : {};
     const [items, total] = await this.scrapers.findAndCount({
+      where,
       order: { name: 'ASC' as const },
       take,
       skip,
+      relations: ['topic'],
     });
     return ScrapersListResponseSchema.parse({
       items: items.map((i) => ({
@@ -59,6 +62,7 @@ export class ScrapersController {
         type: i.type,
         config: i.config,
         ...(i.postProcessors ? { postProcessors: i.postProcessors } : {}),
+        ...(i.topic ? { topicId: i.topic.id } : {}),
       })),
       total,
       limit: take,
