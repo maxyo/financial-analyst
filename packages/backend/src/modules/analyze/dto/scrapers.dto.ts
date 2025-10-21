@@ -12,10 +12,11 @@ import {
 export const ListQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(200).default(50).describe('Количество элементов на странице'),
   offset: z.coerce.number().int().min(0).default(0).describe('Смещение для пагинации'),
+  topicId: z.coerce.number().int().positive().optional().describe('Filter by topic ID'),
 }).describe('Параметры пагинации');
 
 const TrimWhiteSpaceProcessorSchema = z.object({
-  type: z.literal(PostProcessorType.TRIM_WHITESPACE).describe('Тип пост-обработчика: обрезка пробелов'),
+  type: z.literal(PostProcessorType.TRIM_WHITESPACE).describe('Тип пост-обработчика: обрезка пробело��'),
   config: trimWhitespaceConfigSchema.describe('Настройки пост-обработчика TRIM_WHITESPACE'),
 }).describe('Пост-обработчик TRIM_WHITESPACE');
 
