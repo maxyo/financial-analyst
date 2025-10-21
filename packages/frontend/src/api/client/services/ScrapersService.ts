@@ -17,12 +17,14 @@ export class ScrapersService {
      * Returns a paginated list of configured scrapers ordered by name.
      * @param limit Количество элементов на странице
      * @param offset Смещение для пагинации
+     * @param topicId Filter by topic ID
      * @returns ScrapersListResponseDto_Output
      * @throws ApiError
      */
     public static scrapersControllerList(
         limit: number = 50,
         offset?: number,
+        topicId?: number,
     ): CancelablePromise<ScrapersListResponseDto_Output> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -30,6 +32,7 @@ export class ScrapersService {
             query: {
                 'limit': limit,
                 'offset': offset,
+                'topicId': topicId,
             },
         });
     }
