@@ -237,9 +237,9 @@ export const getResponseBody = async (response: Response): Promise<any> => {
                 const jsonTypes = ['application/json', 'application/problem+json']
                 const isJSON = jsonTypes.some(type => contentType.toLowerCase().startsWith(type));
                 if (isJSON) {
-                    return await response.clone().json();
+                    return await response.json();
                 } else {
-                    return await response.clone().text();
+                    return await response.text();
                 }
             }
         } catch (error) {
@@ -300,7 +300,8 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
 
             if (!onCancel.isCancelled) {
                 const response = await sendRequest(config, options, url, body, formData, headers, onCancel);
-                const responseBody = await getResponseBody(response);
+                const responseClone = response.clone();
+                const responseBody = await getResponseBody(responseClone);
                 const responseHeader = getResponseHeader(response, options.responseHeader);
 
                 const result: ApiResult = {
