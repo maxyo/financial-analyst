@@ -77,7 +77,10 @@ export class ScrapersController {
   })
   @ZodResponse({ type: ScraperDto })
   async getOne(@Param('id') id: string) {
-    const item = await this.scrapers.findOne({ where: { id }, relations: ['topic'] });
+    const item = await this.scrapers.findOne({
+      where: { id },
+      relations: ['topic'],
+    });
     if (!item) throw new NotFoundException('Not found');
     return {
       data: ScraperSchema.parse({

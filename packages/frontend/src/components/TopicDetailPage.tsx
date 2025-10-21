@@ -12,7 +12,14 @@ import {
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { ScrollArea } from './ui/scroll-area';
-import { DocumentsService, ProfilesService, ReportsService, ScrapersService, TasksService, TopicsService } from '../api/client';
+import {
+  DocumentsService,
+  ProfilesService,
+  ReportsService,
+  ScrapersService,
+  TasksService,
+  TopicsService,
+} from '../api/client';
 import type {
   DocumentDto_Output,
   ProfileDto_Output,
@@ -41,11 +48,26 @@ export function TopicDetailPage() {
   }, [topicId]);
 
   const loadTopicData = async (id: number) => {
-    const [topicData, profilesRes, scrapersRes, documentsRes, reportsRes, tasksRes] = await Promise.all([
+    const [
+      topicData,
+      profilesRes,
+      scrapersRes,
+      documentsRes,
+      reportsRes,
+      tasksRes,
+    ] = await Promise.all([
       TopicsService.topicsControllerGetOne(String(id)),
       ProfilesService.profileControllerList(Number(topicId), 50),
       ScrapersService.scrapersControllerList(50, undefined, id),
-      DocumentsService.documentsControllerList(50, 0, undefined, undefined, undefined, undefined, undefined),
+      DocumentsService.documentsControllerList(
+        50,
+        0,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+      ),
       ReportsService.reportControllerList(50, 0, id),
       TasksService.tasksControllerList(50),
     ]);

@@ -9,18 +9,44 @@ import {
   trimWhitespaceConfigSchema,
 } from '../types';
 
-export const ListQuerySchema = z.object({
-  limit: z.coerce.number().int().min(1).max(200).default(50).describe('Количество элементов на странице'),
-  offset: z.coerce.number().int().min(0).default(0).describe('Смещение для пагинации'),
-  topicId: z.coerce.number().int().positive().optional().describe('Filter by topic ID'),
-}).describe('Параметры пагинации');
+export const ListQuerySchema = z
+  .object({
+    limit: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(200)
+      .default(50)
+      .describe('Количество элементов на странице'),
+    offset: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .default(0)
+      .describe('Смещение для пагинации'),
+    topicId: z.coerce
+      .number()
+      .int()
+      .positive()
+      .optional()
+      .describe('Filter by topic ID'),
+  })
+  .describe('Параметры пагинации');
 
-const TrimWhiteSpaceProcessorSchema = z.object({
-  type: z.literal(PostProcessorType.TRIM_WHITESPACE).describe('Тип пост-обработчика: обрезка пробело��'),
-  config: trimWhitespaceConfigSchema.describe('Настройки пост-обработчика TRIM_WHITESPACE'),
-}).describe('Пост-обработчик TRIM_WHITESPACE');
+const TrimWhiteSpaceProcessorSchema = z
+  .object({
+    type: z
+      .literal(PostProcessorType.TRIM_WHITESPACE)
+      .describe('Тип пост-обработчика: обрезка пробело��'),
+    config: trimWhitespaceConfigSchema.describe(
+      'Настройки пост-обработчика TRIM_WHITESPACE',
+    ),
+  })
+  .describe('Пост-обработчик TRIM_WHITESPACE');
 
-const PostProcessorSchema = z.discriminatedUnion('type', [TrimWhiteSpaceProcessorSchema]);
+const PostProcessorSchema = z.discriminatedUnion('type', [
+  TrimWhiteSpaceProcessorSchema,
+]);
 
 export const ScraperCreateHtmlSchema = z.object({
   name: z.string().min(1),
@@ -45,8 +71,14 @@ export const ScraperCreateSchema = z.object({
 export const ScraperUpdateSchema = ScraperCreateSchema;
 
 // Output schemas include id inside data
-const ScraperOutputHtmlSchema = ScraperCreateHtmlSchema.extend({ id: z.uuid(), topicId: z.number().int().positive().nullable().optional() });
-const ScraperOutputApiSchema = ScraperCreateApiSchema.extend({ id: z.uuid(), topicId: z.number().int().positive().nullable().optional() });
+const ScraperOutputHtmlSchema = ScraperCreateHtmlSchema.extend({
+  id: z.uuid(),
+  topicId: z.number().int().positive().nullable().optional(),
+});
+const ScraperOutputApiSchema = ScraperCreateApiSchema.extend({
+  id: z.uuid(),
+  topicId: z.number().int().positive().nullable().optional(),
+});
 
 export const ScraperSchema = z.discriminatedUnion('type', [
   ScraperOutputApiSchema,
@@ -68,9 +100,11 @@ export const ScraperRunResponseSchema = z.object({
 export class ListQueryDto extends createZodDto(ListQuerySchema) {}
 export class ScraperCreateDto extends createZodDto(ScraperCreateSchema) {}
 export class ScraperUpdateDto extends createZodDto(ScraperUpdateSchema) {}
-export class ScraperDto extends createZodDto(z.object({
-  data: ScraperSchema,
-})) {}
+export class ScraperDto extends createZodDto(
+  z.object({
+    data: ScraperSchema,
+  }),
+) {}
 export class ScrapersListResponseDto extends createZodDto(
   ScrapersListResponseSchema,
 ) {}
